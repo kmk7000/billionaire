@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required) - User's unique ID
+    //   - email: string (required) - User's email address
+    //   - displayName: string (optional) - User's display name
+    //   - photoURL: string (optional) - User's profile photo URL
+    //   - company: string (optional) - User's company
+    //   - position: string (optional) - User's position
+    //   - role: string (optional, enum: ['user', 'admin']) - User's role
+    //   - createdAt: timestamp (optional) - Creation time
+    //
+    // Collection: meishi
+    // Document ID: {meishiId}
+    // Fields:
+    //   - ownerUid: string (required) - UID of the user who owns this card
+    //   - name: string (required) - Name on the card
+    //   - company: string (required) - Company on the card
+    //   - position: string (optional) - Position on the card
+    //   - email: string (optional) - Email on the card
+    //   - phone: string (optional) - Phone on the card
+    //   - imageUrl: string (optional) - Image URL of the card
+    //   - createdAt: timestamp (optional) - Creation time
+    //
+    // Collection: posts
+    // Document ID: {postId}
+    // Fields:
+    //   - authorUid: string (required) - UID of the author
+    //   - authorCompany: string (optional) - Company of the author (for anonymity)
+    //   - category: string (optional) - Post category
+    //   - title: string (required) - Post title
+    //   - content: string (required) - Post content
+    //   - likes: int (optional) - Number of likes
+    //   - comments: int (optional) - Number of comments
+    //   - createdAt: timestamp (optional) - Creation time
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "milk454537@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             (!('role' in data) || data.role in ['user', 'admin']) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('company' in data) || (data.company is string && data.company.size() < 100)) &&
+             (!('introduction' in data) || (data.introduction is string && data.introduction.size() <= 5000)) &&
+             (!('isJobSeekingIntro' in data) || data.isJobSeekingIntro is bool);
+    }
+
+    function isValidMeishi(data) {
+      return hasRequiredFields(['ownerUid', 'name', 'company']) &&
+             data.ownerUid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.company is string && data.company.size() > 0 && data.company.size() < 100;
+    }
+
+    function isValidPost(data) {
+      return hasRequiredFields(['authorUid', 'title', 'content']) &&
+             data.authorUid == request.auth.uid &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 5000;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /meishi/{meishiId} {
+      allow read: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidMeishi(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.ownerUid == request.auth.uid && isValidMeishi(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.authorUid == request.auth.uid && isValidPost(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.authorUid == request.auth.uid || isAdmin());
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

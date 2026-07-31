@@ -1,0 +1,11 @@
+{
+  "name": "Billionaire",
+  "description": "Billionaire - 紙の名刺を、キャリアの資産に。デジタル名刺＆ビジネス匿名コミュニティプラットフォーム",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

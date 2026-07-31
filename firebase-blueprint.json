@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "App user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "company": { "type": "string" },
+        "position": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "introduction": { "type": "string", "maxLength": 5000 },
+        "isJobSeekingIntro": { "type": "boolean" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Meishi": {
+      "title": "Meishi",
+      "description": "Business card data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "position": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerUid", "name", "company"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Community forum post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "authorUid": { "type": "string" },
+        "authorCompany": { "type": "string" },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "likes": { "type": "integer" },
+        "comments": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorUid", "title", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/meishi/{meishiId}": {
+      "schema": "Meishi",
+      "description": "Business cards"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Forum posts"
+    }
+  }
+}
