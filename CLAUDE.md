@@ -32,19 +32,29 @@ npm run lint       # 타입 체크 (tsc --noEmit)
 server.ts                        # Express 서버: LINE OAuth + Vite middleware
 firestore.rules                  # Firestore 보안 규칙
 src/
-├── App.tsx                      # ⚠️ 메인 앱 전체 (~8,300줄 단일 파일 — AI Studio 산출물)
+├── App.tsx                      # ⚠️ 앱 셸 + 상태 허브 (~5,600줄, 분리 리팩토링 진행 중)
 ├── firebase.ts                  # Firebase 초기화 + 에러 핸들러
-├── types/db.ts                  # Firestore 데이터 모델 타입
+├── types/
+│   ├── db.ts                    # Firestore 데이터 모델 타입
+│   └── app.ts                   # UI 레벨 타입 (Meishi, UserProfile, Post, Job 등)
+├── constants/
+│   ├── theme.ts                 # 디자인 토큰
+│   ├── profileData.ts           # 선택지 목록 (기업/대학/직종/도도부현 등)
+│   └── mockData.ts              # 목 데이터
+├── screens/                     # 탭 화면: Today, MeishiList, Community, Connect, Jobs
+├── components/
+│   ├── auth/                    # LoginScreen, TermsAgreement, EmailSignup
+│   ├── meishi/                  # MeishiCard, MeishiDetailView, MeishiEditView, MeishiMapView
+│   ├── community/ jobs/ layout/ # ForumPost, JobCard, BottomNav, DesktopSidebar
+│   └── (루트)                    # MeishiScannerModal, PublicCardView, SimpleLoginSettings
 ├── services/firestoreService.ts # Firestore CRUD
 ├── hooks/                       # useMeishiScanner(OCR), useContactsData, useCommunityPosts
-├── components/                  # MeishiScannerModal, PublicCardView, SimpleLoginSettings
-├── constants/theme.ts           # 디자인 토큰
 └── utils/imageUtils.ts          # 이미지 처리
 ```
 
 ## 알려진 이슈 / 이관 시 주의사항
 
-1. **`src/App.tsx`가 ~8,300줄 단일 파일** — AI Studio가 한 파일에 몰아넣은 상태. 기능 수정 시 점진적으로 컴포넌트/화면 단위로 분리할 것 (SPEC 규칙: 300줄 초과 시 분할).
+1. **`src/App.tsx` 분리 리팩토링 진행 중** (8,298줄 → 현재 ~5,600줄). 남은 큰 덩어리는 마이프로필 오버레이(`isProfileOpen`)와 약 40개의 편집 모달(`{isXxxOpen && (...)}` 블록, 약 4,000줄). 다음 단계: 각 모달을 관련 로컬 상태·저장 핸들러와 함께 컴포넌트로 이동 (경력/학력/스킬/설정 등 도메인 단위로).
 2. **Firebase 프로젝트가 AI Studio 관리 프로젝트** (`ai-studio-applet-webapp-c0fee`) — 데이터가 Google 관리 인프라에 있음. 정식 출시 전 자체 Firebase 프로젝트로 이전 필요 (config 교체 + `firestore.rules` 배포).
 3. **`GEMINI_API_KEY`가 클라이언트 번들에 주입됨** (`vite.config.ts`의 `define`) — 배포 시 키가 노출된다. OCR 호출을 서버 라우트로 옮겨야 함.
 4. **LINE Client ID가 `server.ts`에 하드코딩** (`"2009585479"`) — env 변수 `LINE_CLIENT_ID`를 읽도록 수정 필요.

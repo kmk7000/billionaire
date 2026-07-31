@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
-import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, Briefcase, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Filter, Mail, Loader2, Check, Home, Contact, FileText, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, MoreHorizontal, Menu, MapPin, ArrowUpDown, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
+import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, Briefcase, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Filter, Mail, Loader2, Check, Home, Contact, FileText, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
 import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType, EmailAuthProvider } from './firebase';
 import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi, Post, Job } from './types/app';
 import { JAPANESE_COMPANIES, JAPANESE_UNIVERSITIES, JAPANESE_MAJORS, DEGREES, SKILL_RECOMMENDATIONS, ALL_SKILLS, LANGUAGES, LANGUAGE_LEVELS, JOB_CATEGORIES, PREFECTURES, COUNTRIES } from './constants/profileData';
-import { MOCK_JOBS } from './constants/mockData';
 import { resizeImage } from './utils/imageUtils';
 import { TermsAgreement } from './components/auth/TermsAgreement';
 import { EmailSignup } from './components/auth/EmailSignup';
 import { LoginScreen } from './components/auth/LoginScreen';
-import { MeishiCard } from './components/meishi/MeishiCard';
 import { MeishiDetailView } from './components/meishi/MeishiDetailView';
 import { MeishiEditView } from './components/meishi/MeishiEditView';
 import { MeishiMapView } from './components/meishi/MeishiMapView';
-import { ForumPost } from './components/community/ForumPost';
-import { JobCard } from './components/jobs/JobCard';
+import { TodayScreen } from './screens/TodayScreen';
+import { MeishiListScreen } from './screens/MeishiListScreen';
+import { CommunityScreen } from './screens/CommunityScreen';
+import { ConnectScreen } from './screens/ConnectScreen';
+import { JobsScreen } from './screens/JobsScreen';
+import { BottomNav } from './components/layout/BottomNav';
+import { DesktopSidebar } from './components/layout/DesktopSidebar';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -1349,575 +1352,69 @@ export default function App() {
           <main className="flex-1 overflow-y-auto pb-20 lg:pb-6">
         <AnimatePresence mode="wait">
           {activeTab === 'meishi' && (
-            <motion.div
+            <MeishiListScreen
               key="meishi"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col"
-            >
-              {/* Meishi Content based on active tab */}
-              {activeMeishiTab === 'team' ? (
-                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    大切な会社の営業資産、<br />チーム名刺帳で管理しましょう！
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-                    役職員の変動があっても紛失することなく<br />安全に管理できます。
-                  </p>
-                  <div className="bg-gray-100 text-gray-500 font-bold py-2 px-6 rounded-full text-sm">
-                    準備中
-                  </div>
-                </div>
-              ) : activeMeishiTab === 'group' ? (
-                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white flex-1">
-                  <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-                    グループ連絡先
-                  </p>
-                  <div className="bg-gray-100 text-gray-500 font-bold py-2 px-6 rounded-full text-sm">
-                    準備中
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* Filter Bar */}
-                  <div className="px-4 py-1.5 h-[35px] flex justify-between items-center bg-white border-b border-gray-100">
-                    <div className="flex items-center gap-1 text-sm font-bold text-gray-900">
-                      <span>すべて ({meishis.length})</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                    <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
-                      <button 
-                        onClick={() => setIsMeishiMapOpen(true)}
-                        className="flex items-center gap-1 hover:text-[#0A0A0A] transition-colors"
-                      >
-                        <MapPin className="w-3 h-3" />
-                        <span>地図</span>
-                      </button>
-                      <button 
-                        onClick={() => setMeishiSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
-                        className="flex items-center gap-1 hover:text-[#0A0A0A] transition-colors"
-                      >
-                        <ArrowUpDown className="w-3 h-3" />
-                        <span>登録日順 {meishiSortOrder === 'desc' ? '↓' : '↑'}</span>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setIsEditMode(!isEditMode);
-                          if (isEditMode) setSelectedMeishis([]);
-                        }}
-                        className={`flex items-center gap-1 transition-colors ${isEditMode ? 'text-[#0A0A0A]' : 'hover:text-[#0A0A0A]'}`}
-                      >
-                        {isEditMode ? <X className="w-3 h-3" /> : <Edit3 className="w-3 h-3" />}
-                        <span>{isEditMode ? 'キャンセル' : '編集'}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Meishi List */}
-                  <div className="flex flex-col bg-white">
-                    {sortedMeishis.length > 0 ? (
-                      sortedMeishis.map(m => (
-                        <MeishiCard 
-                          key={m.id} 
-                          meishi={m} 
-                          isEditMode={isEditMode}
-                          isSelected={selectedMeishis.includes(m.id)}
-                          onSelect={(id) => {
-                            setSelectedMeishis(prev => 
-                              prev.includes(id) ? prev.filter(mId => mId !== id) : [...prev, id]
-                            );
-                          }}
-                          onClick={(meishi) => setSelectedMeishiForDetail(meishi)}
-                        />
-                      ))
-                    ) : (
-                      <div className="p-8 text-center">
-                        <p className="text-sm text-gray-400">名刺をスキャンして<br />ネットワークを広げましょう</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Floating Action Button */}
-                  {!isEditMode && (
-                    <button 
-                      onClick={handleOpenMeishiCamera}
-                      className="fixed bottom-24 right-4 bg-[#0A0A0A] hover:bg-black text-white px-5 py-3.5 rounded-full shadow-xl flex items-center gap-2 font-bold active:scale-95 transition-transform z-20"
-                    >
-                      <Plus className="w-5 h-5" />
-                      <span>名刺登録</span>
-                    </button>
-                  )}
-                </>
+              activeMeishiTab={activeMeishiTab}
+              meishis={meishis}
+              sortedMeishis={sortedMeishis}
+              meishiSortOrder={meishiSortOrder}
+              onToggleSortOrder={() => setMeishiSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+              isEditMode={isEditMode}
+              onToggleEditMode={() => {
+                setIsEditMode(!isEditMode);
+                if (isEditMode) setSelectedMeishis([]);
+              }}
+              selectedMeishis={selectedMeishis}
+              onToggleSelect={(id) => setSelectedMeishis(prev =>
+                prev.includes(id) ? prev.filter(mId => mId !== id) : [...prev, id]
               )}
-            </motion.div>
+              onSelectMeishi={(meishi) => setSelectedMeishiForDetail(meishi)}
+              onOpenMap={() => setIsMeishiMapOpen(true)}
+              onOpenCamera={handleOpenMeishiCamera}
+            />
           )}
 
           {activeTab === 'community' && (
-            <motion.div
-              key="forum"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <div className="bg-white p-4 mb-2 flex items-center gap-3 border-b border-gray-100">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-gray-400" />
-                </div>
-                <div className="flex-1 bg-gray-50 rounded-full px-4 py-2 text-sm text-gray-400">
-                  今の気持ちを投稿してみましょう
-                </div>
-              </div>
-              {posts.map(p => (
-                <ForumPost key={p.id} post={p} />
-              ))}
-            </motion.div>
+            <CommunityScreen key="forum" posts={posts} />
           )}
 
           {activeTab === 'connect' && (
-            <motion.div
-              key="connect"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="p-4"
-            >
-              <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-                <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-gray-900 mb-2">コネクト</h2>
-                <p className="text-gray-500 text-sm">
-                  新しいつながりを見つけましょう。
-                </p>
-              </div>
-            </motion.div>
+            <ConnectScreen key="connect" />
           )}
 
           {activeTab === 'jobs' && (
-            <motion.div
-              key="jobs"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <div className="p-4 bg-white border-b border-gray-100">
-                <h2 className="text-sm font-bold text-gray-900 mb-4">注目の求人</h2>
-                <div className="flex gap-3 overflow-x-auto no-scrollbar">
-                  {MOCK_JOBS.map(j => (
-                    <div key={j.id} className="min-w-[200px] border border-gray-100 rounded-xl p-3 bg-white shadow-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 bg-gray-50 rounded border border-gray-100 flex items-center justify-center">
-                          <Building2 className="w-3 h-3 text-gray-300" />
-                        </div>
-                        <span className="text-xs font-bold text-gray-600">{j.company}</span>
-                      </div>
-                      <h3 className="text-sm font-bold text-gray-900 line-clamp-1 mb-1">{j.title}</h3>
-                      <p className="text-[10px] text-blue-600 font-bold">{j.salary}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-2">
-                {MOCK_JOBS.map(j => (
-                  <JobCard key={j.id} job={j} />
-                ))}
-              </div>
-            </motion.div>
+            <JobsScreen key="jobs" />
           )}
 
           {activeTab === 'today' && (
-            <motion.div
+            <TodayScreen
               key="today"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-white min-h-screen pb-24"
-            >
-              <div className="p-4">
-                {/* User Profile */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                      {user.photoURL ? (
-                        <img src={user.photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      ) : (
-                        <User className="w-6 h-6 text-white" />
-                      )}
-                    </div>
-                    <h2 className="text-base font-bold text-gray-900">{user.displayName || 'ゲストユーザー'}</h2>
-                  </div>
-                  <button 
-                    onClick={() => setIsProfileOpen(true)}
-                    className="px-3 py-1.5 border border-gray-300 rounded text-xs font-medium text-gray-700"
-                  >
-                    マイプロフィール
-                  </button>
-                </div>
-
-                {/* Profile Completion */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-gray-900 text-xs">プロフィールを完成させる <span className="text-gray-400 font-normal">({completedProfileSteps.length}/6)</span></h3>
-                    <button className="flex items-center text-gray-400 text-xs gap-1">
-                      折りたたむ <ChevronRight className="w-3 h-3 -rotate-90" />
-                    </button>
-                  </div>
-                  
-                  <div className="flex gap-1 mb-4">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full ${i <= completedProfileSteps.length ? 'bg-black' : 'bg-gray-100'}`}></div>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x no-scrollbar">
-                    {/* Card 1 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">プロフィール写真</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        あなたを代表するプロフィール写真を追加してください
-                      </p>
-                      <button 
-                        onClick={() => toggleProfileStep(1)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(1) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(1) ? '完了' : '写真を追加'}
-                      </button>
-                    </div>
-
-                    {/* Card 2 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">自己紹介</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        あなたを紹介する簡単な説明を入力してください
-                      </p>
-                      <button 
-                        onClick={() => setIsIntroEditOpen(true)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(2) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(2) ? '完了' : '紹介を入力'}
-                      </button>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Briefcase className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">経歴情報</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        代表的な経歴を入力してください
-                      </p>
-                      <button 
-                        onClick={() => setIsCareerListOpen(true)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(3) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(3) ? '完了' : '経歴を入力'}
-                      </button>
-                    </div>
-
-                    {/* Card 4 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">総経歴年数</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        総経歴年数を教えてください
-                      </p>
-                      <button 
-                        onClick={() => toggleProfileStep(4)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(4) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(4) ? '完了' : '経歴年数を入力'}
-                      </button>
-                    </div>
-
-                    {/* Card 5 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BarChart2 className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">スキル</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        職務スキルを教えてください
-                      </p>
-                      <button 
-                        onClick={() => toggleProfileStep(5)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(5) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(5) ? '完了' : 'スキルを追加'}
-                      </button>
-                    </div>
-
-                    {/* Card 6 */}
-                    <div className="min-w-[200px] bg-white border border-gray-200 rounded-lg p-3.5 snap-start">
-                      <div className="flex items-center gap-2 mb-2">
-                        <GraduationCap className="w-4 h-4 text-gray-700" />
-                        <h4 className="font-bold text-gray-900 text-xs">学歴</h4>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-4 h-8 leading-relaxed">
-                        最終学歴を教えてください
-                      </p>
-                      <button 
-                        onClick={() => setIsEducationEditOpen(true)}
-                        className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(6) ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}
-                      >
-                        {completedProfileSteps.includes(6) ? '完了' : '学歴を入力'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="bg-white border border-gray-100 rounded-xl p-4 mb-8 shadow-sm flex justify-between items-center">
-                  <button className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-                      <User className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">人脈</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-                      <Mail className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">受信した提案</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-                      <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-white">P</div>
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">ポイント</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-                      <div className="w-5 h-5 border-2 border-white rounded-sm relative">
-                        <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white -translate-x-1/2"></div>
-                        <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white -translate-y-1/2"></div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">ギフト</span>
-                  </button>
-                </div>
-
-                {/* Tips Section */}
-                <div>
-                  <h3 className="font-bold text-base text-gray-900 mb-4">新規会員のためのTIP</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <span className="inline-block px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded mb-2">発信者表示</span>
-                      <p className="font-bold text-gray-900 text-xs leading-relaxed">
-                        名刺を連絡先に保存する必要はありません。電話がかかってくるとRememberがお知らせします。
-                      </p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded mb-2">スカウト提案</span>
-                      <p className="font-bold text-gray-900 text-xs leading-relaxed">
-                        良いスカウト提案をたくさん受けるには、このようにプロフィールを作成してみてください。
-                      </p>
-                    </div>
-
-                    <div 
-                      className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={handleOpenMyMeishiCamera}
-                    >
-                      <span className="inline-block px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] font-bold rounded mb-2">自分の名刺登録</span>
-                      <p className="font-bold text-gray-900 text-xs leading-relaxed">
-                        自分の名刺を登録すると良い2つの利点をお知...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Action Button */}
-                <button 
-                  onClick={handleOpenMeishiCamera}
-                  className="fixed bottom-20 right-4 bg-[#0A0A0A] hover:bg-black text-white px-5 py-3 rounded-full font-bold shadow-lg flex items-center gap-1 z-30"
-                >
-                <Plus className="w-5 h-5" />
-                名刺登録
-              </button>
-            </motion.div>
+              user={user}
+              completedProfileSteps={completedProfileSteps}
+              toggleProfileStep={toggleProfileStep}
+              onOpenProfile={() => setIsProfileOpen(true)}
+              onOpenIntroEdit={() => setIsIntroEditOpen(true)}
+              onOpenCareerList={() => setIsCareerListOpen(true)}
+              onOpenEducationEdit={() => setIsEducationEditOpen(true)}
+              onOpenMyMeishiCamera={handleOpenMyMeishiCamera}
+              onOpenMeishiCamera={handleOpenMeishiCamera}
+            />
           )}
         </AnimatePresence>
       </main>
         </div>
 
         {/* Desktop Right Sidebar (Remember Web Style) */}
-        <aside className="hidden lg:block w-80 shrink-0 space-y-4 sticky top-22">
-          {/* Real-time Trending Posts Widget (リアルタイム人気記事 Top 5) */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <h3 className="font-bold text-sm text-gray-900">リアルタイム人気記事 Top 5</h3>
-              </div>
-              <span className="text-[10px] text-gray-400">Remember Live</span>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                { rank: 1, title: 'LINEヤフー vs メルカリ 年収交渉・転職ノウハウ', comments: 42, board: 'IT・企画' },
-                { rank: 2, title: '2026 B2B営業 名刺スキャンAI自動化の導入事例', comments: 28, board: '営業・マーケ' },
-                { rank: 3, title: 'スタートアップ C-Level 交流会＆ネットワーキング', comments: 19, board: 'CEO・経営' },
-                { rank: 4, title: 'Remember 名刺連携機能による顧客管理のコツ', comments: 34, board: 'Q&A' },
-                { rank: 5, title: '有給休暇の活用と海外出張ビジネスマナー', comments: 15, board: 'フリートーク' },
-              ].map((item) => (
-                <div 
-                  key={item.rank}
-                  onClick={() => setActiveTab('community')}
-                  className="flex items-start gap-2.5 cursor-pointer group p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className={`font-black text-xs w-4 text-center ${item.rank <= 3 ? 'text-[#C9483B]' : 'text-gray-400'}`}>
-                    {item.rank}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 group-hover:text-[#0A0A0A] transition-colors line-clamp-1">
-                      {item.title}
-                    </p>
-                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-                      <span>{item.board}</span>
-                      <span>・</span>
-                      <span className="flex items-center gap-0.5 text-[#0A0A0A] font-medium">
-                        <MessageSquare className="w-2.5 h-2.5" />
-                        {item.comments}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggested Professional Connections */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
-            <h3 className="font-bold text-sm text-gray-900 mb-3">おすすめビジネスネットワーク</h3>
-            <div className="space-y-3">
-              {[
-                { name: '山田 太郎', company: 'LINEヤフー株式会社', role: 'プロダクトマネージャー' },
-                { name: '佐藤 健太', company: 'CyberAgent Inc.', role: 'マーケティングリード' },
-                { name: '鈴木 花子', company: 'Rakuten Group', role: 'B2B Business Dev' },
-              ].map((prof, idx) => (
-                <div key={idx} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-gray-700">
-                      {prof.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{prof.name}</p>
-                      <p className="text-[10px] text-gray-500 truncate max-w-[130px]">{prof.company}</p>
-                    </div>
-                  </div>
-                  <button className="px-2.5 py-1 bg-gray-100 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors rounded-md text-[11px] font-bold">
-                    + Connect
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* App & Digital Business Card QR Widget */}
-          <div className="bg-gradient-to-br from-[#0A0A0A] via-[#1A1A1A] to-[#2B2B2B] text-white rounded-xl p-4 shadow-xs flex items-center gap-4">
-            <div className="bg-white p-2 rounded-lg shrink-0">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window.location.origin + '?c=billionaire_demo')}`} 
-                alt="Mobile App QR"
-                className="w-16 h-16"
-              />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-bold text-amber-300">スマホ名刺スキャン Sync</p>
-              <p className="text-[11px] text-blue-100 mt-1 leading-snug">
-                QRコードをスキャンして、モバイルアプリとデジタル名刺をすぐに確認できます。
-              </p>
-            </div>
-          </div>
-
-          {/* Desktop Footer */}
-          <div className="text-[11px] text-gray-400 space-y-1.5 px-2">
-            <div className="flex flex-wrap gap-2 text-gray-500 font-medium">
-              <a href="#" className="hover:underline">利用規約</a>
-              <span>・</span>
-              <a href="#" className="hover:underline font-bold text-gray-700">プライバシーポリシー</a>
-              <span>・</span>
-              <a href="#" className="hover:underline">ヘルプセンター</a>
-              <span>・</span>
-              <a href="#" className="hover:underline">会社概要</a>
-            </div>
-            <p>© 2026 Billionaire Inc. All rights reserved.</p>
-          </div>
-        </aside>
+        <DesktopSidebar onNavigateCommunity={() => setActiveTab('community')} />
       </div>
 
       {/* Bottom Navigation (Mobile Only) */}
-      {!isEditMode ? (
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex justify-around items-center py-2 px-2 z-20 pb-safe lg:hidden">
-          <button 
-            onClick={() => setActiveTab('today')}
-            className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'today' ? 'text-gray-900' : 'text-gray-400'}`}
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-[10px] font-medium">トゥデイ</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('meishi')}
-            className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'meishi' ? 'text-gray-900' : 'text-gray-400'}`}
-          >
-            <Contact className="w-6 h-6" />
-            <span className="text-[10px] font-medium">名刺帳</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('connect')}
-            className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'connect' ? 'text-gray-900' : 'text-gray-400'}`}
-          >
-            <FileText className="w-6 h-6" />
-            <span className="text-[10px] font-medium">コネクト</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('jobs')}
-            className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'jobs' ? 'text-gray-900' : 'text-gray-400'}`}
-          >
-            <Briefcase className="w-6 h-6" />
-            <span className="text-[10px] font-medium">採用公告</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('community')}
-            className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'community' ? 'text-gray-900' : 'text-gray-400'}`}
-          >
-            <Share2 className="w-6 h-6" />
-            <span className="text-[10px] font-medium">コミュニティ</span>
-          </button>
-        </nav>
-      ) : (
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-gray-900 text-white flex justify-around items-center py-2 px-2 z-20 pb-safe lg:hidden">
-          <button className="flex flex-col items-center gap-1 flex-1 py-1 text-gray-300 hover:text-white transition-colors">
-            <Users className="w-6 h-6" />
-            <span className="text-[10px] font-medium">グループ</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 flex-1 py-1 text-gray-300 hover:text-white transition-colors">
-            <Mail className="w-6 h-6" />
-            <span className="text-[10px] font-medium">メール</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 flex-1 py-1 text-gray-300 hover:text-white transition-colors">
-            <MessageSquare className="w-6 h-6" />
-            <span className="text-[10px] font-medium">メッセージ</span>
-          </button>
-          <button 
-            onClick={() => setIsMoreMenuOpen(true)}
-            className="flex flex-col items-center gap-1 flex-1 py-1 text-gray-300 hover:text-white transition-colors"
-          >
-            <MoreHorizontal className="w-6 h-6" />
-            <span className="text-[10px] font-medium">その他</span>
-          </button>
-        </nav>
-      )}
+      <BottomNav
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
+        isEditMode={isEditMode}
+        onOpenMoreMenu={() => setIsMoreMenuOpen(true)}
+      />
 
       {/* My Profile Overlay */}
       <AnimatePresence>
