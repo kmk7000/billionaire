@@ -22,6 +22,8 @@ import { BottomNav } from './components/layout/BottomNav';
 import { DesktopSidebar } from './components/layout/DesktopSidebar';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
+import { EducationModals } from './components/profile/EducationModals';
+import { useEducationEditor } from './hooks/useEducationEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -53,23 +55,6 @@ export default function App() {
   const [introText, setIntroText] = useState('');
   const [isJobSeekingIntro, setIsJobSeekingIntro] = useState(false);
   const [isSimpleLoginSettingsOpen, setIsSimpleLoginSettingsOpen] = useState(false);
-
-  // Education Edit States
-  const [isEducationEditOpen, setIsEducationEditOpen] = useState(false);
-  const [eduSchool, setEduSchool] = useState('');
-  const [eduDegree, setEduDegree] = useState('');
-  const [eduMajor, setEduMajor] = useState('');
-  const [eduStartDate, setEduStartDate] = useState('');
-  const [eduEndDate, setEduEndDate] = useState('');
-  const [eduIsCurrent, setEduIsCurrent] = useState(false);
-  const [eduDescription, setEduDescription] = useState('');
-  const [isSchoolSearchOpen, setIsSchoolSearchOpen] = useState(false);
-  const [schoolSearchQuery, setSchoolSearchQuery] = useState('');
-  const [isMajorSearchOpen, setIsMajorSearchOpen] = useState(false);
-  const [majorSearchQuery, setMajorSearchQuery] = useState('');
-  const [isDegreeSelectOpen, setIsDegreeSelectOpen] = useState(false);
-  const [isEduYearPickerOpen, setIsEduYearPickerOpen] = useState<'start' | 'end' | null>(null);
-  const [tempEduYear, setTempEduYear] = useState(new Date().getFullYear());
 
   // Job Edit States
   const [isJobEditOpen, setIsJobEditOpen] = useState(false);
@@ -277,6 +262,7 @@ export default function App() {
   };
 
   const career = useCareerEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
+  const education = useEducationEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -441,44 +427,7 @@ export default function App() {
 
 
 
-  const handleSaveEducation = async () => {
-    if (!user || !eduSchool) return;
 
-    try {
-      const newEdu: Education = {
-        id: Date.now().toString(),
-        schoolName: eduSchool,
-        degree: eduDegree,
-        major: eduMajor,
-        startDate: eduStartDate,
-        ...(eduIsCurrent ? {} : { endDate: eduEndDate }),
-        isCurrent: eduIsCurrent,
-        description: eduDescription
-      };
-
-      const updatedEdus = [...(userProfile?.educations || []), newEdu];
-
-      await updateDoc(doc(db, 'users', user.uid), {
-        educations: updatedEdus
-      });
-
-      setIsEducationEditOpen(false);
-      if (!completedProfileSteps.includes(6)) {
-        toggleProfileStep(6); // Mark education as completed
-      }
-      
-      // Reset form
-      setEduSchool('');
-      setEduDegree('');
-      setEduMajor('');
-      setEduStartDate('');
-      setEduEndDate('');
-      setEduIsCurrent(false);
-      setEduDescription('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
   const handleSaveJob = async () => {
     if (!user) return;
@@ -1270,7 +1219,7 @@ export default function App() {
               onOpenProfile={() => setIsProfileOpen(true)}
               onOpenIntroEdit={() => setIsIntroEditOpen(true)}
               onOpenCareerList={() => career.openList()}
-              onOpenEducationEdit={() => setIsEducationEditOpen(true)}
+              onOpenEducationEdit={() => education.open()}
               onOpenMyMeishiCamera={handleOpenMyMeishiCamera}
               onOpenMeishiCamera={handleOpenMeishiCamera}
             />
@@ -1690,7 +1639,7 @@ export default function App() {
                       最終学歴を教えてください
                     </p>
                     <button 
-                      onClick={() => setIsEducationEditOpen(true)}
+                      onClick={() => education.open()}
                       className={`w-full border text-xs font-bold py-2 rounded ${completedProfileSteps.includes(6) ? 'bg-gray-200 border-gray-200 text-gray-500' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       {completedProfileSteps.includes(6) ? '完了' : '学歴入力'}
@@ -1704,7 +1653,7 @@ export default function App() {
                 {[
                   { title: '紹介', action: '+ 紹介追加', onClick: () => setIsIntroEditOpen(true) },
                   { title: '経歴', action: '+ 経歴追加', onClick: () => career.openList() },
-                  { title: '学歴', action: '+ 学歴追加', onClick: () => setIsEducationEditOpen(true) },
+                  { title: '学歴', action: '+ 学歴追加', onClick: () => education.open() },
                   { title: '職務', action: '+ 職務追加', onClick: () => {
                     setSelectedJobs(userProfile?.jobs || []);
                     setIsJobEditOpen(true);
@@ -2210,418 +2159,7 @@ export default function App() {
 
       <CareerModals career={career} />
 
-      {/* Education Edit Overlay */}
-      <AnimatePresence>
-        {isEducationEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <button onClick={() => setIsEducationEditOpen(false)}>
-                  <ArrowLeft className="w-6 h-6 text-gray-900" />
-                </button>
-                <h2 className="text-lg font-bold text-gray-900">学歴追加</h2>
-              </div>
-              <button 
-                onClick={handleSaveEducation}
-                disabled={!eduSchool}
-                className={`font-bold text-sm ${!eduSchool ? 'text-gray-300' : 'text-gray-900'}`}
-              >
-                保存
-              </button>
-            </div>
-
-            <div className="p-4 space-y-6">
-              {/* School Field */}
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  学校 <span className="text-red-500">*</span>
-                </label>
-                <div 
-                  onClick={() => setIsSchoolSearchOpen(true)}
-                  className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                >
-                  <span className={eduSchool ? 'text-gray-900' : 'text-gray-400'}>
-                    {eduSchool || '例）東京大学'}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Degree Field */}
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  学位
-                </label>
-                <div 
-                  onClick={() => setIsDegreeSelectOpen(true)}
-                  className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                >
-                  <span className={eduDegree ? 'text-gray-900' : 'text-gray-400'}>
-                    {eduDegree || '学位を選択'}
-                  </span>
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Major Field */}
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  専攻
-                </label>
-                <div 
-                  onClick={() => setIsMajorSearchOpen(true)}
-                  className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                >
-                  <span className={eduMajor ? 'text-gray-900' : 'text-gray-400'}>
-                    {eduMajor || '例）経営学'}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Date Fields */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    入学
-                  </label>
-                  <div 
-                    onClick={() => {
-                      setTempEduYear(eduStartDate ? parseInt(eduStartDate) : new Date().getFullYear());
-                      setIsEduYearPickerOpen('start');
-                    }}
-                    className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                  >
-                    <span className={eduStartDate ? 'text-gray-900' : 'text-gray-400'}>
-                      {eduStartDate ? `${eduStartDate}年` : '入学年度'}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    卒業
-                  </label>
-                  <div 
-                    onClick={() => {
-                      if (!eduIsCurrent) {
-                        setTempEduYear(eduEndDate ? parseInt(eduEndDate) : new Date().getFullYear());
-                        setIsEduYearPickerOpen('end');
-                      }
-                    }}
-                    className={`w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center ${eduIsCurrent ? 'bg-gray-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <span className={eduEndDate && !eduIsCurrent ? 'text-gray-900' : 'text-gray-400'}>
-                      {eduIsCurrent ? '卒業年度' : (eduEndDate ? `${eduEndDate}年` : '卒業年度')}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Is Current Checkbox */}
-              <button 
-                onClick={() => setEduIsCurrent(!eduIsCurrent)}
-                className="flex items-center gap-2"
-              >
-                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${eduIsCurrent ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}>
-                  {eduIsCurrent && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <span className="text-sm text-gray-900">在学中</span>
-              </button>
-
-              {/* Description Field */}
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  研究分野および論文の説明
-                </label>
-                <div className="relative">
-                  <textarea
-                    value={eduDescription}
-                    onChange={(e) => setEduDescription(e.target.value.slice(0, 5000))}
-                    placeholder="例）スマートフォンセールスにおいてバイラルマーケティングが与える影響の分析(2018)"
-                    className="w-full border border-gray-200 rounded-lg p-3 h-40 resize-none focus:outline-none focus:border-gray-400 text-sm"
-                  />
-                  <div className="absolute bottom-3 right-3 text-xs text-gray-400">
-                    {eduDescription.length}/5000字
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* School Search Overlay */}
-      <AnimatePresence>
-        {isSchoolSearchOpen && (
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            <div className="p-4 flex items-center gap-3 border-b border-gray-100">
-              <div className="flex-1 bg-gray-50 rounded-lg flex items-center px-3 py-2">
-                <Search className="w-5 h-5 text-gray-400 mr-2" />
-                <input 
-                  type="text"
-                  value={schoolSearchQuery}
-                  onChange={(e) => setSchoolSearchQuery(e.target.value)}
-                  placeholder="学校名を入力"
-                  className="bg-transparent w-full text-sm focus:outline-none"
-                  autoFocus
-                />
-                {schoolSearchQuery && (
-                  <button onClick={() => setSchoolSearchQuery('')}>
-                    <X className="w-4 h-4 text-gray-400 bg-gray-200 rounded-full p-0.5" />
-                  </button>
-                )}
-              </div>
-              <button 
-                onClick={() => {
-                  setIsSchoolSearchOpen(false);
-                  setSchoolSearchQuery('');
-                }}
-                className="text-sm font-medium"
-              >
-                キャンセル
-              </button>
-            </div>
-
-            <div className="p-4">
-              {schoolSearchQuery ? (
-                <div>
-                  {JAPANESE_UNIVERSITIES.filter(c => c.includes(schoolSearchQuery)).map((school, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => {
-                        setEduSchool(school);
-                        setIsSchoolSearchOpen(false);
-                        setSchoolSearchQuery('');
-                      }}
-                      className="py-3 border-b border-gray-100 text-sm cursor-pointer"
-                    >
-                      {school}
-                    </div>
-                  ))}
-                  <div className="text-center mt-8">
-                    <p className="text-sm text-gray-500 mb-2">お探しの学校名がありませんか？</p>
-                    <button 
-                      onClick={() => {
-                        setEduSchool(schoolSearchQuery);
-                        setIsSchoolSearchOpen(false);
-                        setSchoolSearchQuery('');
-                      }}
-                      className="text-orange-500 text-sm font-medium underline"
-                    >
-                      '{schoolSearchQuery}' を直接入力
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-sm text-gray-400 mt-8">
-                  最近検索した学校名がありません
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Major Search Overlay */}
-      <AnimatePresence>
-        {isMajorSearchOpen && (
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            <div className="p-4 flex items-center gap-3 border-b border-gray-100">
-              <div className="flex-1 bg-gray-50 rounded-lg flex items-center px-3 py-2">
-                <Search className="w-5 h-5 text-gray-400 mr-2" />
-                <input 
-                  type="text"
-                  value={majorSearchQuery}
-                  onChange={(e) => setMajorSearchQuery(e.target.value)}
-                  placeholder="専攻を入力"
-                  className="bg-transparent w-full text-sm focus:outline-none"
-                  autoFocus
-                />
-                {majorSearchQuery && (
-                  <button onClick={() => setMajorSearchQuery('')}>
-                    <X className="w-4 h-4 text-gray-400 bg-gray-200 rounded-full p-0.5" />
-                  </button>
-                )}
-              </div>
-              <button 
-                onClick={() => {
-                  setIsMajorSearchOpen(false);
-                  setMajorSearchQuery('');
-                }}
-                className="text-sm font-medium"
-              >
-                キャンセル
-              </button>
-            </div>
-
-            <div className="p-4">
-              {majorSearchQuery ? (
-                <div>
-                  {JAPANESE_MAJORS.filter(c => c.includes(majorSearchQuery)).map((major, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => {
-                        setEduMajor(major);
-                        setIsMajorSearchOpen(false);
-                        setMajorSearchQuery('');
-                      }}
-                      className="py-3 border-b border-gray-100 text-sm cursor-pointer"
-                    >
-                      {major}
-                    </div>
-                  ))}
-                  <div className="text-center mt-8">
-                    <p className="text-sm text-gray-500 mb-2">お探しの専攻がありませんか？</p>
-                    <button 
-                      onClick={() => {
-                        setEduMajor(majorSearchQuery);
-                        setIsMajorSearchOpen(false);
-                        setMajorSearchQuery('');
-                      }}
-                      className="text-orange-500 text-sm font-medium underline"
-                    >
-                      '{majorSearchQuery}' を直接入力
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-sm text-gray-400 mt-8">
-                  最近検索した専攻がありません
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Degree Select Overlay */}
-      <AnimatePresence>
-        {isDegreeSelectOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsDegreeSelectOpen(false)}
-              className="fixed inset-0 bg-black/40 z-[80] max-w-md mx-auto"
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-white z-[90] rounded-t-2xl max-w-md mx-auto"
-            >
-              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-bold text-gray-900">学位を選択</h3>
-                <button onClick={() => setIsDegreeSelectOpen(false)}>
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <div className="p-4 space-y-2">
-                {DEGREES.map((degree) => (
-                  <button
-                    key={degree}
-                    onClick={() => {
-                      setEduDegree(degree);
-                      setIsDegreeSelectOpen(false);
-                    }}
-                    className="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-50 text-sm text-gray-900"
-                  >
-                    {degree}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Education Year Picker Overlay */}
-      <AnimatePresence>
-        {isEduYearPickerOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsEduYearPickerOpen(null)}
-              className="fixed inset-0 bg-black/40 z-[80] max-w-md mx-auto"
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-white z-[90] rounded-t-2xl max-w-md mx-auto"
-            >
-              <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                <button 
-                  onClick={() => {
-                    if (isEduYearPickerOpen === 'start') setEduStartDate('');
-                    if (isEduYearPickerOpen === 'end') setEduEndDate('');
-                    setIsEduYearPickerOpen(null);
-                  }}
-                  className="text-blue-500 font-medium"
-                >
-                  削除
-                </button>
-                <button 
-                  onClick={() => {
-                    const formattedYear = tempEduYear.toString();
-                    if (isEduYearPickerOpen === 'start') setEduStartDate(formattedYear);
-                    if (isEduYearPickerOpen === 'end') setEduEndDate(formattedYear);
-                    setIsEduYearPickerOpen(null);
-                  }}
-                  className="text-blue-500 font-medium"
-                >
-                  完了
-                </button>
-              </div>
-              
-              <div className="flex justify-center items-center h-48 px-8 relative">
-                <div className="w-full h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="edu-year-scroll">
-                  <div className="h-20"></div>
-                  {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() + 5 - i).map(year => (
-                    <div 
-                      key={year} 
-                      onClick={() => setTempEduYear(year)}
-                      className={`h-8 flex items-center justify-center snap-center cursor-pointer ${tempEduYear === year ? 'text-xl font-bold text-gray-900' : 'text-gray-400'}`}
-                    >
-                      {year}年
-                    </div>
-                  ))}
-                  <div className="h-20"></div>
-                </div>
-                {/* Selection Highlight */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-gray-100 rounded-lg -z-10 pointer-events-none"></div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <EducationModals education={education} />
 
       {/* Job Edit Overlay */}
       <AnimatePresence>
