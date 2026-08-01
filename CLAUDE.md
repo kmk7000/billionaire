@@ -32,7 +32,7 @@ npm run lint       # 타입 체크 (tsc --noEmit)
 server.ts                        # Express 서버: LINE OAuth + Vite middleware
 firestore.rules                  # Firestore 보안 규칙
 src/
-├── App.tsx                      # ⚠️ 앱 셸 + 상태 허브 (~4,000줄, 분리 리팩토링 진행 중)
+├── App.tsx                      # ⚠️ 앱 셸 + 상태 허브 (~3,900줄, 분리 리팩토링 진행 중)
 ├── firebase.ts                  # Firebase 초기화 + 에러 핸들러
 ├── types/
 │   ├── db.ts                    # Firestore 데이터 모델 타입
@@ -50,13 +50,13 @@ src/
 ├── services/firestoreService.ts # Firestore CRUD
 ├── hooks/                       # useMeishiScanner(OCR), useContactsData, useCommunityPosts,
 │                                 # useCareerEditor, useEducationEditor, useSkillEditor, useJobEditor,
-│                                 # useLanguageEditor (편집 상태+Firestore 저장)
+│                                 # useLanguageEditor, useWebsiteEditor (편집 상태+Firestore 저장)
 └── utils/imageUtils.ts          # 이미지 처리
 ```
 
 ## 알려진 이슈 / 이관 시 주의사항
 
-1. **`src/App.tsx` 분리 리팩토링 진행 중** (8,298줄 → 현재 ~4,000줄). 경력·학력·스킬·직무·언어 편집 모달군은 각각 `hooks/useCareerEditor.ts`+`components/profile/CareerModals.tsx`, `hooks/useEducationEditor.ts`+`components/profile/EducationModals.tsx`, `hooks/useSkillEditor.ts`+`components/profile/SkillModals.tsx`, `hooks/useJobEditor.ts`+`components/profile/JobModals.tsx`, `hooks/useLanguageEditor.ts`+`components/profile/LanguageModals.tsx`로 분리 완료 — 이 패턴(도메인별 `useXxxEditor` 훅 + `XxxModals` 컴포넌트)을 다음 도메인에도 반복 적용. 남은 대상: 마이프로필 오버레이(`isProfileOpen`)와 웹사이트·강연·출판·기사·수상·자격증·개인정보·설정/계정관리 등 약 24개 모달(`{isXxxOpen && (...)}` 블록, ~2,300줄, `App.tsx` 검색 패턴 `{is[A-Z].*Open && (`).
+1. **`src/App.tsx` 분리 리팩토링 진행 중** (8,298줄 → 현재 ~3,900줄). 경력·학력·스킬·직무·언어·웹사이트 편집 모달군은 각각 `hooks/useCareerEditor.ts`+`components/profile/CareerModals.tsx`, `hooks/useEducationEditor.ts`+`components/profile/EducationModals.tsx`, `hooks/useSkillEditor.ts`+`components/profile/SkillModals.tsx`, `hooks/useJobEditor.ts`+`components/profile/JobModals.tsx`, `hooks/useLanguageEditor.ts`+`components/profile/LanguageModals.tsx`, `hooks/useWebsiteEditor.ts`+`components/profile/WebsiteModals.tsx`로 분리 완료 — 이 패턴(도메인별 `useXxxEditor` 훅 + `XxxModals` 컴포넌트)을 다음 도메인에도 반복 적용. 남은 대상: 마이프로필 오버레이(`isProfileOpen`)와 강연·출판·기사·수상·자격증·개인정보·설정/계정관리 등 약 22개 모달(`{isXxxOpen && (...)}` 블록, ~2,200줄, `App.tsx` 검색 패턴 `{is[A-Z].*Open && (`).
 2. **Firebase 프로젝트가 AI Studio 관리 프로젝트** (`ai-studio-applet-webapp-c0fee`) — 데이터가 Google 관리 인프라에 있음. 정식 출시 전 자체 Firebase 프로젝트로 이전 필요 (config 교체 + `firestore.rules` 배포).
 3. **`GEMINI_API_KEY`가 클라이언트 번들에 주입됨** (`vite.config.ts`의 `define`) — 배포 시 키가 노출된다. OCR 호출을 서버 라우트로 옮겨야 함.
 4. **LINE Client ID가 `server.ts`에 하드코딩** (`"2009585479"`) — env 변수 `LINE_CLIENT_ID`를 읽도록 수정 필요.
