@@ -28,6 +28,8 @@ import { SkillModals } from './components/profile/SkillModals';
 import { useSkillEditor } from './hooks/useSkillEditor';
 import { JobModals } from './components/profile/JobModals';
 import { useJobEditor } from './hooks/useJobEditor';
+import { LanguageModals } from './components/profile/LanguageModals';
+import { useLanguageEditor } from './hooks/useLanguageEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -64,13 +66,7 @@ export default function App() {
 
 
 
-  // Language Edit States
-  const [isLanguageEditOpen, setIsLanguageEditOpen] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
-  const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
-  const [isLevelSelectOpen, setIsLevelSelectOpen] = useState(false);
-  const [editingLanguageId, setEditingLanguageId] = useState<string | null>(null);
+
 
   // Website Edit States
   const [isWebsiteEditOpen, setIsWebsiteEditOpen] = useState(false);
@@ -257,6 +253,7 @@ export default function App() {
   const education = useEducationEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
   const skill = useSkillEditor(user, userProfile);
   const job = useJobEditor(user, userProfile);
+  const language = useLanguageEditor(user, userProfile);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -427,55 +424,7 @@ export default function App() {
 
 
 
-  const handleSaveLanguage = async () => {
-    if (!user || !selectedLanguage || !selectedLevel) return;
 
-    try {
-      const currentLanguages = userProfile?.languages || [];
-      let updatedLanguages;
-
-      if (editingLanguageId) {
-        updatedLanguages = currentLanguages.map(lang => 
-          lang.id === editingLanguageId 
-            ? { ...lang, language: selectedLanguage, level: selectedLevel }
-            : lang
-        );
-      } else {
-        updatedLanguages = [
-          ...currentLanguages,
-          {
-            id: Date.now().toString(),
-            language: selectedLanguage,
-            level: selectedLevel
-          }
-        ];
-      }
-
-      await updateDoc(doc(db, 'users', user.uid), {
-        languages: updatedLanguages
-      });
-
-      setIsLanguageEditOpen(false);
-      setSelectedLanguage("");
-      setSelectedLevel("");
-      setEditingLanguageId(null);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
-
-  const deleteLanguage = async (id: string) => {
-    if (!user || !userProfile?.languages) return;
-    
-    try {
-      const updatedLanguages = userProfile.languages.filter(lang => lang.id !== id);
-      await updateDoc(doc(db, 'users', user.uid), {
-        languages: updatedLanguages
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
   const handleSaveWebsite = async () => {
     if (!user) return;
@@ -1623,12 +1572,7 @@ export default function App() {
                   { title: '学歴', action: '+ 学歴追加', onClick: () => education.open() },
                   { title: '職務', action: '+ 職務追加', onClick: () => job.open() },
                   { title: '専門分野・スキル', action: '+ 専門分野・スキル追加', onClick: () => skill.open() },
-                  { title: '外国語', action: '+ 外国語追加', onClick: () => {
-                    setSelectedLanguage("");
-                    setSelectedLevel("");
-                    setEditingLanguageId(null);
-                    setIsLanguageEditOpen(true);
-                  } },
+                  { title: '外国語', action: '+ 外国語追加', onClick: () => language.openNew() },
                   { title: 'ウェブサイト・ブログ', action: '+ ウェブサイト・ブログ追加', onClick: () => {
                     setWebsiteUrls(userProfile?.websites?.length ? userProfile.websites : [""]);
                     setIsWebsiteEditOpen(true);
@@ -1752,18 +1696,13 @@ export default function App() {
                               </div>
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => {
-                                    setSelectedLanguage(lang.language);
-                                    setSelectedLevel(lang.level);
-                                    setEditingLanguageId(lang.id);
-                                    setIsLanguageEditOpen(true);
-                                  }}
+                                  onClick={() => language.openExisting(lang)}
                                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => deleteLanguage(lang.id)}
+                                  onClick={() => language.deleteLanguage(lang.id)}
                                   className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -2126,166 +2065,7 @@ export default function App() {
 
       <SkillModals skill={skill} userProfile={userProfile} />
 
-      {/* Language Edit Overlay */}
-      <AnimatePresence>
-        {isLanguageEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-50 flex flex-col"
-          >
-            <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
-              <div className="px-4 py-4 flex items-center justify-between relative">
-                <button 
-                  onClick={() => {
-                    setIsLanguageEditOpen(false);
-                    setSelectedLanguage("");
-                    setSelectedLevel("");
-                    setEditingLanguageId(null);
-                  }} 
-                  className="p-1 -ml-1"
-                >
-                  <ArrowLeft className="w-6 h-6 text-gray-900" />
-                </button>
-                <h2 className="text-lg font-bold text-gray-900">外国語追加</h2>
-                <button 
-                  onClick={handleSaveLanguage}
-                  disabled={!selectedLanguage || !selectedLevel}
-                  className={`font-bold ${!selectedLanguage || !selectedLevel ? 'text-gray-300' : 'text-blue-600'}`}
-                >
-                  保存
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-6">
-              <div className="space-y-6">
-                {/* Language Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">
-                    言語 <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    onClick={() => setIsLanguageSelectOpen(true)}
-                    className="w-full flex items-center justify-between h-[45px] px-4 border border-gray-200 rounded-md bg-white text-left"
-                  >
-                    <span className={selectedLanguage ? "text-gray-900" : "text-gray-400"}>
-                      {selectedLanguage || "言語を選択してください"}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </button>
-                </div>
-
-                {/* Level Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">
-                    レベル <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    onClick={() => setIsLevelSelectOpen(true)}
-                    className="w-full flex items-center justify-between h-[45px] px-4 border border-gray-200 rounded-md bg-white text-left"
-                  >
-                    <span className={selectedLevel ? "text-gray-900" : "text-gray-400"}>
-                      {selectedLevel || "レベルを選択してください"}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Sheets for Selection */}
-            <AnimatePresence>
-              {isLanguageSelectOpen && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setIsLanguageSelectOpen(false)}
-                    className="fixed inset-0 bg-black/40 z-[60]"
-                  />
-                  <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] flex flex-col max-h-[80vh]"
-                  >
-                    <div className="flex items-center justify-end p-4 border-b border-gray-100">
-                      <button 
-                        onClick={() => setIsLanguageSelectOpen(false)}
-                        className="font-bold text-blue-600"
-                      >
-                        完了
-                      </button>
-                    </div>
-                    <div className="overflow-y-auto py-2">
-                      {LANGUAGES.map((lang) => (
-                        <button
-                          key={lang}
-                          onClick={() => setSelectedLanguage(lang)}
-                          className={`w-full text-center py-3 text-[14px] ${
-                            selectedLanguage === lang ? 'bg-gray-100 font-bold text-gray-900' : 'text-gray-600'
-                          }`}
-                        >
-                          {lang}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {isLevelSelectOpen && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setIsLevelSelectOpen(false)}
-                    className="fixed inset-0 bg-black/40 z-[60]"
-                  />
-                  <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[70] flex flex-col"
-                  >
-                    <div className="flex items-center justify-end p-4 border-b border-gray-100">
-                      <button 
-                        onClick={() => setIsLevelSelectOpen(false)}
-                        className="font-bold text-blue-600"
-                      >
-                        完了
-                      </button>
-                    </div>
-                    <div className="py-2">
-                      {LANGUAGE_LEVELS.map((level) => (
-                        <button
-                          key={level}
-                          onClick={() => setSelectedLevel(level)}
-                          className={`w-full text-center py-3 text-[14px] ${
-                            selectedLevel === level ? 'bg-gray-100 font-bold text-gray-900' : 'text-gray-600'
-                          }`}
-                        >
-                          {level}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LanguageModals language={language} />
 
       {/* More Page Overlay */}
       <AnimatePresence>
