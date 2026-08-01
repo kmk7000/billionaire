@@ -20,6 +20,8 @@ import { ConnectScreen } from './screens/ConnectScreen';
 import { JobsScreen } from './screens/JobsScreen';
 import { BottomNav } from './components/layout/BottomNav';
 import { DesktopSidebar } from './components/layout/DesktopSidebar';
+import { CareerModals } from './components/profile/CareerModals';
+import { useCareerEditor } from './hooks/useCareerEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -51,25 +53,6 @@ export default function App() {
   const [introText, setIntroText] = useState('');
   const [isJobSeekingIntro, setIsJobSeekingIntro] = useState(false);
   const [isSimpleLoginSettingsOpen, setIsSimpleLoginSettingsOpen] = useState(false);
-
-  // Career Edit States
-  const [isCareerListOpen, setIsCareerListOpen] = useState(false);
-  const [editingCareerId, setEditingCareerId] = useState<string | null>(null);
-  const [totalCareerYears, setTotalCareerYears] = useState('');
-  const [isCareerEditOpen, setIsCareerEditOpen] = useState(false);
-  const [careerCompany, setCareerCompany] = useState('');
-  const [careerIsCurrent, setCareerIsCurrent] = useState(false);
-  const [careerStartDate, setCareerStartDate] = useState('');
-  const [careerEndDate, setCareerEndDate] = useState('');
-  const [careerTitle, setCareerTitle] = useState('');
-  const [careerDepartment, setCareerDepartment] = useState('');
-  const [careerDescription, setCareerDescription] = useState('');
-  const [careerLocationRegion, setCareerLocationRegion] = useState('');
-  const [careerLocationCountry, setCareerLocationCountry] = useState('');
-  const [isCompanySearchOpen, setIsCompanySearchOpen] = useState(false);
-  const [companySearchQuery, setCompanySearchQuery] = useState('');
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState<'start' | 'end' | null>(null);
-  const [tempDate, setTempDate] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
 
   // Education Edit States
   const [isEducationEditOpen, setIsEducationEditOpen] = useState(false);
@@ -288,10 +271,12 @@ export default function App() {
   };
 
   const toggleProfileStep = (step: number) => {
-    setCompletedProfileSteps(prev => 
+    setCompletedProfileSteps(prev =>
       prev.includes(step) ? prev.filter(s => s !== step) : [...prev, step]
     );
   };
+
+  const career = useCareerEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -452,119 +437,9 @@ export default function App() {
     }
   };
 
-  React.useEffect(() => {
-    if (isCareerListOpen && userProfile) {
-      setTotalCareerYears(userProfile.totalCareerYears || '');
-    }
-  }, [isCareerListOpen, userProfile]);
 
-  const handleSaveTotalCareerYears = async (years: string) => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        totalCareerYears: years
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
-  const calculateDuration = (startDate: string, endDate?: string, isCurrent?: boolean) => {
-    if (!startDate) return '';
-    const start = new Date(startDate);
-    const end = isCurrent || !endDate ? new Date() : new Date(endDate);
-    
-    let months = (end.getFullYear() - start.getFullYear()) * 12;
-    months -= start.getMonth();
-    months += end.getMonth();
-    
-    // Add 1 to include both start and end months
-    months += 1;
 
-    if (months < 1) return '0ヶ月';
-    
-    const years = Math.floor(months / 12);
-    const remainingMonths = months % 12;
-    
-    if (years === 0) return `${remainingMonths}ヶ月`;
-    if (remainingMonths === 0) return `${years}年`;
-    return `${years}年 ${remainingMonths}ヶ月`;
-  };
-
-  const handleSaveCareer = async () => {
-    if (!user || !careerCompany || !careerStartDate) return;
-    if (!careerIsCurrent && !careerEndDate) return;
-
-    try {
-      const careerData: Career = {
-        id: editingCareerId || Date.now().toString(),
-        companyName: careerCompany,
-        isCurrent: careerIsCurrent,
-        startDate: careerStartDate,
-        ...(careerIsCurrent ? {} : { endDate: careerEndDate }),
-        title: careerTitle,
-        department: careerDepartment,
-        description: careerDescription,
-        location: careerLocationRegion === '海外' ? careerLocationCountry : careerLocationRegion,
-      };
-
-      let updatedCareers = userProfile?.careers || [];
-      if (editingCareerId) {
-        updatedCareers = updatedCareers.map(c => c.id === editingCareerId ? careerData : c);
-      } else {
-        updatedCareers = [...updatedCareers, careerData];
-      }
-
-      await updateDoc(doc(db, 'users', user.uid), {
-        careers: updatedCareers
-      });
-
-      setIsCareerEditOpen(false);
-      setEditingCareerId(null);
-      if (!completedProfileSteps.includes(3)) {
-        toggleProfileStep(3); // Mark career as completed
-      }
-      
-      // Reset form
-      setCareerCompany('');
-      setCareerIsCurrent(false);
-      setCareerStartDate('');
-      setCareerEndDate('');
-      setCareerTitle('');
-      setCareerDepartment('');
-      setCareerDescription('');
-      setCareerLocationRegion('');
-      setCareerLocationCountry('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
-
-  const handleDeleteCareer = async () => {
-    if (!user || !editingCareerId) return;
-    try {
-      const updatedCareers = userProfile?.careers?.filter(c => c.id !== editingCareerId) || [];
-      await updateDoc(doc(db, 'users', user.uid), {
-        careers: updatedCareers
-      });
-
-      setIsCareerEditOpen(false);
-      setEditingCareerId(null);
-      
-      // Reset form
-      setCareerCompany('');
-      setCareerIsCurrent(false);
-      setCareerStartDate('');
-      setCareerEndDate('');
-      setCareerTitle('');
-      setCareerDepartment('');
-      setCareerDescription('');
-      setCareerLocationRegion('');
-      setCareerLocationCountry('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
   const handleSaveEducation = async () => {
     if (!user || !eduSchool) return;
@@ -1394,7 +1269,7 @@ export default function App() {
               toggleProfileStep={toggleProfileStep}
               onOpenProfile={() => setIsProfileOpen(true)}
               onOpenIntroEdit={() => setIsIntroEditOpen(true)}
-              onOpenCareerList={() => setIsCareerListOpen(true)}
+              onOpenCareerList={() => career.openList()}
               onOpenEducationEdit={() => setIsEducationEditOpen(true)}
               onOpenMyMeishiCamera={handleOpenMyMeishiCamera}
               onOpenMeishiCamera={handleOpenMeishiCamera}
@@ -1767,7 +1642,7 @@ export default function App() {
                       代表的な経歴を入力してください
                     </p>
                     <button 
-                      onClick={() => setIsCareerListOpen(true)}
+                      onClick={() => career.openList()}
                       className={`w-full border text-xs font-bold py-2 rounded ${completedProfileSteps.includes(3) ? 'bg-gray-200 border-gray-200 text-gray-500' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       {completedProfileSteps.includes(3) ? '完了' : '経歴入力'}
@@ -1828,7 +1703,7 @@ export default function App() {
               <div className="space-y-6">
                 {[
                   { title: '紹介', action: '+ 紹介追加', onClick: () => setIsIntroEditOpen(true) },
-                  { title: '経歴', action: '+ 経歴追加', onClick: () => setIsCareerListOpen(true) },
+                  { title: '経歴', action: '+ 経歴追加', onClick: () => career.openList() },
                   { title: '学歴', action: '+ 学歴追加', onClick: () => setIsEducationEditOpen(true) },
                   { title: '職務', action: '+ 職務追加', onClick: () => {
                     setSelectedJobs(userProfile?.jobs || []);
@@ -2333,489 +2208,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Career List Overlay */}
-      <AnimatePresence>
-        {isCareerListOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            {/* Header */}
-            <div className="flex items-center p-4 bg-white sticky top-0 z-10">
-              <button onClick={() => setIsCareerListOpen(false)} className="mr-3">
-                <ArrowLeft className="w-6 h-6 text-gray-900" />
-              </button>
-              <h2 className="text-lg font-bold text-gray-900">経歴編集</h2>
-            </div>
-
-            <div className="flex flex-col">
-              {/* Total Years */}
-              <div className="p-4 bg-white">
-                <label className="block text-sm font-bold text-gray-400 mb-2">
-                  総経歴年数
-                </label>
-                <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                  <input
-                    type="text"
-                    value={totalCareerYears}
-                    onChange={(e) => setTotalCareerYears(e.target.value)}
-                    onBlur={() => handleSaveTotalCareerYears(totalCareerYears)}
-                    placeholder="例) 15"
-                    className="w-full text-gray-900 placeholder-gray-300 focus:outline-none text-lg"
-                  />
-                  <ChevronRight className="w-5 h-5 text-gray-900 flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="h-2 bg-gray-50 w-full"></div>
-
-              {/* Add Career */}
-              <div className="p-4 bg-white">
-                <h3 className="text-sm font-bold text-gray-400 mb-4">経歴追加</h3>
-                <button 
-                  onClick={() => {
-                    setEditingCareerId(null);
-                    setCareerCompany('');
-                    setCareerIsCurrent(false);
-                    setCareerStartDate('');
-                    setCareerEndDate('');
-                    setCareerTitle('');
-                    setCareerDepartment('');
-                    setCareerDescription('');
-                    setCareerLocationRegion('');
-                    setCareerLocationCountry('');
-                    setIsCareerEditOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between py-3 border-b border-gray-100"
-                >
-                  <div className="flex items-center gap-3">
-                    <Edit3 className="w-5 h-5 text-gray-900" />
-                    <span className="font-bold text-gray-900">直接入力する</span>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-900" />
-                </button>
-              </div>
-
-              {/* Career List */}
-              {userProfile?.careers && userProfile.careers.length > 0 && (
-                <div className="p-4 bg-white pt-0">
-                  <div className="space-y-6">
-                    {userProfile.careers.map((career) => (
-                      <div 
-                        key={career.id} 
-                        onClick={() => {
-                          setEditingCareerId(career.id);
-                          setCareerCompany(career.companyName);
-                          setCareerIsCurrent(career.isCurrent);
-                          setCareerStartDate(career.startDate);
-                          setCareerEndDate(career.endDate || '');
-                          setCareerTitle(career.title || '');
-                          setCareerDepartment(career.department || '');
-                          setCareerDescription(career.description || '');
-                          const loc = career.location || '';
-                          if (PREFECTURES.includes(loc)) {
-                            setCareerLocationRegion(loc);
-                            setCareerLocationCountry('');
-                          } else if (loc) {
-                            setCareerLocationRegion('海外');
-                            setCareerLocationCountry(loc);
-                          } else {
-                            setCareerLocationRegion('');
-                            setCareerLocationCountry('');
-                          }
-                          setIsCareerEditOpen(true);
-                        }}
-                        className="flex flex-col cursor-pointer group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-gray-900 text-lg mb-1">{career.companyName}</h4>
-                          <ChevronRight className="w-5 h-5 text-gray-900 flex-shrink-0" />
-                        </div>
-                        <p className="text-sm text-gray-400 mb-3">
-                          {career.startDate.replace('-', '.')} ~ {career.isCurrent ? '現在' : career.endDate?.replace('-', '.')} ({calculateDuration(career.startDate, career.endDate, career.isCurrent)})
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Career Edit Overlay */}
-      <AnimatePresence>
-        {isCareerEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <button onClick={() => setIsCareerEditOpen(false)}>
-                  <ArrowLeft className="w-6 h-6 text-gray-900" />
-                </button>
-                <h2 className="text-lg font-bold text-gray-900">{editingCareerId ? '経歴編集' : '経歴追加'}</h2>
-              </div>
-              <button 
-                onClick={handleSaveCareer}
-                disabled={!careerCompany || !careerStartDate || (!careerIsCurrent && !careerEndDate)}
-                className={`font-bold text-sm ${(!careerCompany || !careerStartDate || (!careerIsCurrent && !careerEndDate)) ? 'text-gray-300' : 'text-blue-500'}`}
-              >
-                完了
-              </button>
-            </div>
-
-            <div className="p-4">
-              {/* Company Field */}
-              <div className="mb-6">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  会社 <span className="text-red-500">*</span>
-                </label>
-                <div 
-                  onClick={() => setIsCompanySearchOpen(true)}
-                  className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                >
-                  <span className={careerCompany ? 'text-gray-900' : 'text-gray-400'}>
-                    {careerCompany || '例）LINEヤフー'}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-                
-                <div className="mt-3 flex items-center gap-2">
-                  <button 
-                    onClick={() => setCareerIsCurrent(!careerIsCurrent)}
-                    className="flex items-center gap-2"
-                  >
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${careerIsCurrent ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}>
-                      {careerIsCurrent && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm text-gray-900">在職中</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Date Fields */}
-              <div className="flex gap-4 mb-6">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    入社 <span className="text-red-500">*</span>
-                  </label>
-                  <div 
-                    onClick={() => {
-                      setTempDate(careerStartDate ? { year: parseInt(careerStartDate.split('-')[0]), month: parseInt(careerStartDate.split('-')[1]) } : { year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
-                      setIsDatePickerOpen('start');
-                    }}
-                    className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
-                  >
-                    <span className={careerStartDate ? 'text-gray-900' : 'text-gray-400'}>
-                      {careerStartDate ? `${careerStartDate.split('-')[0]}年 ${careerStartDate.split('-')[1]}月` : '入社年月'}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    退社 {!careerIsCurrent && <span className="text-red-500">*</span>}
-                  </label>
-                  <div 
-                    onClick={() => {
-                      if (!careerIsCurrent) {
-                        setTempDate(careerEndDate ? { year: parseInt(careerEndDate.split('-')[0]), month: parseInt(careerEndDate.split('-')[1]) } : { year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
-                        setIsDatePickerOpen('end');
-                      }
-                    }}
-                    className={`w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center ${careerIsCurrent ? 'bg-gray-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <span className={careerEndDate && !careerIsCurrent ? 'text-gray-900' : 'text-gray-400'}>
-                      {careerIsCurrent ? '退社年月' : (careerEndDate ? `${careerEndDate.split('-')[0]}年 ${careerEndDate.split('-')[1]}月` : '退社年月')}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Conditional Fields when Company is selected */}
-              {careerCompany && (
-                <>
-                  {/* Title Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      役職
-                    </label>
-                    <input
-                      type="text"
-                      value={careerTitle}
-                      onChange={(e) => setCareerTitle(e.target.value)}
-                      placeholder="例）チームリーダー/課長"
-                      className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900"
-                    />
-                  </div>
-
-                  {/* Department Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      部署
-                    </label>
-                    <input
-                      type="text"
-                      value={careerDepartment}
-                      onChange={(e) => setCareerDepartment(e.target.value)}
-                      placeholder="例）企画戦略室"
-                      className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900"
-                    />
-                  </div>
-
-                  {/* Description Field */}
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-bold text-gray-900">
-                        業務説明
-                      </label>
-                    </div>
-                    <div className="relative">
-                      <textarea
-                        value={careerDescription}
-                        onChange={(e) => setCareerDescription(e.target.value)}
-                        placeholder="例）プロジェクト管理およびチームリーダーの役割を遂行&#10;・顧客の要件分析および解決策の提案&#10;・データ分析を通じたインサイトの導出"
-                        className="w-full border border-gray-200 rounded-md p-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 min-h-[200px] resize-none"
-                        maxLength={5000}
-                      />
-                      <div className="absolute bottom-3 left-4 text-xs text-gray-400">
-                        専門性のために50文字以上を推奨します
-                      </div>
-                      <div className="absolute bottom-3 right-4 text-xs text-gray-400">
-                        {careerDescription.length}/5000字
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                      会社所在地
-                    </label>
-                    <div className="flex gap-3">
-                      <div className="relative flex-1">
-                        <select
-                          value={careerLocationRegion}
-                          onChange={(e) => {
-                            setCareerLocationRegion(e.target.value);
-                            if (e.target.value !== '海外') {
-                              setCareerLocationCountry('');
-                            }
-                          }}
-                          className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 appearance-none focus:outline-none focus:border-gray-900 bg-white"
-                        >
-                          <option value="" disabled hidden className="text-gray-400">地域を選択</option>
-                          {PREFECTURES.map(pref => (
-                            <option key={pref} value={pref}>{pref}</option>
-                          ))}
-                          <option value="海外">海外</option>
-                        </select>
-                        <ChevronRight className="w-5 h-5 text-gray-900 absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
-                      </div>
-
-                      {careerLocationRegion === '海外' && (
-                        <div className="relative flex-1">
-                          <select
-                            value={careerLocationCountry}
-                            onChange={(e) => setCareerLocationCountry(e.target.value)}
-                            className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 appearance-none focus:outline-none focus:border-gray-900 bg-white"
-                          >
-                            <option value="" disabled hidden className="text-gray-400">国家</option>
-                            {COUNTRIES.map(country => (
-                              <option key={country} value={country}>{country}</option>
-                            ))}
-                          </select>
-                          <ChevronRight className="w-5 h-5 text-gray-900 absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Delete Button */}
-                  {editingCareerId && (
-                    <div className="mt-12 mb-8 flex justify-center">
-                      <button 
-                        onClick={handleDeleteCareer}
-                        className="text-gray-500 font-medium hover:text-red-500 transition-colors"
-                      >
-                        経歴を削除
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Company Search Overlay */}
-      <AnimatePresence>
-        {isCompanySearchOpen && (
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            <div className="p-4 flex items-center gap-3 border-b border-gray-100">
-              <div className="flex-1 bg-gray-50 rounded-lg flex items-center px-3 py-2">
-                <Search className="w-5 h-5 text-gray-400 mr-2" />
-                <input 
-                  type="text"
-                  value={companySearchQuery}
-                  onChange={(e) => setCompanySearchQuery(e.target.value)}
-                  placeholder="会社名を入力"
-                  className="bg-transparent w-full text-sm focus:outline-none"
-                  autoFocus
-                />
-                {companySearchQuery && (
-                  <button onClick={() => setCompanySearchQuery('')}>
-                    <X className="w-4 h-4 text-gray-400 bg-gray-200 rounded-full p-0.5" />
-                  </button>
-                )}
-              </div>
-              <button 
-                onClick={() => {
-                  setIsCompanySearchOpen(false);
-                  setCompanySearchQuery('');
-                }}
-                className="text-sm font-medium"
-              >
-                キャンセル
-              </button>
-            </div>
-
-            <div className="p-4">
-              {companySearchQuery ? (
-                <div>
-                  {JAPANESE_COMPANIES.filter(c => c.includes(companySearchQuery)).map((company, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => {
-                        setCareerCompany(company);
-                        setIsCompanySearchOpen(false);
-                        setCompanySearchQuery('');
-                      }}
-                      className="py-3 border-b border-gray-100 text-sm cursor-pointer"
-                    >
-                      {company}
-                    </div>
-                  ))}
-                  <div className="text-center mt-8">
-                    <p className="text-sm text-gray-500 mb-2">お探しの会社名がありませんか？</p>
-                    <button 
-                      onClick={() => {
-                        setCareerCompany(companySearchQuery);
-                        setIsCompanySearchOpen(false);
-                        setCompanySearchQuery('');
-                      }}
-                      className="text-orange-500 text-sm font-medium underline"
-                    >
-                      '{companySearchQuery}' を直接入力
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-sm text-gray-400 mt-8">
-                  最近検索した会社名がありません
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Date Picker Overlay */}
-      <AnimatePresence>
-        {isDatePickerOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsDatePickerOpen(null)}
-              className="fixed inset-0 bg-black/40 z-[80] max-w-md mx-auto"
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-white z-[90] rounded-t-2xl max-w-md mx-auto"
-            >
-              <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                <button 
-                  onClick={() => {
-                    if (isDatePickerOpen === 'start') setCareerStartDate('');
-                    if (isDatePickerOpen === 'end') setCareerEndDate('');
-                    setIsDatePickerOpen(null);
-                  }}
-                  className="text-blue-500 font-medium"
-                >
-                  削除
-                </button>
-                <button 
-                  onClick={() => {
-                    const formattedDate = `${tempDate.year}-${tempDate.month.toString().padStart(2, '0')}`;
-                    if (isDatePickerOpen === 'start') setCareerStartDate(formattedDate);
-                    if (isDatePickerOpen === 'end') setCareerEndDate(formattedDate);
-                    setIsDatePickerOpen(null);
-                  }}
-                  className="text-blue-500 font-medium"
-                >
-                  完了
-                </button>
-              </div>
-              
-              <div className="flex justify-center items-center h-48 gap-8 px-8">
-                <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="year-scroll">
-                  <div className="h-20"></div>
-                  {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                    <div 
-                      key={year} 
-                      onClick={() => setTempDate(prev => ({ ...prev, year }))}
-                      className={`h-8 flex items-center justify-center snap-center cursor-pointer ${tempDate.year === year ? 'text-xl font-bold text-gray-900' : 'text-gray-400'}`}
-                    >
-                      {year}年
-                    </div>
-                  ))}
-                  <div className="h-20"></div>
-                </div>
-                <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="month-scroll">
-                  <div className="h-20"></div>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                    <div 
-                      key={month} 
-                      onClick={() => setTempDate(prev => ({ ...prev, month }))}
-                      className={`h-8 flex items-center justify-center snap-center cursor-pointer ${tempDate.month === month ? 'text-xl font-bold text-gray-900' : 'text-gray-400'}`}
-                    >
-                      {month}月
-                    </div>
-                  ))}
-                  <div className="h-20"></div>
-                </div>
-                {/* Selection Highlight */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-gray-100 rounded-lg -z-10 pointer-events-none"></div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <CareerModals career={career} />
 
       {/* Education Edit Overlay */}
       <AnimatePresence>
