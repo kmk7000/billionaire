@@ -30,6 +30,8 @@ import { JobModals } from './components/profile/JobModals';
 import { useJobEditor } from './hooks/useJobEditor';
 import { LanguageModals } from './components/profile/LanguageModals';
 import { useLanguageEditor } from './hooks/useLanguageEditor';
+import { WebsiteModals } from './components/profile/WebsiteModals';
+import { useWebsiteEditor } from './hooks/useWebsiteEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -68,9 +70,7 @@ export default function App() {
 
 
 
-  // Website Edit States
-  const [isWebsiteEditOpen, setIsWebsiteEditOpen] = useState(false);
-  const [websiteUrls, setWebsiteUrls] = useState<string[]>([""]);
+
 
   // Lecture Edit State
   const [isLectureEditOpen, setIsLectureEditOpen] = useState(false);
@@ -254,6 +254,7 @@ export default function App() {
   const skill = useSkillEditor(user, userProfile);
   const job = useJobEditor(user, userProfile);
   const language = useLanguageEditor(user, userProfile);
+  const website = useWebsiteEditor(user, userProfile);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -426,20 +427,7 @@ export default function App() {
 
 
 
-  const handleSaveWebsite = async () => {
-    if (!user) return;
 
-    try {
-      const validUrls = websiteUrls.filter(url => url.trim() !== "");
-      await updateDoc(doc(db, 'users', user.uid), {
-        websites: validUrls
-      });
-
-      setIsWebsiteEditOpen(false);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
   const handleSaveLecture = async () => {
     if (!user || !lectureTitle || !lectureDate) return;
@@ -744,15 +732,9 @@ export default function App() {
     }
   };
 
-  const handleAddWebsiteInput = () => {
-    setWebsiteUrls([...websiteUrls, ""]);
-  };
 
-  const handleWebsiteChange = (index: number, value: string) => {
-    const newUrls = [...websiteUrls];
-    newUrls[index] = value;
-    setWebsiteUrls(newUrls);
-  };
+
+
 
   const renderHeader = () => {
     switch (activeTab) {
@@ -1573,10 +1555,7 @@ export default function App() {
                   { title: '職務', action: '+ 職務追加', onClick: () => job.open() },
                   { title: '専門分野・スキル', action: '+ 専門分野・スキル追加', onClick: () => skill.open() },
                   { title: '外国語', action: '+ 外国語追加', onClick: () => language.openNew() },
-                  { title: 'ウェブサイト・ブログ', action: '+ ウェブサイト・ブログ追加', onClick: () => {
-                    setWebsiteUrls(userProfile?.websites?.length ? userProfile.websites : [""]);
-                    setIsWebsiteEditOpen(true);
-                  } },
+                  { title: 'ウェブサイト・ブログ', action: '+ ウェブサイト・ブログ追加', onClick: () => website.open() },
                   { title: '講義・諮問活動', action: '+ 講義・諮問活動追加', onClick: () => {
                     setLectureTitle("");
                     setLectureDate("");
@@ -1719,10 +1698,7 @@ export default function App() {
                                 {url}
                               </a>
                               <button
-                                onClick={() => {
-                                  setWebsiteUrls(userProfile.websites || [""]);
-                                  setIsWebsiteEditOpen(true);
-                                }}
+                                onClick={website.open}
                                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -2777,68 +2753,7 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
-      <AnimatePresence>
-        {isWebsiteEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-50 flex flex-col"
-          >
-            <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
-              <div className="flex items-center justify-between p-4 relative">
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setIsWebsiteEditOpen(false)} 
-                    className="p-1 -ml-1"
-                  >
-                    <ArrowLeft className="w-6 h-6 text-gray-900" />
-                  </button>
-                  <h2 className="text-lg font-bold text-gray-900">ウェブサイト・ブログ編集</h2>
-                </div>
-                <button 
-                  onClick={handleSaveWebsite}
-                  className="font-bold text-blue-600 text-sm"
-                >
-                  保存
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-6">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <label className="text-sm font-bold text-gray-900">
-                    リンク・URL
-                  </label>
-                  {websiteUrls.map((url, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => handleWebsiteChange(index, e.target.value)}
-                        placeholder="ウェブサイトやブログのリンクを入力"
-                        className="w-full h-[45px] px-4 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-black focus:ring-0"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleAddWebsiteInput}
-                  className="flex items-center gap-2 text-gray-900 font-bold py-2"
-                >
-                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
-                    <Plus className="w-4 h-4 text-white" />
-                  </div>
-                  追加
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <WebsiteModals website={website} />
 
       {/* Lecture Edit Overlay */}
       <AnimatePresence>
