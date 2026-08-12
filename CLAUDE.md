@@ -45,7 +45,10 @@ src/
 ├── components/
 │   ├── auth/                    # LoginScreen, TermsAgreement, EmailSignup
 │   ├── meishi/                  # MeishiCard, MeishiDetailView, MeishiEditView, MeishiMapView
-│   ├── community/ jobs/ layout/ # ForumPost, JobCard, BottomNav, DesktopSidebar
+│   ├── community/               # BoardSidebar, BoardChipBar, PostCard, BestPostsSection,
+│   │                             # RecommendedSidebar, PostDetailOverlay, CommentThread,
+│   │                             # WritePostModal (리멤버 커뮤니티 웹 벤치마킹, docs/SPEC.md §2.2A)
+│   ├── jobs/ layout/             # JobCard, BottomNav, DesktopSidebar
 │   ├── settings/                # SettingsModals (더보기→설정→계정관리→탈퇴, 비밀번호 변경/재설정)
 │   ├── profile/                 # ProfileOverlay(마이프로필 오버레이 골격) + MyMeishiTab +
 │   │                             # ProfileDetailsTab + 도메인별 XxxModals/XxxSection 12종
@@ -53,13 +56,15 @@ src/
 │   │                             # Publication/Article/Awards/Certificates/PersonalInfo)
 │   └── (루트)                    # MeishiScannerModal, PublicCardView, SimpleLoginSettings
 ├── services/firestoreService.ts # Firestore CRUD
+├── constants/communityBoards.ts # 리멤버 벤치마킹 11개 게시판 정적 목록 (Firestore 컬렉션 아님)
 ├── hooks/                       # useMeishiScanner(OCR), useContactsData, useCommunityPosts,
+│                                 # useCommunityComments, useCommunityWrite,
 │                                 # useCareerEditor, useEducationEditor, useSkillEditor, useJobEditor,
 │                                 # useLanguageEditor, useWebsiteEditor, useLectureEditor,
 │                                 # usePublicationEditor, useArticleEditor, useAwardsEditor,
 │                                 # useCertificatesEditor, usePersonalInfoEditor,
 │                                 # useAccountSettings (편집 상태+Firestore/Auth 저장)
-└── utils/imageUtils.ts          # 이미지 처리
+└── utils/                       # imageUtils, anonHandle(익명 닉네임 생성), formatRelativeTime
 ```
 
 ## 알려진 이슈 / 이관 시 주의사항
@@ -69,6 +74,7 @@ src/
 3. **`GEMINI_API_KEY`가 클라이언트 번들에 주입됨** (`vite.config.ts`의 `define`) — 배포 시 키가 노출된다. OCR 호출을 서버 라우트로 옮겨야 함.
 4. **LINE Client ID가 `server.ts`에 하드코딩** (`"2009585479"`) — env 변수 `LINE_CLIENT_ID`를 읽도록 수정 필요.
 5. i18n 미적용 — 사용자 노출 문자열이 App.tsx에 하드코딩되어 있음 (SPEC은 `ja.json` 분리 요구).
+6. **커뮤니티 기능은 리멤버(Remember) 웹(`community.rememberapp.co.kr`) 구조를 벤치마킹해 전면 구축 완료** — 게시판 사이드바/칩바, 베스트 투고 랭킹, 새 투고/추천 투고 피드, 게시글 상세+댓글, 글쓰기, 신고/차단까지 동작한다. **단, `firestore.rules`를 프로덕션 Firebase 프로젝트에 아직 배포하지 않았다.** 로컬에서 `authorUid`/`content` → `authorId`/`body` 필드 불일치 버그를 고치고 `comments`/`reports`/`blocks` 규칙을 추가했지만, 배포 전까지는 게시글 작성이 "Missing or insufficient permissions"로 실패한다 (브라우저로 직접 검증 완료). 배포 명령: `firebase deploy --only firestore:rules`.
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 

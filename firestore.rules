@@ -29,18 +29,26 @@ service cloud.firestore {
     //   - imageUrl: string (optional) - Image URL of the card
     //   - createdAt: timestamp (optional) - Creation time
     //
-    // Collection: posts
+    // Collection: posts (matches CommunityPost in src/types/db.ts)
     // Document ID: {postId}
     // Fields:
-    //   - authorUid: string (required) - UID of the author
-    //   - authorCompany: string (optional) - Company of the author (for anonymity)
-    //   - category: string (optional) - Post category
+    //   - boardId: string (required) - Which community board this post belongs to
+    //   - authorId: string (required) - UID of the author (never returned to other clients by the app)
+    //   - anonHandle: string (required) - Anonymous display name, e.g. "匿名の営業部長"
+    //   - authorLabel: string (required) - e.g. "IT業界・営業" or "株式会社サンプル(認証済)"
     //   - title: string (required) - Post title
-    //   - content: string (required) - Post content
-    //   - likes: int (optional) - Number of likes
-    //   - comments: int (optional) - Number of comments
-    //   - createdAt: timestamp (optional) - Creation time
+    //   - body: string (required) - Post content
+    //   - likeCount / commentCount / viewCount: int - Engagement counters, updatable by any authenticated user
+    //   - status: string (enum) - published/held/hidden/deleted
+    //   - createdAt / updatedAt: timestamp
     //
+    // Collection: comments (matches CommunityComment in src/types/db.ts)
+    // Document ID: {commentId}
+    // Fields:
+    //   - postId, authorId, anonHandle, authorLabel, body, likeCount, status, createdAt
+    //
+    // Collection: reports (matches ReportItem in src/types/db.ts)
+    // Collection: blocks (matches UserBlock in src/types/db.ts)
     // ===============================================================
 
     // ===============================================================
@@ -96,10 +104,24 @@ service cloud.firestore {
     }
 
     function isValidPost(data) {
-      return hasRequiredFields(['authorUid', 'title', 'content']) &&
-             data.authorUid == request.auth.uid &&
+      return hasRequiredFields(['boardId', 'authorId', 'anonHandle', 'authorLabel', 'title', 'body']) &&
+             data.authorId == request.auth.uid &&
+             data.boardId is string && data.boardId.size() > 0 &&
              data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
-             data.content is string && data.content.size() > 0 && data.content.size() < 5000;
+             data.body is string && data.body.size() > 0 && data.body.size() < 5000;
+    }
+
+    function isValidComment(data) {
+      return hasRequiredFields(['postId', 'authorId', 'anonHandle', 'authorLabel', 'body']) &&
+             data.authorId == request.auth.uid &&
+             data.postId is string && data.postId.size() > 0 &&
+             data.body is string && data.body.size() > 0 && data.body.size() < 3000;
+    }
+
+    // Allows engagement-counter-only updates (likes/comments/views) by any
+    // authenticated user, distinct from the author editing their own content.
+    function onlyCountersChanged(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
     }
 
     // ===============================================================
@@ -122,8 +144,33 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidPost(request.resource.data);
-      allow update: if isAuthenticated() && resource.data.authorUid == request.auth.uid && isValidPost(request.resource.data);
-      allow delete: if isAuthenticated() && (resource.data.authorUid == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() &&
+        ((resource.data.authorId == request.auth.uid && isValidPost(request.resource.data)) ||
+          onlyCountersChanged(['likeCount', 'commentCount', 'viewCount', 'updatedAt']));
+      allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    match /comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidComment(request.resource.data);
+      allow update: if isAuthenticated() &&
+        ((resource.data.authorId == request.auth.uid && isValidComment(request.resource.data)) ||
+          onlyCountersChanged(['likeCount']));
+      allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && (resource.data.reporterId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && hasRequiredFields(['reporterId', 'targetType', 'targetId', 'reason']) &&
+        request.resource.data.reporterId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    match /blocks/{blockId} {
+      allow read: if isAuthenticated() && resource.data.blockerId == request.auth.uid;
+      allow create: if isAuthenticated() && hasRequiredFields(['blockerId', 'blockedId']) &&
+        request.resource.data.blockerId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.blockerId == request.auth.uid;
     }
 
     // Default deny

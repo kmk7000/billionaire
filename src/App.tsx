@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
 import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType, EmailAuthProvider } from './firebase';
-import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi, Post, Job } from './types/app';
+import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi, Job } from './types/app';
 import { JAPANESE_COMPANIES, JAPANESE_UNIVERSITIES, JAPANESE_MAJORS, DEGREES, SKILL_RECOMMENDATIONS, ALL_SKILLS, LANGUAGES, LANGUAGE_LEVELS, JOB_CATEGORIES, PREFECTURES, COUNTRIES } from './constants/profileData';
 import { resizeImage } from './utils/imageUtils';
 import { TermsAgreement } from './components/auth/TermsAgreement';
@@ -20,6 +20,12 @@ import { ConnectScreen } from './screens/ConnectScreen';
 import { JobsScreen } from './screens/JobsScreen';
 import { BottomNav } from './components/layout/BottomNav';
 import { DesktopSidebar } from './components/layout/DesktopSidebar';
+import { BoardSidebar } from './components/community/BoardSidebar';
+import { RecommendedSidebar } from './components/community/RecommendedSidebar';
+import { PostDetailOverlay } from './components/community/PostDetailOverlay';
+import { WritePostModal } from './components/community/WritePostModal';
+import { useCommunityPosts } from './hooks/useCommunityPosts';
+import { useCommunityWrite } from './hooks/useCommunityWrite';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
 import { EducationModals } from './components/profile/EducationModals';
@@ -142,9 +148,11 @@ export default function App() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMyMeishiDeleteDialogOpen, setIsMyMeishiDeleteDialogOpen] = useState(false);
   const myMeishi = meishis.find(m => m.isMyCard);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedCommunityBoard, setSelectedCommunityBoard] = useState<string>('all');
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const { posts } = useCommunityPosts(selectedCommunityBoard);
+  const communityWrite = useCommunityWrite(user, userProfile);
+  const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');
   const [completedProfileSteps, setCompletedProfileSteps] = useState<number[]>([]);
@@ -292,7 +300,6 @@ export default function App() {
     if (!user) {
       setUserProfile(null);
       setMeishis([]);
-      setPosts([]);
       return;
     }
 
@@ -315,20 +322,9 @@ export default function App() {
       setMeishis(data);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'meishi'));
 
-    // Listen to Posts
-    const postsQuery = query(
-      collection(db, 'posts'),
-      orderBy('createdAt', 'desc')
-    );
-    const unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-      setPosts(data);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts'));
-
     return () => {
       unsubscribeProfile();
       unsubscribeMeishi();
-      unsubscribePosts();
     };
   }, [user]);
 
@@ -800,7 +796,7 @@ export default function App() {
             <button 
               onClick={() => {
                 setActiveTab('community');
-                setIsPostModalOpen(true);
+                communityWrite.open(selectedCommunityBoard);
               }}
               className="flex items-center gap-1.5 px-3 py-2 bg-[#C9483B] text-white font-bold text-xs rounded-lg hover:bg-[#B03A2E] transition-colors shadow-xs"
             >
@@ -866,42 +862,14 @@ export default function App() {
             </button>
           </div>
 
-          {/* Remember Community Category Navigation */}
-          <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-xs space-y-1">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 py-1">
-              REMEMBER COMMUNITY
-            </p>
-            {[
-              { label: '🔥 人気投稿 (Hot)', board: 'all', icon: TrendingUp },
-              { label: '💬 ビジネス相談 & Q&A', board: 'qa', icon: MessageSquare },
-              { label: '💻 IT / 企画 / 開発', board: 'it', icon: FileText },
-              { label: '📈 マーケティング / 営業', board: 'marketing', icon: Briefcase },
-              { label: '👔 CEO & 経営陣', board: 'exec', icon: Building2 },
-              { label: '📌 保存した記事', board: 'saved', icon: Bookmark },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.board}
-                  onClick={() => {
-                    setActiveTab('community');
-                    setSelectedCommunityBoard(item.board);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-                    selectedCommunityBoard === item.board && activeTab === 'community'
-                      ? 'bg-[#0A0A0A] text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4 opacity-80" />
-                    <span>{item.label}</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 opacity-40" />
-                </button>
-              );
-            })}
-          </div>
+          {/* Remember Community Board Navigation */}
+          <BoardSidebar
+            selectedBoard={selectedCommunityBoard}
+            onSelectBoard={(boardId) => {
+              setActiveTab('community');
+              setSelectedCommunityBoard(boardId);
+            }}
+          />
         </aside>
 
         {/* Center Main App Content Container */}
@@ -937,7 +905,14 @@ export default function App() {
           )}
 
           {activeTab === 'community' && (
-            <CommunityScreen key="forum" posts={posts} />
+            <CommunityScreen
+              key="forum"
+              posts={posts}
+              selectedBoard={selectedCommunityBoard}
+              onSelectBoard={setSelectedCommunityBoard}
+              onSelectPost={setSelectedPostId}
+              onOpenWrite={() => communityWrite.open(selectedCommunityBoard)}
+            />
           )}
 
           {activeTab === 'connect' && (
@@ -967,8 +942,26 @@ export default function App() {
         </div>
 
         {/* Desktop Right Sidebar (Remember Web Style) */}
-        <DesktopSidebar onNavigateCommunity={() => setActiveTab('community')} />
+        {activeTab === 'community' ? (
+          <RecommendedSidebar posts={posts} onSelectPost={setSelectedPostId} />
+        ) : (
+          <DesktopSidebar onNavigateCommunity={() => setActiveTab('community')} />
+        )}
       </div>
+
+      <AnimatePresence>
+        {selectedPost && (
+          <PostDetailOverlay
+            key="post-detail"
+            post={selectedPost}
+            user={user}
+            userProfile={userProfile}
+            onBack={() => setSelectedPostId(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <WritePostModal write={communityWrite} onPosted={(postId) => setSelectedPostId(postId)} />
 
       {/* Bottom Navigation (Mobile Only) */}
       <BottomNav

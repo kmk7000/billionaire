@@ -31,7 +31,7 @@ export function useCommunityPosts(boardId: string = 'all', fallbackPosts: Commun
   }, [boardId]);
 
   const createPost = async (
-    postData: Omit<CommunityPost, 'id' | 'likeCount' | 'commentCount' | 'status' | 'createdAt' | 'updatedAt'>
+    postData: Omit<CommunityPost, 'id' | 'likeCount' | 'commentCount' | 'viewCount' | 'status' | 'createdAt' | 'updatedAt'>
   ) => {
     try {
       const newId = await communityService.createPost(postData);
@@ -45,6 +45,7 @@ export function useCommunityPosts(boardId: string = 'all', fallbackPosts: Commun
         id: tempId,
         likeCount: 0,
         commentCount: 0,
+        viewCount: 0,
         status: 'published',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

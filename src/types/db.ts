@@ -97,6 +97,8 @@ export interface ContactCard {
   updatedAt: any;
 }
 
+// `type: 'topic'` boards are curated statically in src/constants/communityBoards.ts
+// rather than stored in Firestore — there is no `boards` collection.
 export interface CommunityBoard {
   id: string;
   type: 'company' | 'industry' | 'topic' | 'qa';
@@ -126,6 +128,7 @@ export interface CommunityPost {
   };
   likeCount: number;
   commentCount: number;
+  viewCount: number;
   status: 'published' | 'held' | 'hidden' | 'deleted';
   createdAt: any;
   updatedAt: any;

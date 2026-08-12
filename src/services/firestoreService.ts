@@ -203,13 +203,14 @@ export const communityService = {
   },
 
   // Create post
-  async createPost(post: Omit<CommunityPost, 'id' | 'likeCount' | 'commentCount' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createPost(post: Omit<CommunityPost, 'id' | 'likeCount' | 'commentCount' | 'viewCount' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const colRef = collection(db, 'posts');
       const newDoc = await addDoc(colRef, {
         ...post,
         likeCount: 0,
         commentCount: 0,
+        viewCount: 0,
         status: 'published',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -218,6 +219,27 @@ export const communityService = {
     } catch (error) {
       handleFirestoreError(error as Error, OperationType.CREATE, 'posts');
       throw error;
+    }
+  },
+
+  // Fetch a single post (for the detail overlay)
+  async getPost(postId: string): Promise<CommunityPost | null> {
+    try {
+      const snap = await getDoc(doc(db, 'posts', postId));
+      if (!snap.exists()) return null;
+      return { id: snap.id, ...snap.data() } as CommunityPost;
+    } catch (error) {
+      handleFirestoreError(error as Error, OperationType.GET, `posts/${postId}`);
+      throw error;
+    }
+  },
+
+  // Increment view count (fire-and-forget, called once per detail-view open)
+  async incrementView(postId: string): Promise<void> {
+    try {
+      await updateDoc(doc(db, 'posts', postId), { viewCount: increment(1) });
+    } catch (error) {
+      handleFirestoreError(error as Error, OperationType.UPDATE, `posts/${postId}`);
     }
   },
 
