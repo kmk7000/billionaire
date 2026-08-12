@@ -32,7 +32,7 @@ npm run lint       # 타입 체크 (tsc --noEmit)
 server.ts                        # Express 서버: LINE OAuth + Vite middleware
 firestore.rules                  # Firestore 보안 규칙
 src/
-├── App.tsx                      # ⚠️ 앱 셸 + 상태 허브 (~2,200줄, 분리 리팩토링 진행 중)
+├── App.tsx                      # 앱 셸 + 상태 허브 (~1,560줄. 8,298줄 원본에서 81% 감소)
 ├── firebase.ts                  # Firebase 초기화 + 에러 핸들러
 ├── types/
 │   ├── db.ts                    # Firestore 데이터 모델 타입
@@ -46,6 +46,11 @@ src/
 │   ├── auth/                    # LoginScreen, TermsAgreement, EmailSignup
 │   ├── meishi/                  # MeishiCard, MeishiDetailView, MeishiEditView, MeishiMapView
 │   ├── community/ jobs/ layout/ # ForumPost, JobCard, BottomNav, DesktopSidebar
+│   ├── settings/                # SettingsModals (더보기→설정→계정관리→탈퇴, 비밀번호 변경/재설정)
+│   ├── profile/                 # ProfileOverlay(마이프로필 오버레이 골격) + MyMeishiTab +
+│   │                             # ProfileDetailsTab + 도메인별 XxxModals/XxxSection 12종
+│   │                             # (Career/Education/Skill/Job/Language/Website/Lecture/
+│   │                             # Publication/Article/Awards/Certificates/PersonalInfo)
 │   └── (루트)                    # MeishiScannerModal, PublicCardView, SimpleLoginSettings
 ├── services/firestoreService.ts # Firestore CRUD
 ├── hooks/                       # useMeishiScanner(OCR), useContactsData, useCommunityPosts,
@@ -59,7 +64,7 @@ src/
 
 ## 알려진 이슈 / 이관 시 주의사항
 
-1. **`src/App.tsx` 분리 리팩토링 진행 중** (8,298줄 → 현재 ~2,200줄, 원본 대비 73% 감소). 경력·학력·스킬·직무·언어·웹사이트·강연·출판·기사·수상·자격증·개인정보·설정/계정관리 편집 모달군은 각각 `hooks/useCareerEditor.ts`+`components/profile/CareerModals.tsx`, `hooks/useEducationEditor.ts`+`components/profile/EducationModals.tsx`, `hooks/useSkillEditor.ts`+`components/profile/SkillModals.tsx`, `hooks/useJobEditor.ts`+`components/profile/JobModals.tsx`, `hooks/useLanguageEditor.ts`+`components/profile/LanguageModals.tsx`, `hooks/useWebsiteEditor.ts`+`components/profile/WebsiteModals.tsx`, `hooks/useLectureEditor.ts`+`components/profile/LectureModals.tsx`, `hooks/usePublicationEditor.ts`+`components/profile/PublicationModals.tsx`, `hooks/useArticleEditor.ts`+`components/profile/ArticleModals.tsx`, `hooks/useAwardsEditor.ts`+`components/profile/AwardsModals.tsx`(+`AwardsSection.tsx`), `hooks/useCertificatesEditor.ts`+`components/profile/CertificatesModals.tsx`(+`CertificatesSection.tsx`), `hooks/usePersonalInfoEditor.ts`+`components/profile/PersonalInfoModals.tsx`(+`PersonalInfoSection.tsx`), `hooks/useAccountSettings.ts`+`components/settings/SettingsModals.tsx`로 분리 완료 — 이 패턴(도메인별 `useXxxEditor`/`useXxx` 훅 + `XxxModals` 컴포넌트)을 다음 도메인에도 반복 적용 가능. 남은 대상: 마이프로필 오버레이 자체의 골격(`isProfileOpen` — 프로필 카드, 탭 전환, 지금까지 분리한 모든 섹션을 담는 컨테이너)과 명함 스캔/등록 관련 잔여 로직.
+1. **`src/App.tsx` 분리 리팩토링 완료** (8,298줄 → 1,563줄, 원본 대비 81% 감소). 프로필 편집 모달 12종(경력·학력·스킬·직무·언어·웹사이트·강연·출판·기사·수상·자격증·개인정보) + 설정/계정관리 1종을 각각 `useXxxEditor`/`useXxx` 훅과 `XxxModals`(+필요 시 `XxxSection`) 컴포넌트로 분리했고, 이 섹션들을 담던 마이프로필 오버레이 자체도 `components/profile/ProfileOverlay.tsx`(골격) + `MyMeishiTab.tsx`(마이名刺 탭) + `ProfileDetailsTab.tsx`(プロフィール 탭)로 분리했다. App.tsx에는 이제 최상위 라우팅·인증 상태·명함 CRUD·초기 렌더링 셸만 남아있다. 새 도메인을 추가할 때는 이 패턴(도메인 전용 훅으로 state+Firestore 핸들러를 캡슐화 → 그 훅을 받는 순수 프레젠테이션 `XxxModals` 컴포넌트)을 그대로 따를 것.
 2. **Firebase 프로젝트가 AI Studio 관리 프로젝트** (`ai-studio-applet-webapp-c0fee`) — 데이터가 Google 관리 인프라에 있음. 정식 출시 전 자체 Firebase 프로젝트로 이전 필요 (config 교체 + `firestore.rules` 배포).
 3. **`GEMINI_API_KEY`가 클라이언트 번들에 주입됨** (`vite.config.ts`의 `define`) — 배포 시 키가 노출된다. OCR 호출을 서버 라우트로 옮겨야 함.
 4. **LINE Client ID가 `server.ts`에 하드코딩** (`"2009585479"`) — env 변수 `LINE_CLIENT_ID`를 읽도록 수정 필요.
