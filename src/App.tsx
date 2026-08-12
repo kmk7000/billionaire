@@ -41,6 +41,9 @@ import { useArticleEditor } from './hooks/useArticleEditor';
 import { AwardsModals } from './components/profile/AwardsModals';
 import { AwardsSection } from './components/profile/AwardsSection';
 import { useAwardsEditor } from './hooks/useAwardsEditor';
+import { CertificatesModals } from './components/profile/CertificatesModals';
+import { CertificatesSection } from './components/profile/CertificatesSection';
+import { useCertificatesEditor } from './hooks/useCertificatesEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -94,9 +97,7 @@ export default function App() {
 
 
 
-  // Certificates Edit State
-  const [isCertificatesEditOpen, setIsCertificatesEditOpen] = useState(false);
-  const [certificatesList, setCertificatesList] = useState<string[]>([""]);
+
 
   // Meishi Registration States
   const [isMeishiCameraOpen, setIsMeishiCameraOpen] = useState(false);
@@ -250,6 +251,7 @@ export default function App() {
   const publication = usePublicationEditor(user);
   const article = useArticleEditor(user, userProfile);
   const awards = useAwardsEditor(user, userProfile);
+  const certificates = useCertificatesEditor(user, userProfile);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -454,31 +456,11 @@ export default function App() {
 
 
 
-  const handleAddCertificateInput = () => {
-    setCertificatesList([...certificatesList, ""]);
-  };
 
-  const handleCertificateChange = (index: number, value: string) => {
-    const newCertificates = [...certificatesList];
-    newCertificates[index] = value;
-    setCertificatesList(newCertificates);
-  };
 
-  const handleSaveCertificates = async () => {
-    if (!user) return;
 
-    try {
-      const validCertificates = certificatesList.filter(url => url.trim() !== "");
-      
-      await updateDoc(doc(db, 'users', user.uid), {
-        certificates: validCertificates.length > 0 ? validCertificates : deleteField()
-      });
 
-      setIsCertificatesEditOpen(false);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
+
 
   const handleMeishiManualProfileClick = () => {
     meishiManualProfileInputRef.current?.click();
@@ -1665,42 +1647,7 @@ export default function App() {
 
                 <AwardsSection userProfile={userProfile} awards={awards} />
 
-                {/* Certificates Section */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-bold text-gray-900">資格証</h3>
-                    {userProfile?.certificates && userProfile.certificates.length > 0 && (
-                      <button 
-                        onClick={() => {
-                          setCertificatesList(userProfile.certificates && userProfile.certificates.length > 0 ? userProfile.certificates : [""]);
-                          setIsCertificatesEditOpen(true);
-                        }}
-                        className="text-gray-500 text-sm flex items-center gap-1"
-                      >
-                        編集 <ChevronRight className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-400 mb-3">採用担当者にのみ公開</p>
-                  
-                  {userProfile?.certificates && userProfile.certificates.length > 0 ? (
-                    <div className="space-y-2">
-                      {userProfile.certificates.map((cert, idx) => (
-                        <p key={idx} className="text-sm text-gray-700">• {cert}</p>
-                      ))}
-                    </div>
-                  ) : (
-                    <button 
-                      onClick={() => {
-                        setCertificatesList([""]);
-                        setIsCertificatesEditOpen(true);
-                      }}
-                      className="w-full border border-dashed border-gray-300 rounded-lg py-4 text-gray-400 text-sm font-medium flex items-center justify-center hover:bg-gray-50 transition-colors"
-                    >
-                      + 資格証追加
-                    </button>
-                  )}
-                </div>
+                <CertificatesSection userProfile={userProfile} certificates={certificates} />
 
                 {/* Preferred Conditions */}
                 <div className="pt-4 border-t border-gray-100">
@@ -2604,77 +2551,7 @@ export default function App() {
 
       <AwardsModals awards={awards} />
 
-      {/* Certificates Edit Overlay */}
-      <AnimatePresence>
-        {isCertificatesEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] flex flex-col"
-          >
-            <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
-              <div className="flex items-center justify-between p-4 relative">
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setIsCertificatesEditOpen(false)} 
-                    className="p-1 -ml-1"
-                  >
-                    <ArrowLeft className="w-6 h-6 text-gray-900" />
-                  </button>
-                  <h2 className="text-lg font-bold text-gray-900">資格証編集</h2>
-                </div>
-                <button 
-                  onClick={handleSaveCertificates}
-                  className="font-bold text-orange-500 text-sm"
-                >
-                  保存
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-6">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <label className="text-sm font-bold text-gray-900">
-                    資格証
-                  </label>
-                  {certificatesList.map((cert, index) => (
-                    <div key={index} className="relative">
-                      <input
-                        type="text"
-                        value={cert}
-                        onChange={(e) => handleCertificateChange(index, e.target.value)}
-                        placeholder="例) 国際財務分析師(CFA)"
-                        className="w-full h-[45px] px-4 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-black focus:ring-0 pr-10"
-                      />
-                      {cert && (
-                        <button 
-                          onClick={() => handleCertificateChange(index, "")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
-                        >
-                          <XCircle className="w-5 h-5 fill-gray-300 text-white" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleAddCertificateInput}
-                  className="flex items-center gap-2 text-gray-900 font-bold py-2"
-                >
-                  <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center">
-                    <span className="text-sm leading-none">+</span>
-                  </div>
-                  追加
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <CertificatesModals certificates={certificates} />
 
       {/* Personal Info Edit Overlay */}
       <AnimatePresence>
