@@ -36,6 +36,8 @@ import { LectureModals } from './components/profile/LectureModals';
 import { useLectureEditor } from './hooks/useLectureEditor';
 import { PublicationModals } from './components/profile/PublicationModals';
 import { usePublicationEditor } from './hooks/usePublicationEditor';
+import { ArticleModals } from './components/profile/ArticleModals';
+import { useArticleEditor } from './hooks/useArticleEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -80,13 +82,7 @@ export default function App() {
 
 
 
-  // Article Edit State
-  const [isArticleListEditOpen, setIsArticleListEditOpen] = useState(false);
-  const [isArticleEditOpen, setIsArticleEditOpen] = useState(false);
-  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
-  const [articleTitle, setArticleTitle] = useState("");
-  const [articleUrl, setArticleUrl] = useState("");
-  const [isArticleDeleteModalOpen, setIsArticleDeleteModalOpen] = useState(false);
+
 
   // Personal Info Edit State
   const [isPersonalInfoEditOpen, setIsPersonalInfoEditOpen] = useState(false);
@@ -251,6 +247,7 @@ export default function App() {
   const website = useWebsiteEditor(user, userProfile);
   const lecture = useLectureEditor(user);
   const publication = usePublicationEditor(user);
+  const article = useArticleEditor(user, userProfile);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -429,58 +426,9 @@ export default function App() {
 
 
 
-  const handleSaveArticle = async () => {
-    if (!user || !articleTitle || !articleUrl) return;
 
-    try {
-      const updatedArticles = [...(userProfile?.articles || [])];
-      
-      if (editingArticleId) {
-        const index = updatedArticles.findIndex(a => a.id === editingArticleId);
-        if (index !== -1) {
-          updatedArticles[index] = { ...updatedArticles[index], title: articleTitle, url: articleUrl };
-        }
-      } else {
-        const newArticle: Article = {
-          id: Date.now().toString(),
-          title: articleTitle,
-          url: articleUrl
-        };
-        updatedArticles.push(newArticle);
-      }
 
-      await updateDoc(doc(db, 'users', user.uid), {
-        articles: updatedArticles
-      });
 
-      setIsArticleEditOpen(false);
-      setArticleTitle("");
-      setArticleUrl("");
-      setEditingArticleId(null);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
-
-  const handleDeleteArticle = async () => {
-    if (!user || !editingArticleId) return;
-    
-    try {
-      const updatedArticles = (userProfile?.articles || []).filter(a => a.id !== editingArticleId);
-      
-      await updateDoc(doc(db, 'users', user.uid), {
-        articles: updatedArticles
-      });
-
-      setIsArticleDeleteModalOpen(false);
-      setIsArticleEditOpen(false);
-      setArticleTitle("");
-      setArticleUrl("");
-      setEditingArticleId(null);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
   const handleSavePersonalInfo = async () => {
     if (!user) return;
@@ -1514,11 +1462,7 @@ export default function App() {
                   { title: 'ウェブサイト・ブログ', action: '+ ウェブサイト・ブログ追加', onClick: () => website.open() },
                   { title: '講義・諮問活動', action: '+ 講義・諮問活動追加', onClick: () => lecture.open() },
                   { title: '論文・著書', action: '+ 論文・著書追加', onClick: () => publication.open() },
-                  { title: '記事', action: '+ 記事追加', onClick: () => {
-                    setArticleTitle("");
-                    setArticleUrl("");
-                    setIsArticleEditOpen(true);
-                  } },
+                  { title: '記事', action: '+ 記事追加', onClick: () => article.openNew() },
                 ].map((section, idx) => {
                   const hasData = 
                     (section.title === '紹介' && !!userProfile?.introduction) ||
@@ -1538,7 +1482,7 @@ export default function App() {
                         <h3 className="font-bold text-gray-900">{section.title}</h3>
                         {hasData && (
                           <button 
-                            onClick={section.title === '記事' ? () => setIsArticleListEditOpen(true) : section.onClick}
+                          onClick={section.title === '記事' ? article.openList : section.onClick}
                             className="text-gray-500 text-sm flex items-center gap-1"
                           >
                             編集 <ChevronRight className="w-4 h-4" />
@@ -2707,167 +2651,9 @@ export default function App() {
 
       <PublicationModals publication={publication} />
 
-      {/* Article List Edit Overlay */}
-      <AnimatePresence>
-        {isArticleListEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            {/* Header */}
-            <div className="flex items-center p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-              <button onClick={() => setIsArticleListEditOpen(false)} className="mr-3">
-                <ArrowLeft className="w-6 h-6 text-gray-900" />
-              </button>
-              <h2 className="text-lg font-bold text-gray-900">記事編集</h2>
-            </div>
+      <ArticleModals article={article} />
 
-            <div className="p-4 bg-white">
-              <button
-                onClick={() => {
-                  setEditingArticleId(null);
-                  setArticleTitle("");
-                  setArticleUrl("");
-                  setIsArticleEditOpen(true);
-                }}
-                className="w-full flex items-center text-orange-500 font-bold mb-6"
-              >
-                <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center mr-2">
-                  <span className="text-sm leading-none">+</span>
-                </div>
-                記事追加
-              </button>
 
-              <div className="space-y-0">
-                {userProfile?.articles?.map((article) => (
-                  <div 
-                    key={article.id} 
-                    className="flex items-center justify-between py-4 border-b border-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setEditingArticleId(article.id);
-                      setArticleTitle(article.title);
-                      setArticleUrl(article.url);
-                      setIsArticleEditOpen(true);
-                    }}
-                  >
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h4 className="text-gray-900 font-medium truncate">{article.title}</h4>
-                      <p className="text-sm text-gray-400 truncate mt-1">{article.url}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Article Edit Overlay */}
-      <AnimatePresence>
-        {isArticleEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <button onClick={() => setIsArticleEditOpen(false)}>
-                  <ArrowLeft className="w-6 h-6 text-gray-900" />
-                </button>
-                <h2 className="text-lg font-bold text-gray-900">{editingArticleId ? '記事編集' : '記事追加'}</h2>
-              </div>
-              <button 
-                onClick={handleSaveArticle}
-                disabled={!articleTitle || !articleUrl || (articleUrl.length > 0 && !articleUrl.startsWith('http://') && !articleUrl.startsWith('https://'))}
-                className={`font-bold text-sm ${(!articleTitle || !articleUrl || (articleUrl.length > 0 && !articleUrl.startsWith('http://') && !articleUrl.startsWith('https://'))) ? 'text-gray-300' : 'text-orange-500'}`}
-              >
-                保存
-              </button>
-            </div>
-
-            <div className="p-4 bg-white">
-              <div className="space-y-6">
-                {/* Title Field */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    記事のタイトル <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={articleTitle}
-                      onChange={(e) => setArticleTitle(e.target.value)}
-                      placeholder="記事を表示するテキストを入力"
-                      className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-sm focus:outline-none focus:border-black focus:ring-0 pr-10"
-                    />
-                    {articleTitle && (
-                      <button 
-                        onClick={() => setArticleTitle('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
-                      >
-                        <XCircle className="w-5 h-5 fill-gray-300 text-white" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* URL Field */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
-                    リンク・URL <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={articleUrl}
-                      onChange={(e) => setArticleUrl(e.target.value)}
-                      placeholder="記事のリンクを入力"
-                      className={`w-full border rounded-md h-[45px] px-4 text-sm focus:outline-none focus:ring-0 pr-10 ${
-                        articleUrl.length > 0 && !articleUrl.startsWith('http://') && !articleUrl.startsWith('https://')
-                          ? 'border-red-500 focus:border-red-500'
-                          : 'border-gray-200 focus:border-black'
-                      }`}
-                    />
-                    {articleUrl && (
-                      <button 
-                        onClick={() => setArticleUrl('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
-                      >
-                        <XCircle className="w-5 h-5 fill-gray-300 text-white" />
-                      </button>
-                    )}
-                  </div>
-                  {articleUrl.length > 0 && !articleUrl.startsWith('http://') && !articleUrl.startsWith('https://') && (
-                    <p className="text-red-500 text-sm mt-2 font-medium">
-                      正しいリンク・URLの形式ではありません<br/>
-                      (アドレスの前に https://, http:// が含まれている必要があります)
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              {editingArticleId && (
-                <div className="mt-12 flex justify-center">
-                  <button 
-                    onClick={() => setIsArticleDeleteModalOpen(true)}
-                    className="text-gray-500 font-medium"
-                  >
-                    記事削除
-                  </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Awards Edit Overlay */}
       <AnimatePresence>
@@ -3093,42 +2879,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Delete Article Confirmation Modal */}
-      <AnimatePresence>
-        {isArticleDeleteModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-white rounded-xl w-full max-w-[320px] p-6 text-center"
-            >
-              <h3 className="text-lg font-bold text-gray-900 mb-6">
-                記事を<br/>削除しますか？
-              </h3>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setIsArticleDeleteModalOpen(false)}
-                  className="flex-1 py-3 border border-gray-200 rounded-lg text-gray-900 font-bold"
-                >
-                  取消
-                </button>
-                <button
-                  onClick={handleDeleteArticle}
-                  className="flex-1 py-3 bg-[#f05656] text-white rounded-lg font-bold"
-                >
-                  削除
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
       {/* Meishi Registration Bottom Sheet */}
       <AnimatePresence>
         {isMeishiOtherMethodsOpen && (
