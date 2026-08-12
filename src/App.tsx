@@ -44,6 +44,9 @@ import { useAwardsEditor } from './hooks/useAwardsEditor';
 import { CertificatesModals } from './components/profile/CertificatesModals';
 import { CertificatesSection } from './components/profile/CertificatesSection';
 import { useCertificatesEditor } from './hooks/useCertificatesEditor';
+import { PersonalInfoModals } from './components/profile/PersonalInfoModals';
+import { PersonalInfoSection } from './components/profile/PersonalInfoSection';
+import { usePersonalInfoEditor } from './hooks/usePersonalInfoEditor';
 import SimpleLoginSettings from './components/SimpleLoginSettings';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
@@ -90,10 +93,7 @@ export default function App() {
 
 
 
-  // Personal Info Edit State
-  const [isPersonalInfoEditOpen, setIsPersonalInfoEditOpen] = useState(false);
-  const [gender, setGender] = useState<'男性' | '女性' | '選択しない' | undefined>(undefined);
-  const [birthYear, setBirthYear] = useState<number | undefined>(undefined);
+
 
 
 
@@ -252,6 +252,7 @@ export default function App() {
   const article = useArticleEditor(user, userProfile);
   const awards = useAwardsEditor(user, userProfile);
   const certificates = useCertificatesEditor(user, userProfile);
+  const personalInfo = usePersonalInfoEditor(user, userProfile);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -434,21 +435,7 @@ export default function App() {
 
 
 
-  const handleSavePersonalInfo = async () => {
-    if (!user) return;
 
-    try {
-      const updateData: any = {};
-      if (gender !== undefined) updateData.gender = gender || deleteField();
-      if (birthYear !== undefined) updateData.birthYear = birthYear || deleteField();
-
-      await updateDoc(doc(db, 'users', user.uid), updateData);
-
-      setIsPersonalInfoEditOpen(false);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-    }
-  };
 
 
 
@@ -1613,37 +1600,7 @@ export default function App() {
                 })}
               </div>
 
-                {/* Personal Info Section */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <div>
-                      <h3 className="font-bold text-gray-900">人的事項</h3>
-                      <p className="text-xs text-gray-400 mt-1">採用担当者にのみ公開</p>
-                    </div>
-                    <button 
-                      onClick={() => {
-                        setGender(userProfile?.gender);
-                        setBirthYear(userProfile?.birthYear);
-                        setIsPersonalInfoEditOpen(true);
-                      }}
-                      className="text-gray-500 text-sm flex items-center gap-1"
-                    >
-                      編集 <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="text-sm text-gray-700 space-y-2">
-                    {userProfile?.birthYear ? (
-                      <p>• {userProfile.birthYear}年</p>
-                    ) : (
-                      <p className="text-gray-400">• 出生年度未設定</p>
-                    )}
-                    {userProfile?.gender ? (
-                      <p>• {userProfile.gender}</p>
-                    ) : (
-                      <p className="text-gray-400">• 性別未設定</p>
-                    )}
-                  </div>
-                </div>
+                <PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
 
                 <AwardsSection userProfile={userProfile} awards={awards} />
 
@@ -2553,85 +2510,7 @@ export default function App() {
 
       <CertificatesModals certificates={certificates} />
 
-      {/* Personal Info Edit Overlay */}
-      <AnimatePresence>
-        {isPersonalInfoEditOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto flex flex-col"
-          >
-            {/* Header */}
-            <div className="flex items-center p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-              <button onClick={() => setIsPersonalInfoEditOpen(false)} className="mr-3">
-                <X className="w-6 h-6 text-gray-900" />
-              </button>
-              <h2 className="text-lg font-bold text-gray-900">人的事項</h2>
-            </div>
-
-            <div className="p-5 bg-white flex-1">
-              {/* Gender Section */}
-              <div className="mb-8">
-                <h3 className="font-bold text-gray-900 mb-4">性別</h3>
-                <div className="flex gap-2">
-                  {['男性', '女性', '選択しない'].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => setGender(option as '男性' | '女性' | '選択しない')}
-                      className={`flex-1 py-3.5 rounded-md font-bold text-[15px] border transition-colors ${
-                        gender === option
-                          ? 'bg-black text-white border-black'
-                          : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Birth Year Section */}
-              <div className="mb-8">
-                <h3 className="font-bold text-gray-900 mb-4">出生年度</h3>
-                <div className="relative">
-                  <select
-                    value={birthYear || ''}
-                    onChange={(e) => setBirthYear(e.target.value ? parseInt(e.target.value) : undefined)}
-                    className="w-full border border-gray-300 rounded-md h-[52px] px-4 text-[15px] focus:outline-none focus:border-black focus:ring-0 appearance-none bg-white"
-                  >
-                    <option value="" disabled>選択してください</option>
-                    {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map((year) => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-5 h-5 text-gray-600 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
-
-              <p className="text-[13px] text-gray-400 leading-relaxed mt-12">
-                * 採用提案および求人支援の確認のため、採用担当者とヘッドハンターにのみ公開されます。
-              </p>
-            </div>
-
-            {/* Bottom Fixed Button */}
-            <div className="p-4 bg-white mt-auto">
-              <button
-                onClick={handleSavePersonalInfo}
-                disabled={gender === userProfile?.gender && birthYear === userProfile?.birthYear}
-                className={`w-full font-bold py-4 rounded-lg transition-colors ${
-                  (gender !== userProfile?.gender || birthYear !== userProfile?.birthYear)
-                    ? 'bg-black text-white hover:bg-gray-800'
-                    : 'bg-[#e5e5e5] text-white cursor-not-allowed'
-                }`}
-              >
-                保存
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PersonalInfoModals personalInfo={personalInfo} />
 
 
       {/* Meishi Registration Bottom Sheet */}
