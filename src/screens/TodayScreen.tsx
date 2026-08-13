@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, ChevronRight, FileText, Briefcase, Clock, BarChart2, GraduationCap, Mail, Plus } from 'lucide-react';
+import { User, ChevronRight, FileText, Briefcase, Clock, BarChart2, GraduationCap, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 
@@ -172,37 +172,6 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white border border-gray-100 rounded-xl p-4 mb-8 shadow-sm flex justify-between items-center">
-        <button className="flex flex-col items-center gap-2 flex-1">
-          <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-            <User className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xs font-medium text-gray-700">人脈</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 flex-1">
-          <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-            <Mail className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xs font-medium text-gray-700">受信した提案</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 flex-1">
-          <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-            <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-white">P</div>
-          </div>
-          <span className="text-xs font-medium text-gray-700">ポイント</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 flex-1">
-          <div className="w-10 h-10 rounded-full bg-[#3870EA] flex items-center justify-center border border-[#3870EA]">
-            <div className="w-5 h-5 border-2 border-white rounded-sm relative">
-              <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white -translate-x-1/2"></div>
-              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white -translate-y-1/2"></div>
-            </div>
-          </div>
-          <span className="text-xs font-medium text-gray-700">ギフト</span>
-        </button>
       </div>
 
       {/* Tips Section */}
