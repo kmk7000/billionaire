@@ -1,5 +1,12 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, EmailAuthProvider } from 'firebase/auth';
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  inMemoryPersistence,
+  GoogleAuthProvider,
+  EmailAuthProvider,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -8,7 +15,12 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
+// IndexedDB persistence can silently hang inside a Capacitor WKWebView, which
+// leaves onAuthStateChanged never firing — fall back through localStorage to
+// in-memory so auth state always resolves.
+export const auth = initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
+});
 export const googleProvider = new GoogleAuthProvider();
 export { EmailAuthProvider };
 

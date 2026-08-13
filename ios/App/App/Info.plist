@@ -30,6 +30,15 @@
 	<string>名刺の写真をアルバムから選択するために使用します。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>撮影した名刺の写真を保存するために使用します。</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.738622111654-uo3jdcqel099eb82kkegi5qcqqvdij79</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

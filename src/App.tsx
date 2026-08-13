@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Mail, Loader2, Check, Home, Contact, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
+import { signInWithPopup, signInWithCredential, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType, EmailAuthProvider } from './firebase';
 import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi } from './types/app';
@@ -155,6 +157,7 @@ export default function App() {
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [completedProfileSteps, setCompletedProfileSteps] = useState<number[]>([]);
 
   const handleDeleteSelectedMeishis = () => {
@@ -369,10 +372,26 @@ export default function App() {
   }, []);
 
   const handleLogin = async () => {
+    setLoginError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+      if (Capacitor.isNativePlatform()) {
+        // signInWithPopup needs window.open, which WKWebView doesn't support
+        // (and Google blocks embedded-webview OAuth anyway) — do native
+        // Google Sign-In instead, then hand the ID token to the JS SDK so
+        // auth.currentUser/onAuthStateChanged stay the single source of truth.
+        const result = await FirebaseAuthentication.signInWithGoogle();
+        const idToken = result.credential?.idToken;
+        if (!idToken) throw new Error(`No ID token in native Google Sign-In result: ${JSON.stringify(result)}`);
+        await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
+    } catch (error: any) {
       console.error('Login failed:', error);
+      const detail = [error?.code, error?.message, error?.customData ? JSON.stringify(error.customData) : null]
+        .filter(Boolean)
+        .join(' | ');
+      setLoginError(detail || String(error));
     }
   };
 
@@ -685,7 +704,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="min-h-screen"
           >
-            <LoginScreen onLogin={handleLogin} onLineLogin={handleLineLogin} onEmailSignup={() => setLoginView('terms')} />
+            <LoginScreen onLogin={handleLogin} onLineLogin={handleLineLogin} onEmailSignup={() => setLoginView('terms')} errorMessage={loginError} />
           </motion.div>
         )}
         {loginView === 'terms' && (
