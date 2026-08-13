@@ -24,6 +24,7 @@ import { PostDetailOverlay } from './components/community/PostDetailOverlay';
 import { WritePostModal } from './components/community/WritePostModal';
 import { useCommunityPosts } from './hooks/useCommunityPosts';
 import { useCommunityWrite } from './hooks/useCommunityWrite';
+import { useNativePush } from './hooks/useNativePush';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
 import { EducationModals } from './components/profile/EducationModals';
@@ -150,6 +151,7 @@ export default function App() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const { posts } = useCommunityPosts(selectedCommunityBoard);
   const communityWrite = useCommunityWrite(user, userProfile);
+  useNativePush(user);
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');

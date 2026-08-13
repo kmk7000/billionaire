@@ -10,6 +10,11 @@ npm install        # 의존성 설치
 npm run dev        # 개발 서버 (Express + Vite middleware, http://localhost:3000)
 npm run build      # 프로덕션 빌드 (vite build → dist/)
 npm run lint       # 타입 체크 (tsc --noEmit)
+
+# 네이티브 앱 (Capacitor)
+npm run cap:sync    # 웹 빌드 후 ios/android 네이티브 프로젝트에 동기화
+npm run cap:ios     # 동기화 후 Xcode로 ios/App/App.xcworkspace 열기
+npm run cap:android # 동기화 후 Android Studio로 android/ 열기
 ```
 
 환경변수는 `.env.local`에 설정 (`.env.example` 참고):
@@ -76,6 +81,12 @@ src/
 5. i18n 미적용 — 사용자 노출 문자열이 App.tsx에 하드코딩되어 있음 (SPEC은 `ja.json` 분리 요구).
 6. **採用公告(구인정보)/コネクト(커넥트) 탭은 의도적으로 제거된 상태** — 둘 다 정적 스텁이었고(구인정보는 하드코딩 목데이터 렌더링만, 커넥트는 문구 한 줄) 나중에 실제 기능으로 다시 만들 예정이라 우선 삭제했다. `Tab` 타입(`src/types/app.ts`)에서 `'connect'`/`'jobs'`를 뺐고, `BottomNav`/데스크톱 헤더 내비게이션/`App.tsx`의 탭 렌더링에서도 제거했다. 관련 파일(`ConnectScreen.tsx`, `JobsScreen.tsx`, `components/jobs/JobCard.tsx`, `Job` 타입, `MOCK_JOBS`)은 완전히 삭제했으며, 필요해지면 git 히스토리에서 복원하거나 새로 설계해서 추가할 것.
 7. **커뮤니티 기능은 리멤버(Remember) 웹(`community.rememberapp.co.kr`) 구조를 벤치마킹해 전면 구축 완료** — 게시판 사이드바/칩바, 베스트 투고 랭킹, 새 투고/추천 투고 피드, 게시글 상세+댓글, 글쓰기, 신고/차단까지 동작한다. `firestore.rules`의 `authorUid`/`content` → `authorId`/`body` 필드 불일치 버그를 고치고 `comments`/`reports`/`blocks` 규칙을 추가한 뒤 프로덕션 Firebase 프로젝트에 배포 완료(`firebase deploy --only firestore:rules`) — 브라우저에서 실제 글쓰기/댓글/좋아요/신고/차단까지 전부 검증됨. 데스크톱 레이아웃은 리멤버 실제 사이트를 DOM까지 조사해 검정 헤더+플랫 패널(둥근 모서리/그림자 없이 여백으로만 구분) 스타일로 맞춰뒀다(모바일은 기존 카드 스타일 유지).
+8. **Capacitor로 iOS/Android 네이티브 셸 통합 완료** — 기존 웹 코드를 다시 만들지 않고 그대로 `ios/`, `android/` 네이티브 프로젝트로 감쌌다(`capacitor.config.ts`, appId `com.billionaire.app`). 카메라 사용 목적 문구(`Info.plist`의 `NSCameraUsageDescription` 등, `AndroidManifest.xml`의 `CAMERA` 권한)를 넣어 애플 심사에서 요구하는 최소한의 네이티브 통합을 갖췄고, `@capacitor/push-notifications`로 네이티브 푸시 등록까지 붙였다(`src/hooks/useNativePush.ts` — 기기 토큰을 `users/{uid}.pushToken`에 저장). 다음 단계로 필요한 것:
+   - **iOS**: Xcode(설치돼 있음)로 `npm run cap:ios` → 서명(Signing & Capabilities)에 개발자 계정 연결, Push Notifications capability 추가, 실기기/시뮬레이터 빌드 확인.
+   - **Android**: Android Studio가 이 환경에 설치되어 있지 않음(`ANDROID_HOME` 미설정) — 사용자가 Android Studio 설치 후 `npm run cap:android`로 프로젝트를 열어야 빌드/실행 가능.
+   - **푸시 발송 서버**: 지금은 클라이언트가 기기 토큰을 저장하는 부분까지만 되어 있고, 실제로 알림을 "보내는" 쪽(Firebase Cloud Messaging 연동, 커뮤니티 좋아요/댓글 시 서버에서 발송)은 아직 없음 — 별도 작업 필요.
+   - **LINE 로그인**: `server.ts`의 `/api/auth/line/url` 콜백은 배포된 HTTPS 서버가 있어야 네이티브 앱에서도 동작한다(로컬호스트로는 불가) — 서버 배포가 선행되어야 함.
+   - 명함 스캔은 기존 `getUserMedia` 기반 커스텀 카메라 UI를 그대로 재사용 중이며(Capacitor 네이티브 셸 안에서는 카메라 권한이 PWA와 달리 앱 단위로 영구 저장되므로 이것만으로도 안정성 문제가 크게 개선됨), `@capacitor/camera` 플러그인으로 교체하는 건 필요해지면 나중에 고려.
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 
