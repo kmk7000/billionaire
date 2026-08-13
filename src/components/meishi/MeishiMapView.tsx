@@ -224,7 +224,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[60] flex flex-col max-w-md mx-auto shadow-2xl"
+      className="fixed inset-0 bg-white z-[60] flex flex-col max-w-md mx-auto shadow-2xl pt-safe"
     >
       {/* Header */}
       <div className="flex items-center p-4 bg-white">
@@ -475,7 +475,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[70] flex flex-col max-w-md mx-auto"
+            className="fixed inset-0 bg-white z-[70] flex flex-col max-w-md mx-auto pt-safe"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100">

@@ -1039,7 +1039,7 @@ export default function App() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-gray-50 z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
+            className="fixed inset-0 bg-gray-50 z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
@@ -1217,7 +1217,7 @@ export default function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[300] flex flex-col"
+            className="fixed inset-0 bg-white z-[300] flex flex-col pt-safe"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -1409,7 +1409,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center text-white"
+            className="fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center text-white pt-safe"
           >
             <div className="relative w-64 h-40 border-2 border-white/20 rounded-lg overflow-hidden mb-8 bg-gray-900/50">
               <div className="absolute inset-0 flex items-center justify-center opacity-20">

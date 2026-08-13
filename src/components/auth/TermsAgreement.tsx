@@ -33,7 +33,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
   const canProceed = agreements.age && agreements.tos && agreements.privacyRequired;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl relative">
+    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl relative pt-safe">
       <div className="p-4">
         <button onClick={onBack} className="p-2 -ml-2">
           <ChevronRight className="w-6 h-6 rotate-180" />

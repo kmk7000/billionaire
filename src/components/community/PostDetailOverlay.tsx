@@ -66,7 +66,7 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar"
+      className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
     >
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between z-10 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-2 text-gray-900">

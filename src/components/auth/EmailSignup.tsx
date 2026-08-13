@@ -8,7 +8,7 @@ export const EmailSignup: React.FC<{ onBack: () => void; onComplete: (email: str
   const isValid = email.includes('@') && password.length >= 8;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl">
+    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl pt-safe">
       <div className="p-4">
         <button onClick={onBack} className="p-2 -ml-2">
           <ChevronRight className="w-6 h-6 rotate-180" />

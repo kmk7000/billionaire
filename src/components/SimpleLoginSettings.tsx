@@ -29,7 +29,7 @@ const SimpleLoginSettings: React.FC<SimpleLoginSettingsProps> = ({ onBack }) => 
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[1000] flex flex-col"
+      className="fixed inset-0 bg-white z-[1000] flex flex-col pt-safe"
     >
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-2 text-gray-900">

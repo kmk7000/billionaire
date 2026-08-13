@@ -25,7 +25,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[100] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[100] flex flex-col max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
@@ -190,7 +190,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[110] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[110] flex flex-col max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
@@ -317,7 +317,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
@@ -360,7 +360,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[130] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[130] flex flex-col max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4">
@@ -434,7 +434,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4 gap-3 border-b border-gray-100">
             <button onClick={s.closePasswordChange} className="p-1 -ml-1">
@@ -558,7 +558,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4 gap-3 border-b border-gray-100">
             <button onClick={s.closePasswordReset} className="p-1 -ml-1">

@@ -12,7 +12,7 @@ export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => (
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-white z-50 flex flex-col"
+        className="fixed inset-0 bg-white z-50 flex flex-col pt-safe"
       >
         <div className="sticky top-0 bg-white z-20">
           <div className="px-4 py-4 flex items-center justify-between">

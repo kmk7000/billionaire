@@ -14,7 +14,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <div className="flex items-center p-4 bg-white sticky top-0 z-10">
@@ -96,7 +96,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
@@ -304,7 +304,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto"
+          className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
           <div className="p-4 flex items-center gap-3 border-b border-gray-100">
             <div className="flex-1 bg-gray-50 rounded-lg flex items-center px-3 py-2">

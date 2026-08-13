@@ -78,7 +78,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-black z-[200] flex flex-col max-w-md mx-auto overflow-hidden"
+        className="fixed inset-0 bg-black z-[200] flex flex-col max-w-md mx-auto overflow-hidden pt-safe"
       >
         {/* Hidden File Input for Album Pick */}
         <input 

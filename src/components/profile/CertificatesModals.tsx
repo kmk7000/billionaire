@@ -11,7 +11,7 @@ export const CertificatesModals: React.FC<{ certificates: CertificatesEditor }> 
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-white z-[60] flex flex-col"
+        className="fixed inset-0 bg-white z-[60] flex flex-col pt-safe"
       >
         <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
           <div className="flex items-center justify-between p-4 relative">

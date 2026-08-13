@@ -44,7 +44,7 @@ export const MeishiDetailView: React.FC<{
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar"
+      className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
     >
       {/* Header */}
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between z-10">
