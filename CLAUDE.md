@@ -36,19 +36,19 @@ src/
 ├── firebase.ts                  # Firebase 초기화 + 에러 핸들러
 ├── types/
 │   ├── db.ts                    # Firestore 데이터 모델 타입
-│   └── app.ts                   # UI 레벨 타입 (Meishi, UserProfile, Post, Job 등)
+│   └── app.ts                   # UI 레벨 타입 (Meishi, UserProfile, Post 등)
 ├── constants/
 │   ├── theme.ts                 # 디자인 토큰
 │   ├── profileData.ts           # 선택지 목록 (기업/대학/직종/도도부현 등)
 │   └── mockData.ts              # 목 데이터
-├── screens/                     # 탭 화면: Today, MeishiList, Community, Connect, Jobs
+├── screens/                     # 탭 화면: Today, MeishiList, Community
 ├── components/
 │   ├── auth/                    # LoginScreen, TermsAgreement, EmailSignup
 │   ├── meishi/                  # MeishiCard, MeishiDetailView, MeishiEditView, MeishiMapView
 │   ├── community/               # BoardSidebar, BoardChipBar, PostCard, BestPostsSection,
 │   │                             # RecommendedSidebar, PostDetailOverlay, CommentThread,
 │   │                             # WritePostModal (리멤버 커뮤니티 웹 벤치마킹, docs/SPEC.md §2.2A)
-│   ├── jobs/ layout/             # JobCard, BottomNav, DesktopSidebar
+│   ├── layout/                  # BottomNav, DesktopSidebar
 │   ├── settings/                # SettingsModals (더보기→설정→계정관리→탈퇴, 비밀번호 변경/재설정)
 │   ├── profile/                 # ProfileOverlay(마이프로필 오버레이 골격) + MyMeishiTab +
 │   │                             # ProfileDetailsTab + 도메인별 XxxModals/XxxSection 12종
@@ -74,7 +74,8 @@ src/
 3. **`GEMINI_API_KEY`가 클라이언트 번들에 주입됨** (`vite.config.ts`의 `define`) — 배포 시 키가 노출된다. OCR 호출을 서버 라우트로 옮겨야 함.
 4. **LINE Client ID가 `server.ts`에 하드코딩** (`"2009585479"`) — env 변수 `LINE_CLIENT_ID`를 읽도록 수정 필요.
 5. i18n 미적용 — 사용자 노출 문자열이 App.tsx에 하드코딩되어 있음 (SPEC은 `ja.json` 분리 요구).
-6. **커뮤니티 기능은 리멤버(Remember) 웹(`community.rememberapp.co.kr`) 구조를 벤치마킹해 전면 구축 완료** — 게시판 사이드바/칩바, 베스트 투고 랭킹, 새 투고/추천 투고 피드, 게시글 상세+댓글, 글쓰기, 신고/차단까지 동작한다. **단, `firestore.rules`를 프로덕션 Firebase 프로젝트에 아직 배포하지 않았다.** 로컬에서 `authorUid`/`content` → `authorId`/`body` 필드 불일치 버그를 고치고 `comments`/`reports`/`blocks` 규칙을 추가했지만, 배포 전까지는 게시글 작성이 "Missing or insufficient permissions"로 실패한다 (브라우저로 직접 검증 완료). 배포 명령: `firebase deploy --only firestore:rules`.
+6. **採用公告(구인정보)/コネクト(커넥트) 탭은 의도적으로 제거된 상태** — 둘 다 정적 스텁이었고(구인정보는 하드코딩 목데이터 렌더링만, 커넥트는 문구 한 줄) 나중에 실제 기능으로 다시 만들 예정이라 우선 삭제했다. `Tab` 타입(`src/types/app.ts`)에서 `'connect'`/`'jobs'`를 뺐고, `BottomNav`/데스크톱 헤더 내비게이션/`App.tsx`의 탭 렌더링에서도 제거했다. 관련 파일(`ConnectScreen.tsx`, `JobsScreen.tsx`, `components/jobs/JobCard.tsx`, `Job` 타입, `MOCK_JOBS`)은 완전히 삭제했으며, 필요해지면 git 히스토리에서 복원하거나 새로 설계해서 추가할 것.
+7. **커뮤니티 기능은 리멤버(Remember) 웹(`community.rememberapp.co.kr`) 구조를 벤치마킹해 전면 구축 완료** — 게시판 사이드바/칩바, 베스트 투고 랭킹, 새 투고/추천 투고 피드, 게시글 상세+댓글, 글쓰기, 신고/차단까지 동작한다. `firestore.rules`의 `authorUid`/`content` → `authorId`/`body` 필드 불일치 버그를 고치고 `comments`/`reports`/`blocks` 규칙을 추가한 뒤 프로덕션 Firebase 프로젝트에 배포 완료(`firebase deploy --only firestore:rules`) — 브라우저에서 실제 글쓰기/댓글/좋아요/신고/차단까지 전부 검증됨. 데스크톱 레이아웃은 리멤버 실제 사이트를 DOM까지 조사해 검정 헤더+플랫 패널(둥근 모서리/그림자 없이 여백으로만 구분) 스타일로 맞춰뒀다(모바일은 기존 카드 스타일 유지).
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 

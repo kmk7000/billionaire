@@ -1,5 +1,5 @@
 // UI-level types used by the app shell (distinct from Firestore models in db.ts)
-export type Tab = 'today' | 'meishi' | 'connect' | 'jobs' | 'community';
+export type Tab = 'today' | 'meishi' | 'community';
 
 export interface Career {
   id: string;
@@ -107,15 +107,4 @@ export interface Post {
   likes: number;
   comments: number;
   createdAt: string;
-}
-
-export interface Job {
-  id: string;
-  company: string;
-  title: string;
-  location: string;
-  salary: string;
-  cultureScore: number;
-  tags: string[];
-  logoUrl?: string;
 }

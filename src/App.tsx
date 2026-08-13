@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, Briefcase, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Filter, Mail, Loader2, Check, Home, Contact, FileText, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
+import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Mail, Loader2, Check, Home, Contact, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
 import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType, EmailAuthProvider } from './firebase';
-import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi, Job } from './types/app';
+import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi } from './types/app';
 import { JAPANESE_COMPANIES, JAPANESE_UNIVERSITIES, JAPANESE_MAJORS, DEGREES, SKILL_RECOMMENDATIONS, ALL_SKILLS, LANGUAGES, LANGUAGE_LEVELS, JOB_CATEGORIES, PREFECTURES, COUNTRIES } from './constants/profileData';
 import { resizeImage } from './utils/imageUtils';
 import { TermsAgreement } from './components/auth/TermsAgreement';
@@ -16,8 +16,6 @@ import { MeishiMapView } from './components/meishi/MeishiMapView';
 import { TodayScreen } from './screens/TodayScreen';
 import { MeishiListScreen } from './screens/MeishiListScreen';
 import { CommunityScreen } from './screens/CommunityScreen';
-import { ConnectScreen } from './screens/ConnectScreen';
-import { JobsScreen } from './screens/JobsScreen';
 import { BottomNav } from './components/layout/BottomNav';
 import { DesktopSidebar } from './components/layout/DesktopSidebar';
 import { BoardSidebar } from './components/community/BoardSidebar';
@@ -646,23 +644,6 @@ export default function App() {
             </div>
           </header>
         );
-      case 'jobs':
-        return (
-          <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 h-[52px] flex items-center justify-between">
-            <h1 className="text-xl font-black tracking-tight text-gray-900">求人</h1>
-            <div className="flex gap-4">
-              <Filter className="w-6 h-6 text-gray-700" />
-              <Bell className="w-6 h-6 text-gray-700" />
-            </div>
-          </header>
-        );
-      case 'connect':
-        return (
-          <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 h-[52px] flex items-center justify-between">
-            <h1 className="text-xl font-black tracking-tight text-gray-900">コネクト</h1>
-            <Bell className="w-6 h-6 text-gray-700" />
-          </header>
-        );
     }
   };
 
@@ -760,8 +741,6 @@ export default function App() {
               { id: 'community', label: 'コミュニティ', icon: Share2 },
               { id: 'meishi', label: '名刺/ネットワーク', icon: Contact },
               { id: 'today', label: 'トゥデイ', icon: Home },
-              { id: 'jobs', label: '転職・キャリア', icon: Briefcase },
-              { id: 'connect', label: 'コネクト', icon: FileText },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -912,14 +891,6 @@ export default function App() {
               onSelectPost={setSelectedPostId}
               onOpenWrite={() => communityWrite.open(selectedCommunityBoard)}
             />
-          )}
-
-          {activeTab === 'connect' && (
-            <ConnectScreen key="connect" />
-          )}
-
-          {activeTab === 'jobs' && (
-            <JobsScreen key="jobs" />
           )}
 
           {activeTab === 'today' && (
