@@ -407,7 +407,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
             <div className="flex items-center gap-3 mb-10">
               <button
                 onClick={s.toggleWithdrawalChecked}
-                className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${s.isWithdrawalChecked ? 'bg-blue-500 border-blue-500' : 'border-gray-300 bg-white'}`}
+                className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${s.isWithdrawalChecked ? 'bg-[#0A0A0A]/50 border-[#0A0A0A]' : 'border-gray-300 bg-white'}`}
               >
                 <Check className={`w-4 h-4 ${s.isWithdrawalChecked ? 'text-white' : 'text-transparent'}`} />
               </button>

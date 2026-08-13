@@ -183,7 +183,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
         {/* Header Branding Banner */}
         <div className="bg-gradient-to-r from-[#0A0A0A] via-[#1C1C1C] to-[#2B2B2B] text-white p-6 relative">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] tracking-widest uppercase text-blue-200 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
+            <span className="text-[10px] tracking-widest uppercase text-white/70 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
               VERIFIED BUSINESS CARD
             </span>
             <button 
@@ -196,19 +196,19 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
           </div>
 
           <div className="flex items-center gap-2 mb-1">
-            <Building2 className="w-5 h-5 text-blue-300" />
+            <Building2 className="w-5 h-5 text-white/80" />
             <h3 className="text-base font-semibold tracking-tight text-white/95">
               {card.companyName}
             </h3>
             <ShieldCheck className="w-4 h-4 text-emerald-400" title="企業認証済み" />
           </div>
           {card.department && (
-            <p className="text-xs text-blue-200 font-medium ml-7">{card.department}</p>
+            <p className="text-xs text-white/70 font-medium ml-7">{card.department}</p>
           )}
 
           <div className="mt-8">
             {card.lastNameKana && card.firstNameKana && (
-              <p className="text-xs text-blue-200 font-normal tracking-wider mb-0.5">
+              <p className="text-xs text-white/70 font-normal tracking-wider mb-0.5">
                 {card.lastNameKana} {card.firstNameKana}
               </p>
             )}

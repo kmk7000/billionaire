@@ -90,13 +90,13 @@ export const PublicationModals: React.FC<{ publication: PublicationEditor }> = (
             <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <button
                 onClick={p.clearDate}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 削除
               </button>
               <button
                 onClick={p.confirmDate}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 完了
               </button>

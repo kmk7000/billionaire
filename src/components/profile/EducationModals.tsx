@@ -212,7 +212,7 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
                       e.setIsSchoolSearchOpen(false);
                       e.setSchoolSearchQuery('');
                     }}
-                    className="text-orange-500 text-sm font-medium underline"
+                    className="text-[#0A0A0A] text-sm font-medium underline"
                   >
                     '{e.schoolSearchQuery}' を直接入力
                   </button>
@@ -290,7 +290,7 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
                       e.setIsMajorSearchOpen(false);
                       e.setMajorSearchQuery('');
                     }}
-                    className="text-orange-500 text-sm font-medium underline"
+                    className="text-[#0A0A0A] text-sm font-medium underline"
                   >
                     '{e.majorSearchQuery}' を直接入力
                   </button>
@@ -370,13 +370,13 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
             <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <button
                 onClick={e.clearYear}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 削除
               </button>
               <button
                 onClick={e.confirmYear}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 完了
               </button>

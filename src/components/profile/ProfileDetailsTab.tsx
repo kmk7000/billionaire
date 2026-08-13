@@ -203,7 +203,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
                 {userProfile?.totalCareerYears && (
                   <div className="mb-2">
                     <span className="text-gray-500 text-sm">総経歴年数 </span>
-                    <span className="text-blue-500 font-bold">{userProfile.totalCareerYears}年</span>
+                    <span className="text-[#0A0A0A] font-bold">{userProfile.totalCareerYears}年</span>
                   </div>
                 )}
                 {userProfile?.careers && userProfile.careers.map((careerItem) => (
@@ -291,7 +291,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
               <div className="space-y-3">
                 {userProfile.websites.map((url, i) => (
                   <div key={i} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
-                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate mr-4">
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#0A0A0A] hover:underline truncate mr-4">
                       {url}
                     </a>
                     <button
@@ -333,7 +333,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
                       <span className="text-gray-500 mr-2">•</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-gray-900">{articleItem.title}</h4>
-                        <a href={articleItem.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-1 block truncate">
+                        <a href={articleItem.url} target="_blank" rel="noopener noreferrer" className="text-sm text-[#0A0A0A] hover:underline mt-1 block truncate">
                           {articleItem.url}
                         </a>
                       </div>

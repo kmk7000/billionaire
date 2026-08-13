@@ -14,7 +14,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelect }) => (
     onClick={() => onSelect(post.id)}
     className="bg-white p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
   >
-    <span className="inline-block text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-2">
+    <span className="inline-block text-[10px] font-bold text-[#0A0A0A] bg-[#0A0A0A]/5 px-2 py-0.5 rounded-full mb-2">
       {getCommunityBoardLabel(post.boardId)}
     </span>
     <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{post.title}</h3>

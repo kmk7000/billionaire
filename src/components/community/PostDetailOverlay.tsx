@@ -78,7 +78,7 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
       </div>
 
       <div className="px-5 py-5 max-w-2xl w-full mx-auto">
-        <span className="inline-block text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-3">
+        <span className="inline-block text-[10px] font-bold text-[#0A0A0A] bg-[#0A0A0A]/5 px-2 py-0.5 rounded-full mb-3">
           {getCommunityBoardLabel(post.boardId)}
         </span>
         <h1 className="text-lg font-bold text-gray-900 mb-2">{post.title}</h1>

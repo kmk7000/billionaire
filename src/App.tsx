@@ -601,7 +601,7 @@ export default function App() {
               <Search className="w-6 h-6 text-gray-700" />
               <div className="relative">
                 <Bell className="w-6 h-6 text-gray-700" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">6</div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">6</div>
               </div>
               <Menu className="w-6 h-6 text-gray-700 cursor-pointer" onClick={accountSettings.openMorePage} />
             </div>
@@ -616,7 +616,7 @@ export default function App() {
                 <Search className="w-6 h-6 text-gray-700" />
                 <div className="relative">
                   <Bell className="w-6 h-6 text-gray-700" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">99+</div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">99+</div>
                 </div>
                 <Menu className="w-6 h-6 text-gray-700 cursor-pointer" onClick={accountSettings.openMorePage} />
               </div>
@@ -688,7 +688,7 @@ export default function App() {
   if (!isAuthReady || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#0A0A0A] animate-spin" />
       </div>
     );
   }
@@ -805,7 +805,7 @@ export default function App() {
 
             <div className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#0A0A0A] rounded-full" />
             </div>
 
             <button
@@ -1051,7 +1051,7 @@ export default function App() {
               </div>
               <button 
                 onClick={handleSaveIntro}
-                className="text-orange-500 font-bold text-sm"
+                className="text-[#0A0A0A] font-bold text-sm"
               >
                 保存
               </button>
@@ -1086,7 +1086,7 @@ export default function App() {
               </div>
               <button 
                 onClick={() => setIsJobSeekingIntro(!isJobSeekingIntro)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isJobSeekingIntro ? 'bg-orange-500' : 'bg-gray-200'}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${isJobSeekingIntro ? 'bg-[#0A0A0A]' : 'bg-gray-200'}`}
               >
                 <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${isJobSeekingIntro ? 'translate-x-6' : 'translate-x-0.5'}`} />
               </button>
@@ -1165,7 +1165,7 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
                     <ImageIcon className="w-6 h-6" />
                   </div>
                   <div className="text-left">

@@ -26,7 +26,7 @@ export const CertificatesModals: React.FC<{ certificates: CertificatesEditor }> 
             </div>
             <button
               onClick={c.handleSave}
-              className="font-bold text-orange-500 text-sm"
+              className="font-bold text-[#0A0A0A] text-sm"
             >
               保存
             </button>
@@ -64,7 +64,7 @@ export const CertificatesModals: React.FC<{ certificates: CertificatesEditor }> 
               onClick={c.addCertificateInput}
               className="flex items-center gap-2 text-gray-900 font-bold py-2"
             >
-              <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center">
                 <span className="text-sm leading-none">+</span>
               </div>
               追加

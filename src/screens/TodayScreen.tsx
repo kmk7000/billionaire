@@ -187,7 +187,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4">
-            <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded mb-2">スカウト提案</span>
+            <span className="inline-block px-2 py-0.5 bg-[#0A0A0A]/5 text-[#0A0A0A] text-[10px] font-bold rounded mb-2">スカウト提案</span>
             <p className="font-bold text-gray-900 text-xs leading-relaxed">
               良いスカウト提案をたくさん受けるには、このようにプロフィールを作成してみてください。
             </p>

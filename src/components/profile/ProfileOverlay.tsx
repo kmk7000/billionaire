@@ -134,10 +134,10 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
           </div>
 
           {/* Notification Banner */}
-          <div className="bg-blue-50 rounded-xl p-4 flex items-center justify-between mb-6">
+          <div className="bg-[#0A0A0A]/5 rounded-xl p-4 flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center relative">
-                <Mail className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10 bg-[#0A0A0A]/10 rounded-full flex items-center justify-center relative">
+                <Mail className="w-5 h-5 text-[#0A0A0A]" />
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900">{user?.displayName || 'ユーザー'}様、</p>
@@ -146,7 +146,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
             </div>
             <button className="bg-black text-white text-xs font-bold px-4 py-2 rounded relative">
               確認する
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">1</span>
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#0A0A0A] text-white text-[10px] font-bold rounded-full flex items-center justify-center">1</span>
             </button>
           </div>
 

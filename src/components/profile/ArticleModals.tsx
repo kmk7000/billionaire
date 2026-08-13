@@ -26,9 +26,9 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           <div className="p-4 bg-white">
             <button
               onClick={a.openNew}
-              className="w-full flex items-center text-orange-500 font-bold mb-6"
+              className="w-full flex items-center text-[#0A0A0A] font-bold mb-6"
             >
-              <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center mr-2">
+              <div className="w-5 h-5 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center mr-2">
                 <span className="text-sm leading-none">+</span>
               </div>
               記事追加
@@ -75,7 +75,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
             <button
               onClick={a.handleSave}
               disabled={!a.title || !a.url || !a.isUrlValid}
-              className={`font-bold text-sm ${(!a.title || !a.url || !a.isUrlValid) ? 'text-gray-300' : 'text-orange-500'}`}
+              className={`font-bold text-sm ${(!a.title || !a.url || !a.isUrlValid) ? 'text-gray-300' : 'text-[#0A0A0A]'}`}
             >
               保存
             </button>

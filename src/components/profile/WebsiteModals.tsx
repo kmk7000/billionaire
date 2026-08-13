@@ -26,7 +26,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
             </div>
             <button
               onClick={w.handleSave}
-              className="font-bold text-blue-600 text-sm"
+              className="font-bold text-[#0A0A0A] text-sm"
             >
               保存
             </button>
@@ -56,7 +56,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
               onClick={w.addUrlInput}
               className="flex items-center gap-2 text-gray-900 font-bold py-2"
             >
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-[#0A0A0A] flex items-center justify-center">
                 <Plus className="w-4 h-4 text-white" />
               </div>
               追加

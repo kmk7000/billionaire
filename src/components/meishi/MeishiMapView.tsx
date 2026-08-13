@@ -289,7 +289,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
                         } ${option.value !== 2000 ? 'border-b border-gray-100' : ''}`}
                       >
                         <span>{option.label}</span>
-                        {radius === option.value && <Check className="w-5 h-5 text-blue-500" />}
+                        {radius === option.value && <Check className="w-5 h-5 text-[#0A0A0A]" />}
                       </button>
                     ))}
                   </div>
@@ -364,8 +364,8 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 p-8 text-center">
             {loadError || !apiKey ? (
               <div className="max-w-xs">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-orange-500" />
+                <div className="w-16 h-16 bg-[#0A0A0A]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-8 h-8 text-[#0A0A0A]" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">地図の読み込みエラー</h3>
                 <p className="text-xs text-gray-500 leading-relaxed mb-4 text-left">
@@ -381,7 +381,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
               </div>
             ) : (
               <div className="text-center">
-                <Loader2 className="w-10 h-10 animate-spin text-orange-500 mx-auto mb-4" />
+                <Loader2 className="w-10 h-10 animate-spin text-[#0A0A0A] mx-auto mb-4" />
                 <p className="text-sm text-gray-400 font-medium">地図を読み込んでいます...</p>
               </div>
             )}
@@ -390,9 +390,9 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
 
         {/* Center Search Radius Indicator (Mock) */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <div className="w-16 h-16 rounded-full border-2 border-orange-500/30 bg-orange-500/5 flex items-center justify-center">
-            <div className="w-1 h-4 bg-orange-500/40 absolute"></div>
-            <div className="h-1 w-4 bg-orange-500/40 absolute"></div>
+          <div className="w-16 h-16 rounded-full border-2 border-[#0A0A0A]/30 bg-[#0A0A0A]/5 flex items-center justify-center">
+            <div className="w-1 h-4 bg-[#0A0A0A]/40 absolute"></div>
+            <div className="h-1 w-4 bg-[#0A0A0A]/40 absolute"></div>
           </div>
         </div>
 
@@ -400,9 +400,9 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
         <div className="absolute top-4 left-4 z-[1000]">
           <button 
             onClick={handleCurrentLocation}
-            className="w-11 h-11 bg-white rounded-lg shadow-lg flex items-center justify-center border border-orange-500 active:scale-95 transition-transform"
+            className="w-11 h-11 bg-white rounded-lg shadow-lg flex items-center justify-center border border-[#0A0A0A] active:scale-95 transition-transform"
           >
-            <Target className="w-7 h-7 text-orange-500" />
+            <Target className="w-7 h-7 text-[#0A0A0A]" />
           </button>
         </div>
 
@@ -411,14 +411,14 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
           <button 
             onClick={handleSearchArea}
             disabled={isSearching}
-            className="bg-white px-4 py-2.5 rounded-lg shadow-lg border border-orange-500 text-xs font-bold text-orange-500 flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            className="bg-white px-4 py-2.5 rounded-lg shadow-lg border border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
           >
             {isSearching ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <div className="relative w-4 h-4">
-                <div className="absolute inset-0 border-2 border-orange-500/40 rounded-full"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
+                <div className="absolute inset-0 border-2 border-[#0A0A0A]/40 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-[#0A0A0A] rounded-full"></div>
               </div>
             )}
             この位置で再検索
@@ -443,17 +443,17 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
 
         {/* Bottom Right: Action Buttons */}
         <div className="absolute bottom-6 right-4 flex gap-3 z-[1000]">
-          <button className="bg-white px-6 py-3 rounded-xl shadow-xl border border-orange-500 flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform">
-            <div className="w-4 h-4 rounded-full border-2 border-orange-500 flex items-center justify-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+          <button className="bg-white px-6 py-3 rounded-xl shadow-xl border border-[#0A0A0A] flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform">
+            <div className="w-4 h-4 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A]"></div>
             </div>
             会社
           </button>
           <button 
             onClick={onBack}
-            className="bg-white px-6 py-3 rounded-xl shadow-xl border border-orange-500 flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform"
+            className="bg-white px-6 py-3 rounded-xl shadow-xl border border-[#0A0A0A] flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform"
           >
-            <ChevronUp className="w-5 h-5 text-orange-500" />
+            <ChevronUp className="w-5 h-5 text-[#0A0A0A]" />
             リスト
           </button>
         </div>
@@ -462,7 +462,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
       {/* Footer Status Bar */}
       <div className="p-4 bg-white flex items-center justify-between border-t border-gray-100 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-[1000]">
         <span className="text-xs text-gray-600 font-medium">この周辺に検索された名刺がありません。</span>
-        <button className="bg-orange-100/50 text-orange-400 px-5 py-3 rounded-xl text-xs font-bold flex items-center gap-2 opacity-80 cursor-not-allowed">
+        <button className="bg-[#0A0A0A]/5 text-[#0A0A0A] px-5 py-3 rounded-xl text-xs font-bold flex items-center gap-2 opacity-80 cursor-not-allowed">
           <RefreshCw className="w-4 h-4" />
           さらに読み込む
         </button>
@@ -494,7 +494,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
                   placeholder="検索"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-50 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full bg-gray-50 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20"
                 />
               </div>
             </div>
@@ -522,8 +522,8 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
                             onClick={() => handleSelectMeishiLocation(meishi)}
                             className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg text-left transition-colors"
                           >
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                              <Briefcase className="w-5 h-5 text-blue-500" />
+                            <div className="w-10 h-10 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center shrink-0">
+                              <Briefcase className="w-5 h-5 text-[#0A0A0A]" />
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-900">{meishi.company || meishi.name}</p>

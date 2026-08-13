@@ -84,10 +84,10 @@ export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => (
                             <button
                               key={role}
                               onClick={() => j.toggleJob(role)}
-                              className={`w-full text-left px-6 py-3 text-sm flex items-center justify-between transition-colors ${isSelected ? 'text-blue-600 font-bold' : 'text-gray-700 hover:bg-gray-100'}`}
+                              className={`w-full text-left px-6 py-3 text-sm flex items-center justify-between transition-colors ${isSelected ? 'text-[#0A0A0A] font-bold' : 'text-gray-700 hover:bg-gray-100'}`}
                             >
                               {role}
-                              {isSelected && <Check className="w-4 h-4 text-blue-600" />}
+                              {isSelected && <Check className="w-4 h-4 text-[#0A0A0A]" />}
                             </button>
                           );
                         })}

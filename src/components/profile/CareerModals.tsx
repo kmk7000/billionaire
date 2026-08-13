@@ -109,7 +109,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
             <button
               onClick={c.handleSaveCareer}
               disabled={!c.company || !c.startDate || (!c.isCurrent && !c.endDate)}
-              className={`font-bold text-sm ${(!c.company || !c.startDate || (!c.isCurrent && !c.endDate)) ? 'text-gray-300' : 'text-blue-500'}`}
+              className={`font-bold text-sm ${(!c.company || !c.startDate || (!c.isCurrent && !c.endDate)) ? 'text-gray-300' : 'text-[#0A0A0A]'}`}
             >
               完了
             </button>
@@ -358,7 +358,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                       c.setIsCompanySearchOpen(false);
                       c.setCompanySearchQuery('');
                     }}
-                    className="text-orange-500 text-sm font-medium underline"
+                    className="text-[#0A0A0A] text-sm font-medium underline"
                   >
                     '{c.companySearchQuery}' を直接入力
                   </button>
@@ -395,13 +395,13 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
             <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <button
                 onClick={c.clearDate}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 削除
               </button>
               <button
                 onClick={c.confirmDate}
-                className="text-blue-500 font-medium"
+                className="text-[#0A0A0A] font-medium"
               >
                 完了
               </button>

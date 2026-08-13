@@ -26,7 +26,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
             <button
               onClick={l.handleSave}
               disabled={!l.selectedLanguage || !l.selectedLevel}
-              className={`font-bold ${!l.selectedLanguage || !l.selectedLevel ? 'text-gray-300' : 'text-blue-600'}`}
+              className={`font-bold ${!l.selectedLanguage || !l.selectedLevel ? 'text-gray-300' : 'text-[#0A0A0A]'}`}
             >
               保存
             </button>
@@ -90,7 +90,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
                 <div className="flex items-center justify-end p-4 border-b border-gray-100">
                   <button
                     onClick={() => l.setIsLanguageSelectOpen(false)}
-                    className="font-bold text-blue-600"
+                    className="font-bold text-[#0A0A0A]"
                   >
                     完了
                   </button>
@@ -133,7 +133,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
                 <div className="flex items-center justify-end p-4 border-b border-gray-100">
                   <button
                     onClick={() => l.setIsLevelSelectOpen(false)}
-                    className="font-bold text-blue-600"
+                    className="font-bold text-[#0A0A0A]"
                   >
                     完了
                   </button>
