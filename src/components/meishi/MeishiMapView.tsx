@@ -228,7 +228,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
     >
       {/* Header */}
       <div className="flex items-center p-4 bg-white">
-        <button onClick={onBack} className="p-1 -ml-1">
+        <button aria-label="戻る" onClick={onBack} className="p-1 -ml-1">
           <ArrowLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="ml-4 text-lg font-bold text-gray-900">名刺地図</h1>
@@ -398,7 +398,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
 
         {/* Top Left: Current Location */}
         <div className="absolute top-4 left-4 z-[1000]">
-          <button 
+          <button aria-label="現在地を表示" 
             onClick={handleCurrentLocation}
             className="w-11 h-11 bg-white rounded-lg shadow-lg flex items-center justify-center border border-[#0A0A0A] active:scale-95 transition-transform"
           >

@@ -16,7 +16,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
       >
         <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
           <div className="px-4 py-4 flex items-center justify-between relative">
-            <button
+            <button aria-label="戻る"
               onClick={l.close}
               className="p-1 -ml-1"
             >

@@ -65,12 +65,12 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
         {/* Profile Page Content */}
         <div className="flex items-center justify-between p-4 sticky top-0 bg-white z-10 border-b border-gray-50">
           <div className="flex items-center gap-4">
-            <button onClick={onClose} className="p-1 -ml-1 hover:bg-gray-100 rounded-full transition-colors">
+            <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1 hover:bg-gray-100 rounded-full transition-colors">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">{user?.displayName || 'ユーザー'}</h1>
           </div>
-          <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+          <button aria-label="設定" className="p-1 hover:bg-gray-100 rounded-full transition-colors">
             <UserCog className="w-6 h-6 text-gray-900" />
           </button>
         </div>
@@ -111,7 +111,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
                     <User className="w-12 h-12 text-gray-400" />
                   )}
                 </div>
-                <button className="absolute bottom-0 right-0 w-7 h-7 bg-[#262626] rounded-full flex items-center justify-center border-2 border-[#1a1a1a] shadow-lg hover:bg-[#333333] transition-colors">
+                <button aria-label="写真を変更" className="absolute bottom-0 right-0 w-7 h-7 bg-[#262626] rounded-full flex items-center justify-center border-2 border-[#1a1a1a] shadow-lg hover:bg-[#333333] transition-colors">
                   <Camera className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>

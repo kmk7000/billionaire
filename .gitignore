@@ -7,3 +7,6 @@ coverage/
 .env*
 !.env.example
 service-account.json
+
+# Local-only third-party design skill (npm install -g ui-ux-pro-max-cli && uipro init --ai claude)
+.claude/skills/ui-ux-pro-max/

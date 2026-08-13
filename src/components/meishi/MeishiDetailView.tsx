@@ -48,7 +48,7 @@ export const MeishiDetailView: React.FC<{
     >
       {/* Header */}
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between z-10">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
+        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-gray-900">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={() => setIsMoreOptionsOpen(true)} className="p-1">
@@ -75,16 +75,16 @@ export const MeishiDetailView: React.FC<{
 
       {/* Action Buttons */}
       <div className="px-6 flex justify-between items-center mb-10">
-        <button className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="電話をかける" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
           <Phone className="w-6 h-6" />
         </button>
-        <button className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="メッセージを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
           <MessageSquare className="w-6 h-6" />
         </button>
-        <button className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.email ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="メールを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.email ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
           <Mail className="w-6 h-6" />
         </button>
-        <button className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+        <button aria-label="ギフトを送る" className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
           <Gift className="w-6 h-6" />
         </button>
       </div>

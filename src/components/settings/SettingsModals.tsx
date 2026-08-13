@@ -29,7 +29,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
-            <button onClick={s.closeMorePage} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeMorePage} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">もっと見る</h1>
@@ -194,7 +194,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
-            <button onClick={s.closeSettingsPage} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeSettingsPage} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">設定</h1>
@@ -321,7 +321,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white border-b border-gray-100 h-[52px] flex items-center px-4 gap-3">
-            <button onClick={s.closeAccountManagement} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeAccountManagement} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">アカウント</h1>
@@ -364,7 +364,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4">
-            <button onClick={s.closeWithdrawal} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeWithdrawal} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
           </header>
@@ -405,7 +405,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
             </div>
 
             <div className="flex items-center gap-3 mb-10">
-              <button
+              <button aria-label="退会に同意する"
                 onClick={s.toggleWithdrawalChecked}
                 className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${s.isWithdrawalChecked ? 'bg-[#0A0A0A]/50 border-[#0A0A0A]' : 'border-gray-300 bg-white'}`}
               >
@@ -437,7 +437,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4 gap-3 border-b border-gray-100">
-            <button onClick={s.closePasswordChange} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closePasswordChange} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">パスワード再設定</h1>
@@ -561,7 +561,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           className="fixed inset-0 bg-white z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-white h-[52px] flex items-center px-4 gap-3 border-b border-gray-100">
-            <button onClick={s.closePasswordReset} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closePasswordReset} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="text-lg font-bold text-gray-900">パスワード再設定</h1>

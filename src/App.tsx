@@ -603,7 +603,9 @@ export default function App() {
                 <Bell className="w-6 h-6 text-gray-700" />
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">6</div>
               </div>
-              <Menu className="w-6 h-6 text-gray-700 cursor-pointer" onClick={accountSettings.openMorePage} />
+              <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
+                <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
+              </button>
             </div>
           </header>
         );
@@ -618,7 +620,9 @@ export default function App() {
                   <Bell className="w-6 h-6 text-gray-700" />
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">99+</div>
                 </div>
-                <Menu className="w-6 h-6 text-gray-700 cursor-pointer" onClick={accountSettings.openMorePage} />
+                <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
+                <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
+              </button>
               </div>
             </div>
 

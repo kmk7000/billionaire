@@ -35,7 +35,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
   return (
     <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl relative pt-safe">
       <div className="p-4">
-        <button onClick={onBack} className="p-2 -ml-2">
+        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2">
           <ChevronRight className="w-6 h-6 rotate-180" />
         </button>
       </div>

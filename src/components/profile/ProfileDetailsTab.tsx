@@ -294,7 +294,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
                     <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#0A0A0A] hover:underline truncate mr-4">
                       {url}
                     </a>
-                    <button
+                    <button aria-label="編集"
                       onClick={website.open}
                       className="p-2 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
                     >

@@ -15,7 +15,7 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
       >
         {/* Header */}
         <div className="flex items-center p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-          <button onClick={p.close} className="mr-3">
+          <button aria-label="閉じる" onClick={p.close} className="mr-3">
             <X className="w-6 h-6 text-gray-900" />
           </button>
           <h2 className="text-lg font-bold text-gray-900">人的事項</h2>

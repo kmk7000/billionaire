@@ -19,7 +19,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
           <div className="px-4 py-4 flex items-center justify-between relative">
             <div className="w-6" />
             <h2 className="text-lg font-bold text-gray-900">専門分野・スキル選択</h2>
-            <button onClick={s.close} className="p-1 -mr-1">
+            <button aria-label="閉じる" onClick={s.close} className="p-1 -mr-1">
               <X className="w-6 h-6 text-gray-900" />
             </button>
           </div>

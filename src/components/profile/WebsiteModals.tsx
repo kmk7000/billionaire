@@ -16,7 +16,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
         <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
           <div className="flex items-center justify-between p-4 relative">
             <div className="flex items-center gap-3">
-              <button
+              <button aria-label="戻る"
                 onClick={w.close}
                 className="p-1 -ml-1"
               >

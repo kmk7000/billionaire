@@ -85,7 +85,7 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
               <ArrowUpDown className="w-3 h-3" />
               <span>登録日順 {meishiSortOrder === 'desc' ? '↓' : '↑'}</span>
             </button>
-            <button
+            <button aria-label="閉じる"
               onClick={onToggleEditMode}
               className={`flex items-center gap-1 transition-colors ${isEditMode ? 'text-[#0A0A0A]' : 'hover:text-[#0A0A0A]'}`}
             >

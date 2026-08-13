@@ -37,7 +37,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">投稿を作成</h2>
-              <button onClick={close} className="p-1 text-gray-400">
+              <button aria-label="閉じる" onClick={close} className="p-1 text-gray-400">
                 <X className="w-5 h-5" />
               </button>
             </div>

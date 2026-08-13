@@ -93,7 +93,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
           <>
             {/* Camera View Header */}
             <div className="p-4 flex justify-between items-center z-10 text-white bg-gradient-to-b from-black/60 to-transparent">
-              <button 
+              <button aria-label="フラッシュを切り替え" 
                 onClick={toggleFlash}
                 className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-amber-400 text-black' : 'bg-white/10 text-white'}`}
               >
@@ -102,7 +102,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               <span className="font-bold text-sm">
                 {isRegisteringMyMeishi ? 'マイ名刺登録' : '名刺スキャン'}
               </span>
-              <button onClick={handleClose} className="p-2">
+              <button aria-label="閉じる" onClick={handleClose} className="p-2">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -162,7 +162,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 <span className="text-xs font-bold">アルバム</span>
               </button>
 
-              <button 
+              <button aria-label="撮影する" 
                 onClick={captureImage}
                 className="w-20 h-20 rounded-full border-4 border-[#0A0A0A] p-1 flex items-center justify-center active:scale-95 transition-transform"
               >
@@ -185,11 +185,11 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             {/* Header */}
             <div className="p-4 flex items-center justify-between text-white">
               <div className="flex gap-6">
-                <button className="text-white hover:opacity-80"><RotateCw className="w-6 h-6" /></button>
-                <button className="text-white hover:opacity-80"><Wand2 className="w-6 h-6" /></button>
-                <button className="text-white hover:opacity-80"><Crop className="w-6 h-6" /></button>
+                <button aria-label="再撮影" className="text-white hover:opacity-80"><RotateCw className="w-6 h-6" /></button>
+                <button aria-label="画質を調整" className="text-white hover:opacity-80"><Wand2 className="w-6 h-6" /></button>
+                <button aria-label="トリミング" className="text-white hover:opacity-80"><Crop className="w-6 h-6" /></button>
               </div>
-              <button onClick={handleClose}>
+              <button aria-label="閉じる" onClick={handleClose}>
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -339,7 +339,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 
         {meishiStep === 'success' && (
           <div className="flex-1 flex flex-col bg-white relative">
-            <button 
+            <button aria-label="閉じる" 
               onClick={handleClose}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 z-10"
             >

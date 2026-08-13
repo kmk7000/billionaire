@@ -18,7 +18,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
         >
           {/* Header */}
           <div className="flex items-center p-4 bg-white sticky top-0 z-10">
-            <button onClick={c.closeList} className="mr-3">
+            <button aria-label="戻る" onClick={c.closeList} className="mr-3">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h2 className="text-lg font-bold text-gray-900">経歴編集</h2>

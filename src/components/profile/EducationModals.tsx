@@ -19,7 +19,7 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
             <div className="flex items-center gap-3">
-              <button onClick={e.close}>
+              <button aria-label="戻る" onClick={e.close}>
                 <ArrowLeft className="w-6 h-6 text-gray-900" />
               </button>
               <h2 className="text-lg font-bold text-gray-900">学歴追加</h2>

@@ -65,7 +65,7 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ threaded, postId, 
           placeholder={`${sessionHandle}として書き込む`}
           className="flex-1 h-[40px] px-3 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-black"
         />
-        <button
+        <button aria-label="送信"
           onClick={handleSubmit}
           disabled={!draft.trim() || isSubmitting}
           className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center disabled:bg-gray-300 transition-colors"

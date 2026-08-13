@@ -17,7 +17,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
         >
           {/* Header */}
           <div className="flex items-center p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-            <button onClick={a.closeList} className="mr-3">
+            <button aria-label="戻る" onClick={a.closeList} className="mr-3">
               <ArrowLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h2 className="text-lg font-bold text-gray-900">記事編集</h2>
@@ -67,7 +67,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
             <div className="flex items-center gap-3">
-              <button onClick={a.close}>
+              <button aria-label="戻る" onClick={a.close}>
                 <ArrowLeft className="w-6 h-6 text-gray-900" />
               </button>
               <h2 className="text-lg font-bold text-gray-900">{a.editingArticleId ? '記事編集' : '記事追加'}</h2>

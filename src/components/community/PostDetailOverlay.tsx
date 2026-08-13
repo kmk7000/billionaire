@@ -69,7 +69,7 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
       className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
     >
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between z-10 border-b border-gray-100">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
+        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-gray-900">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={() => setIsMoreOpen(true)} className="p-1">
@@ -93,7 +93,7 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
         <p className="text-[15px] text-gray-800 whitespace-pre-wrap leading-relaxed mb-6">{post.body}</p>
 
         <div className="flex items-center gap-4 py-3 border-y border-gray-100 mb-2">
-          <button
+          <button aria-label="いいね"
             onClick={handleLike}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${
               hasLiked ? 'bg-black text-white' : 'bg-gray-100 text-gray-600'

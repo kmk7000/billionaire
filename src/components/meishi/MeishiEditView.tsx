@@ -43,7 +43,7 @@ export const MeishiEditView: React.FC<{
       {/* Header */}
       <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100 z-10">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
+          <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-gray-900">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h3 className="text-[17px] font-bold text-gray-900">名刺情報の編集</h3>

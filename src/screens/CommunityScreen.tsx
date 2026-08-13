@@ -82,7 +82,7 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
         </div>
       )}
 
-      <button
+      <button aria-label="投稿を作成"
         onClick={onOpenWrite}
         className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-black text-white flex items-center justify-center shadow-lg z-20 lg:hidden"
       >
