@@ -873,8 +873,8 @@ export default function App() {
 
         {/* Center Main App Content Container */}
         <div className="flex-1 min-w-0 bg-white min-h-screen lg:min-h-[850px] overflow-hidden flex flex-col max-w-md lg:max-w-none mx-auto lg:mx-0 shadow-2xl lg:shadow-none w-full">
-          {/* Mobile Header (Hidden on Desktop) */}
-          <div className="lg:hidden">
+          {/* Mobile Header (Hidden on Desktop) — pt-safe clears the notch/Dynamic Island in the native app shell */}
+          <div className="lg:hidden pt-safe bg-white">
             {renderHeader()}
           </div>
 

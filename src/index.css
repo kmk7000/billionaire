@@ -24,4 +24,12 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* Notch/Dynamic Island + home-indicator clearance for the native shell —
+     env() falls back to 0 on regular web, so these are harmless there. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
