@@ -19,8 +19,8 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ posts, o
   const Wrapper = inline ? 'div' : 'aside';
 
   return (
-    <Wrapper className={inline ? 'space-y-4' : 'hidden lg:block w-80 shrink-0 space-y-4 sticky top-22'}>
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
+    <Wrapper className={inline ? 'space-y-4' : 'hidden lg:block w-80 shrink-0 space-y-4 sticky top-20'}>
+      <div className={inline ? 'bg-white rounded-xl border border-gray-200 p-4 shadow-xs' : 'bg-white p-4'}>
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
           <h3 className="font-bold text-sm text-gray-900">推薦投稿</h3>
           <span className="text-[10px] text-gray-400">Remember Live</span>

@@ -2,9 +2,9 @@ import React from 'react';
 import { MessageSquare } from 'lucide-react';
 
 export const DesktopSidebar: React.FC<{ onNavigateCommunity: () => void }> = ({ onNavigateCommunity }) => (
-  <aside className="hidden lg:block w-80 shrink-0 space-y-4 sticky top-22">
+  <aside className="hidden lg:block w-80 shrink-0 space-y-4 sticky top-20">
     {/* Real-time Trending Posts Widget (リアルタイム人気記事 Top 5) */}
-    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
+    <div className="bg-white p-4">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -48,7 +48,7 @@ export const DesktopSidebar: React.FC<{ onNavigateCommunity: () => void }> = ({ 
     </div>
 
     {/* Suggested Professional Connections */}
-    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
+    <div className="bg-white p-4">
       <h3 className="font-bold text-sm text-gray-900 mb-3">おすすめビジネスネットワーク</h3>
       <div className="space-y-3">
         {[

@@ -8,7 +8,7 @@ interface BoardSidebarProps {
 }
 
 export const BoardSidebar: React.FC<BoardSidebarProps> = ({ selectedBoard, onSelectBoard }) => (
-  <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-xs space-y-1">
+  <div className="bg-white p-3 space-y-1">
     <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 py-1">
       関心事・テーマ
     </p>

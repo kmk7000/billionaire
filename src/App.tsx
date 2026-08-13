@@ -734,23 +734,22 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F6F8] text-[#141A21]">
+    <div className="min-h-screen bg-[#F5F6F8] lg:bg-[#F2F2F2] text-[#141A21]">
       {/* Desktop Web Header Bar (Remember Web Style) */}
-      <header className="hidden lg:block w-full bg-white border-b border-gray-200 sticky top-0 z-40 shadow-xs">
+      <header className="hidden lg:block w-full bg-[#0A0A0A] sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('today')}>
-              <h1 className="text-2xl font-black font-serif tracking-tight text-[#0A0A0A]">Billionaire</h1>
-              <span className="text-[10px] font-extrabold bg-[#0A0A0A]/10 text-[#0A0A0A] px-2 py-0.5 rounded-full uppercase tracking-wider">REMEMBER SYNC</span>
+              <h1 className="text-2xl font-black font-serif tracking-tight text-white">Billionaire</h1>
             </div>
 
             {/* Global Web Search Input */}
             <div className="relative w-72 xl:w-80">
               <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text" 
-                placeholder="会社名、お名前、職種、キーワードで検索..." 
-                className="w-full bg-[#F5F6F8] border border-transparent focus:border-[#0A0A0A] focus:bg-white text-xs pl-9 pr-4 py-2 rounded-full outline-none transition-all"
+              <input
+                type="text"
+                placeholder="会社名、お名前、職種、キーワードで検索..."
+                className="w-full bg-white/10 border border-transparent focus:border-white/30 focus:bg-white/15 text-white placeholder:text-gray-400 text-xs pl-9 pr-4 py-2 rounded-full outline-none transition-all"
               />
             </div>
           </div>
@@ -771,9 +770,9 @@ export default function App() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id as Tab)}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors ${
-                    isActive 
-                      ? 'bg-[#0A0A0A] text-white shadow-xs' 
-                      : 'text-gray-600 hover:bg-gray-100'
+                    isActive
+                      ? 'bg-white text-[#0A0A0A]'
+                      : 'text-gray-300 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -785,35 +784,35 @@ export default function App() {
 
           {/* Desktop Right Header Action Items */}
           <div className="flex items-center gap-2.5">
-            <button 
+            <button
               onClick={handleOpenMeishiCamera}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#0A0A0A] text-white font-bold text-xs rounded-lg hover:bg-black transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white text-[#0A0A0A] font-bold text-xs rounded-lg hover:bg-gray-100 transition-colors"
             >
               <Plus className="w-4 h-4" />
               名刺登録
             </button>
 
-            <button 
+            <button
               onClick={() => {
                 setActiveTab('community');
                 communityWrite.open(selectedCommunityBoard);
               }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#C9483B] text-white font-bold text-xs rounded-lg hover:bg-[#B03A2E] transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-2 bg-[#C9483B] text-white font-bold text-xs rounded-lg hover:bg-[#B03A2E] transition-colors"
             >
               <PenSquare className="w-4 h-4" />
               投稿する
             </button>
 
-            <div className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">
+            <div className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full" />
             </div>
 
-            <button 
+            <button
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/10 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-white text-[#0A0A0A] flex items-center justify-center font-bold text-xs">
                 {userProfile?.displayName?.[0] || 'B'}
               </div>
             </button>
@@ -824,11 +823,11 @@ export default function App() {
       {/* Main Responsive Layout Grid (Remember Web Style) */}
       <div className="max-w-7xl mx-auto px-0 lg:px-6 py-0 lg:py-6 flex gap-6 items-start">
         {/* Desktop Left Sidebar */}
-        <aside className="hidden lg:block w-64 shrink-0 space-y-4 sticky top-22">
-          {/* User Profile Card Widget */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
+        <aside className="hidden lg:block w-64 shrink-0 space-y-4 sticky top-20">
+          {/* User Profile Panel */}
+          <div className="bg-white p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-11 h-11 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-base shadow-xs">
+              <div className="w-11 h-11 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-base">
                 {userProfile?.displayName?.[0] || 'B'}
               </div>
               <div className="overflow-hidden">
@@ -853,7 +852,7 @@ export default function App() {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => setPublicHandle('billionaire_demo')}
               className="w-full py-2 bg-gray-100 text-[#0A0A0A] font-bold text-xs rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
             >
@@ -873,7 +872,7 @@ export default function App() {
         </aside>
 
         {/* Center Main App Content Container */}
-        <div className="flex-1 min-w-0 bg-white lg:rounded-2xl lg:shadow-xs lg:border lg:border-gray-200 min-h-screen lg:min-h-[850px] overflow-hidden flex flex-col max-w-md lg:max-w-none mx-auto lg:mx-0 shadow-2xl lg:shadow-none w-full">
+        <div className="flex-1 min-w-0 bg-white min-h-screen lg:min-h-[850px] overflow-hidden flex flex-col max-w-md lg:max-w-none mx-auto lg:mx-0 shadow-2xl lg:shadow-none w-full">
           {/* Mobile Header (Hidden on Desktop) */}
           <div className="lg:hidden">
             {renderHeader()}
