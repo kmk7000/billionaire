@@ -404,7 +404,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         {viewMode === 'list' && (
           <button
             onClick={() => setViewMode('map')}
-            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-accent text-accent text-sm font-medium"
+            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-primary text-primary text-sm font-medium"
           >
             <ChevronDown className="w-4 h-4" />
             地図
