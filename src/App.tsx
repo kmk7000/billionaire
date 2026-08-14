@@ -740,9 +740,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F6F8] lg:bg-[#F2F2F2] text-[#141A21]">
+    <div className="min-h-screen bg-canvas text-ink">
       {/* Desktop Web Header Bar (Remember Web Style) */}
-      <header className="hidden lg:block w-full bg-[#0A0A0A] sticky top-0 z-40">
+      <header className="hidden lg:block w-full bg-primary sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('today')}>
@@ -773,9 +773,9 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as Tab)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors duration-200 ${
                     isActive
-                      ? 'bg-white text-[#0A0A0A]'
+                      ? 'bg-surface text-primary'
                       : 'text-gray-300 hover:bg-white/10 hover:text-white'
                   }`}
                 >
@@ -790,7 +790,7 @@ export default function App() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={handleOpenMeishiCamera}
-              className="flex items-center gap-1.5 px-3 py-2 bg-white text-[#0A0A0A] font-bold text-xs rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 bg-surface text-primary font-bold text-xs rounded-lg hover:bg-primary-soft transition-colors duration-200"
             >
               <Plus className="w-4 h-4" />
               名刺登録
@@ -801,7 +801,7 @@ export default function App() {
                 setActiveTab('community');
                 communityWrite.open(selectedCommunityBoard);
               }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#C9483B] text-white font-bold text-xs rounded-lg hover:bg-[#B03A2E] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 bg-accent text-white font-bold text-xs rounded-lg hover:opacity-90 transition-colors duration-200"
             >
               <PenSquare className="w-4 h-4" />
               投稿する
@@ -809,14 +809,14 @@ export default function App() {
 
             <div className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#0A0A0A] rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
             </div>
 
             <button
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/10 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-white text-[#0A0A0A] flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center font-bold text-xs">
                 {userProfile?.displayName?.[0] || 'B'}
               </div>
             </button>
@@ -829,36 +829,36 @@ export default function App() {
         {/* Desktop Left Sidebar */}
         <aside className="hidden lg:block w-64 shrink-0 space-y-4 sticky top-20">
           {/* User Profile Panel */}
-          <div className="bg-white p-4">
+          <div className="bg-surface p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-11 h-11 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-base">
+              <div className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center font-bold text-base">
                 {userProfile?.displayName?.[0] || 'B'}
               </div>
               <div className="overflow-hidden">
                 <div className="flex items-center gap-1">
-                  <h3 className="font-bold text-sm text-gray-900 truncate">
+                  <h3 className="font-bold text-sm text-ink truncate">
                     {userProfile?.displayName || 'Billionaire User'}
                   </h3>
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" title="認証済み" />
+                  <ShieldCheck className="w-4 h-4 text-success shrink-0" title="認証済み" />
                 </div>
-                <p className="text-xs text-gray-500 truncate">株式会社サンプル ・ 営業部</p>
+                <p className="text-xs text-ink-muted truncate">株式会社サンプル ・ 営業部</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-center py-2 px-1 bg-gray-50 rounded-lg text-xs font-medium text-gray-600 mb-3">
+            <div className="grid grid-cols-2 gap-2 text-center py-2 px-1 bg-canvas rounded-lg text-xs font-medium text-ink-muted mb-3">
               <div>
-                <p className="text-[10px] text-gray-400">登録名刺</p>
-                <p className="font-bold text-gray-900">{meishis.length}枚</p>
+                <p className="text-[10px] text-ink-faint">登録名刺</p>
+                <p className="font-bold text-ink">{meishis.length}枚</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400">コミュニティ</p>
-                <p className="font-bold text-gray-900">{posts.length}件</p>
+                <p className="text-[10px] text-ink-faint">コミュニティ</p>
+                <p className="font-bold text-ink">{posts.length}件</p>
               </div>
             </div>
 
             <button
               onClick={() => setPublicHandle('billionaire_demo')}
-              className="w-full py-2 bg-gray-100 text-[#0A0A0A] font-bold text-xs rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-primary-soft text-primary font-bold text-xs rounded-lg hover:bg-line transition-colors duration-200 flex items-center justify-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
               マイ公開デジタル名刺 URL
@@ -876,9 +876,9 @@ export default function App() {
         </aside>
 
         {/* Center Main App Content Container */}
-        <div className="flex-1 min-w-0 bg-white min-h-screen lg:min-h-[850px] overflow-hidden flex flex-col max-w-md lg:max-w-none mx-auto lg:mx-0 shadow-2xl lg:shadow-none w-full">
+        <div className="flex-1 min-w-0 bg-surface min-h-screen lg:min-h-[850px] overflow-hidden flex flex-col max-w-md lg:max-w-none mx-auto lg:mx-0 shadow-2xl lg:shadow-none w-full">
           {/* Mobile Header (Hidden on Desktop) — pt-safe clears the notch/Dynamic Island in the native app shell */}
-          <div className="lg:hidden pt-safe bg-white">
+          <div className="lg:hidden pt-safe bg-surface">
             {renderHeader()}
           </div>
 

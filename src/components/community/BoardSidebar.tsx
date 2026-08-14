@@ -8,14 +8,14 @@ interface BoardSidebarProps {
 }
 
 export const BoardSidebar: React.FC<BoardSidebarProps> = ({ selectedBoard, onSelectBoard }) => (
-  <div className="bg-white p-3 space-y-1">
-    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 py-1">
+  <div className="bg-surface p-3 space-y-1">
+    <p className="text-[11px] font-bold text-ink-faint uppercase tracking-wider px-3 py-1">
       関心事・テーマ
     </p>
     <button
       onClick={() => onSelectBoard('all')}
       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-        selectedBoard === 'all' ? 'bg-[#0A0A0A] text-white' : 'text-gray-700 hover:bg-gray-100'
+        selectedBoard === 'all' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-primary-soft'
       }`}
     >
       <div className="flex items-center gap-2.5">
@@ -29,7 +29,7 @@ export const BoardSidebar: React.FC<BoardSidebarProps> = ({ selectedBoard, onSel
         key={board.id}
         onClick={() => onSelectBoard(board.id)}
         className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-          selectedBoard === board.id ? 'bg-[#0A0A0A] text-white' : 'text-gray-700 hover:bg-gray-100'
+          selectedBoard === board.id ? 'bg-primary text-white' : 'text-ink-muted hover:bg-primary-soft'
         }`}
       >
         <span>{getCommunityBoardLabel(board.id)}</span>
