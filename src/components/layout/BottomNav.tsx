@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Contact, Share2, Users, Mail, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { Home, IdCard, Share2, Users, Mail, MessageSquare, MoreHorizontal } from 'lucide-react';
 import type { Tab } from '../../types/app';
 
 interface BottomNavProps {
@@ -23,7 +23,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab, is
         onClick={() => onChangeTab('meishi')}
         className={`flex flex-col items-center gap-1 flex-1 py-1 ${activeTab === 'meishi' ? 'text-gray-900' : 'text-gray-400'}`}
       >
-        <Contact className="w-6 h-6" />
+        <IdCard className="w-6 h-6" />
         <span className="text-[10px] font-medium">名刺帳</span>
       </button>
       <button

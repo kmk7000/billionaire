@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Mail, Loader2, Check, Home, Contact, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
+import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Mail, Loader2, Check, Home, IdCard, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, signInWithCredential, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, createUserWithEmailAndPassword, signInWithEmailAndPassword, User as FirebaseUser } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
@@ -784,7 +784,7 @@ export default function App() {
           <nav className="flex items-center gap-1 font-bold text-sm">
             {[
               { id: 'community', label: 'コミュニティ', icon: Share2 },
-              { id: 'meishi', label: '名刺/ネットワーク', icon: Contact },
+              { id: 'meishi', label: '名刺/ネットワーク', icon: IdCard },
               { id: 'today', label: 'トゥデイ', icon: Home },
             ].map((item) => {
               const Icon = item.icon;
@@ -1490,7 +1490,7 @@ export default function App() {
           >
             <div className="relative w-64 h-40 border-2 border-white/20 rounded-lg overflow-hidden mb-8 bg-gray-900/50">
               <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                <Contact className="w-20 h-20" />
+                <IdCard className="w-20 h-20" />
               </div>
               <motion.div 
                 animate={{ top: ['0%', '100%', '0%'] }}
