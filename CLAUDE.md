@@ -87,6 +87,8 @@ src/
    - **푸시 발송 서버**: 지금은 클라이언트가 기기 토큰을 저장하는 부분까지만 되어 있고, 실제로 알림을 "보내는" 쪽(Firebase Cloud Messaging 연동, 커뮤니티 좋아요/댓글 시 서버에서 발송)은 아직 없음 — 별도 작업 필요.
    - **LINE 로그인**: `server.ts`의 `/api/auth/line/url` 콜백은 배포된 HTTPS 서버가 있어야 네이티브 앱에서도 동작한다(로컬호스트로는 불가) — 서버 배포가 선행되어야 함.
    - 명함 스캔은 기존 `getUserMedia` 기반 커스텀 카메라 UI를 그대로 재사용 중이며(Capacitor 네이티브 셸 안에서는 카메라 권한이 PWA와 달리 앱 단위로 영구 저장되므로 이것만으로도 안정성 문제가 크게 개선됨), `@capacitor/camera` 플러그인으로 교체하는 건 필요해지면 나중에 고려.
+9. **디자인 토큰 시스템** — 색상/그림자/radius 토큰이 `src/index.css`의 Tailwind 4 `@theme` 블록에 정의되어 있다(`ink`/`ink-muted`/`ink-faint`/`line`/`surface`/`canvas`/`primary`/`primary-soft`/`accent`(朱色)/`success`/`warning`/`danger`). 새 UI는 반드시 이 토큰 클래스(`text-ink`, `bg-canvas` 등)를 쓰고 `gray-*`/`bg-white`/`bg-black`/hex 하드코딩을 금지. 구 `src/constants/theme.ts`는 삭제됨.
+10. **스텁/빈 기능 정리 완료 (2026-08)** — 검색(`SearchOverlay`: 명함+커뮤니티 통합, 모바일 3개 헤더+데스크톱 헤더 연결), 알림 패널(`NotificationsPanel`: 정직한 빈 상태, 가짜 배지 제거), 명함 상세 메모(Firestore `meishi.memo`)와 tel/sms/mailto 액션, 이메일 실제 가입(createUserWithEmailAndPassword), 프로필 완성도(로컬 토글 → 실데이터 파생), 프로필 사진 업로드(리사이즈 후 users.photoURL에 dataURL 저장), 마이프로필 投稿 탭(내 게시글 목록). 가짜 데이터(팔로워 128/129, 가짜 제안 배너, 목 트렌딩, 가짜 커뮤니티 카테고리 탭) 제거됨. **아직 스텁인 것**: チーム名刺帳/グループ連絡先(準備中), 프로필 履歴書管理/お知らせ 탭(準備中です), 알림 백엔드, 공개 명함 핸들(`billionaire_demo` 하드코딩 — 유저별 핸들 미구현).
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 
