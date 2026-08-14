@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Briefcase, Plus, Search, Loader2, Check, ArrowLeft, ChevronDown, X, MapPin, AlertCircle, Target, RefreshCw, Minus, ChevronUp, Building2, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleMap, useJsApiLoader, InfoWindow, Circle, OverlayView } from '@react-google-maps/api';
+// The functional (…F) variants clean themselves up correctly; the class
+// versions leak an instance under StrictMode's double-mount, which left a
+// stale radius circle behind at the previous centre.
+import { GoogleMap, useJsApiLoader, InfoWindowF, CircleF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import type { Meishi } from '../../types/app';
 import { buildGeocodeQuery, geocodeSequentially } from '../../services/geocodeService';
 
@@ -405,7 +408,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
               if (newCenter) setMapCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
             }}
           >
-            <Circle
+            <CircleF
               center={mapCenter}
               radius={radius}
               options={{
@@ -423,7 +426,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                 collided badly once several cards shared an area. */}
             {pins.map((group) => (
               <React.Fragment key={group.key}>
-              <OverlayView
+              <OverlayViewF
                 position={{ lat: group.lat, lng: group.lng }}
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               >
@@ -450,12 +453,12 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                     )}
                   </span>
                 </button>
-              </OverlayView>
+              </OverlayViewF>
               </React.Fragment>
             ))}
 
             {selectedGroup && (
-              <InfoWindow
+              <InfoWindowF
                 position={{ lat: selectedGroup.lat, lng: selectedGroup.lng }}
                 onCloseClick={() => setSelectedGroup(null)}
               >
@@ -472,7 +475,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                     </button>
                   ))}
                 </div>
-              </InfoWindow>
+              </InfoWindowF>
             )}
           </GoogleMap>
         ) : (
@@ -498,12 +501,10 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           </div>
         )}
 
-        {/* Centre crosshair marking the search origin */}
+        {/* Centre marker for the search origin: a plain thin cross, with no
+            ring around it so it can't be mistaken for the radius circle. */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <div className="w-16 h-16 rounded-full border-2 border-primary/30 bg-primary/5 flex items-center justify-center">
-            <div className="w-1 h-4 bg-primary/40 absolute" />
-            <div className="h-1 w-4 bg-primary/40 absolute" />
-          </div>
+          <Plus className="w-6 h-6 text-primary/50" strokeWidth={1} />
         </div>
 
         <div className="absolute top-4 left-4 z-[1000]">
