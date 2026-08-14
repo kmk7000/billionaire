@@ -6,6 +6,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import SimpleLoginSettings from '../SimpleLoginSettings';
+import { InquiryPage } from './InquiryPage';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
 
 interface SettingsModalsProps {
@@ -79,7 +80,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 </div>
                 <span className="text-[11px] font-bold text-gray-700">ヘルプ</span>
               </button>
-              <button className="flex flex-col items-center gap-2">
+              <button
+                onClick={() => { s.closeMorePage(); s.openInquiry(); }}
+                className="flex flex-col items-center gap-2"
+              >
                 <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center">
                   <Headset className="w-6 h-6 text-gray-700" />
                 </div>
@@ -649,5 +653,12 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
         />
       )}
     </AnimatePresence>
+
+    <InquiryPage
+      isOpen={s.isInquiryOpen}
+      onClose={s.closeInquiry}
+      user={user}
+      onOpenAccountManagement={() => { s.closeInquiry(); s.openAccountManagement(); }}
+    />
   </>
 );

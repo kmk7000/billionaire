@@ -191,6 +191,28 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
     }
 
+    // 1:1 support inquiries. Screenshots live in an attachments subcollection
+    // rather than on the inquiry itself: this project has no Cloud Storage, so
+    // images are inlined as data URLs and several of them would blow past
+    // Firestore's 1MB per-document ceiling if kept in one doc.
+    match /inquiries/{inquiryId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() &&
+        hasRequiredFields(['userId', 'email', 'body']) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.body is string &&
+        request.resource.data.body.size() > 0 &&
+        request.resource.data.body.size() <= 5000;
+      allow update: if isAdmin();
+
+      match /attachments/{attachmentId} {
+        allow read: if isAuthenticated() &&
+          (get(/databases/$(database)/documents/inquiries/$(inquiryId)).data.userId == request.auth.uid || isAdmin());
+        allow create: if isAuthenticated() &&
+          get(/databases/$(database)/documents/inquiries/$(inquiryId)).data.userId == request.auth.uid;
+      }
+    }
+
     match /reports/{reportId} {
       allow read: if isAuthenticated() && (resource.data.reporterId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() && hasRequiredFields(['reporterId', 'targetType', 'targetId', 'reason']) &&

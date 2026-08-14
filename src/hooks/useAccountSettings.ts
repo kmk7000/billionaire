@@ -21,6 +21,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
   const [isPasswordResetSuccessOpen, setIsPasswordResetSuccessOpen] = useState(false);
   const [isPasswordResetErrorOpen, setIsPasswordResetErrorOpen] = useState(false);
   const [isSimpleLoginSettingsOpen, setIsSimpleLoginSettingsOpen] = useState(false);
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
@@ -145,6 +146,9 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
     }
   };
 
+  const openInquiry = () => setIsInquiryOpen(true);
+  const closeInquiry = () => setIsInquiryOpen(false);
+
   const openSimpleLoginSettings = () => setIsSimpleLoginSettingsOpen(true);
   const closeSimpleLoginSettings = () => setIsSimpleLoginSettingsOpen(false);
 
@@ -160,6 +164,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
     isPasswordResetSuccessOpen, closePasswordResetSuccess,
     isPasswordResetErrorOpen, closePasswordResetError,
     isSimpleLoginSettingsOpen, openSimpleLoginSettings, closeSimpleLoginSettings,
+    isInquiryOpen, openInquiry, closeInquiry,
     currentPassword, setCurrentPassword,
     password, setPassword,
     confirmPassword, setConfirmPassword,
