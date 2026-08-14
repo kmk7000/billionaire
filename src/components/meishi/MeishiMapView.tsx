@@ -51,7 +51,9 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
 
   // Group pins by company (default) or show one pin per person.
   const [groupByCompany, setGroupByCompany] = useState(true);
-  const [isListOpen, setIsListOpen] = useState(false);
+  // The list is a full page, not an overlay, so the map and list are two
+  // modes of the same screen rather than one stacked on the other.
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
 
   // Coordinates resolved during this session, before the parent persists them.
   const [resolvedCoords, setResolvedCoords] = useState<Record<string, { lat: number; lng: number }>>({});
@@ -155,11 +157,16 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
+  /** Cards inside the radius, nearest first, each with its distance. */
   const meishisInRadius = useMemo(() => {
-    return mappableMeishis.filter(
-      (m) => getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng) <= radius
-    );
+    return mappableMeishis
+      .map((m) => ({ ...m, distance: getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng) }))
+      .filter((m) => m.distance <= radius)
+      .sort((a, b) => a.distance - b.distance);
   }, [mappableMeishis, mapCenter, radius]);
+
+  const formatDistance = (metres: number) =>
+    metres >= 1000 ? `${(metres / 1000).toFixed(1)}km` : `${Math.round(metres)}m`;
 
   /**
    * Pins to draw. In company mode colleagues at one address collapse into a
@@ -305,7 +312,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
     setLocationName(meishi.company || meishi.name);
     setZoom(17);
     setIsLocationSearchOpen(false);
-    setIsListOpen(false);
+    setViewMode('map');
     setSearchQuery("");
   };
 
@@ -337,15 +344,15 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
       </div>
 
       {/* Filters Bar */}
-      <div className="flex justify-between items-center px-4 py-2 bg-canvas border-b border-line relative z-20">
+      <div className="flex justify-between items-center gap-2 px-4 py-2 bg-canvas border-b border-line relative z-20">
         <button
           onClick={() => setIsLocationSearchOpen(true)}
-          className="flex items-center gap-1 text-sm font-medium text-ink-muted max-w-[50%] truncate"
+          className="flex items-center gap-1 text-sm font-medium text-ink-muted min-w-0 flex-1"
         >
           <span className="truncate">{locationName}</span>
           <ChevronDown className="w-4 h-4 text-ink-faint shrink-0" />
         </button>
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             onClick={() => setIsRadiusDropdownOpen(!isRadiusDropdownOpen)}
             className="flex items-center gap-1 text-sm font-medium text-ink-muted"
@@ -392,10 +399,63 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
             )}
           </AnimatePresence>
         </div>
+
+        {/* Switch back to the map from the list page */}
+        {viewMode === 'list' && (
+          <button
+            onClick={() => setViewMode('map')}
+            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-accent text-accent text-sm font-medium"
+          >
+            <ChevronDown className="w-4 h-4" />
+            地図
+          </button>
+        )}
       </div>
 
+      {/* List page: full screen, not an overlay on the map */}
+      {viewMode === 'list' && (
+        <div className="flex-1 overflow-y-auto bg-surface min-h-0">
+          {meishisInRadius.length === 0 ? (
+            <div className="h-full flex items-center justify-center px-8">
+              <p className="text-ink-faint text-[15px]">検索結果がありません。</p>
+            </div>
+          ) : (
+            meishisInRadius.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => onSelectMeishi?.(m)}
+                className="w-full flex items-start gap-4 px-5 py-5 text-left hover:bg-canvas transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-[17px] font-bold text-ink truncate">{m.name}</h3>
+                    <span className="text-[13px] font-medium text-accent shrink-0">
+                      {formatDistance(m.distance)}
+                    </span>
+                  </div>
+                  <p className="text-[14px] text-ink-muted mt-1 truncate">
+                    {[m.position, m.department].filter(Boolean).join(' / ')}
+                  </p>
+                  <p className="text-[14px] text-ink-muted truncate">{m.company}</p>
+                </div>
+                {m.imageUrl && (
+                  <div className="w-[104px] h-[64px] rounded-md overflow-hidden bg-canvas border border-line shrink-0">
+                    <img
+                      src={m.imageUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+
       {/* Map Area */}
-      <div className="flex-1 relative bg-canvas overflow-hidden z-0 w-full h-full min-h-0">
+      <div className={`flex-1 relative bg-canvas overflow-hidden z-0 w-full h-full min-h-0 ${viewMode === 'list' ? 'hidden' : ''}`}>
         {isLoaded && !loadError && apiKey ? (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
@@ -562,7 +622,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           </button>
         </div>
 
-        {/* Bottom Right: pin grouping toggle + list sheet */}
+        {/* Bottom Right: pin grouping toggle + switch to the list page */}
         <div className="absolute bottom-6 right-4 flex gap-3 z-[1000]">
           <button
             onClick={() => setGroupByCompany((prev) => !prev)}
@@ -576,7 +636,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
             {groupByCompany ? '会社' : '個人'}
           </button>
           <button
-            onClick={() => setIsListOpen(true)}
+            onClick={() => setViewMode('list')}
             className="bg-surface px-5 py-3 rounded-xl shadow-xl border border-primary flex items-center gap-2 text-sm font-bold text-ink active:scale-95 transition-transform"
           >
             <ChevronUp className="w-5 h-5 text-primary" />
@@ -587,9 +647,10 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
       </div>
 
       {/* Footer status: reports what is actually on the map right now.
-          Kept at a low z-index so the list sheet and location search modal
-          layer above it instead of being clipped by it. */}
-      <div className="px-4 py-3 bg-surface flex items-center justify-between border-t border-line shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-20 gap-3">
+          Kept at a low z-index so the location search modal layers above it
+          instead of being clipped by it. The list page carries its own
+          empty/へ count copy, so the bar is map-only. */}
+      <div className={`px-4 py-3 bg-surface flex items-center justify-between border-t border-line shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-20 gap-3 ${viewMode === 'list' ? 'hidden' : ''}`}>
         <div className="min-w-0">
           <p className="text-xs text-ink-muted font-medium">
             {isGeocoding
@@ -613,74 +674,6 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           住所を再取得
         </button>
       </div>
-
-      {/* List sheet: the meishis currently inside the search radius */}
-      <AnimatePresence>
-        {isListOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-ink/40 z-[75]"
-              onClick={() => setIsListOpen(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-              className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface rounded-t-2xl z-[80] max-h-[70vh] flex flex-col pb-safe"
-            >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-line">
-                <h2 className="text-base font-bold text-ink">
-                  この周辺の名刺 <span className="text-primary">{meishisInRadius.length}</span>
-                </h2>
-                <button aria-label="閉じる" onClick={() => setIsListOpen(false)} className="p-1 -mr-1 text-ink-muted">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto">
-                {meishisInRadius.length === 0 ? (
-                  <div className="py-16 text-center">
-                    <p className="text-sm text-ink-faint">
-                      この範囲に名刺がありません。<br />半径を広げるか、地図を移動してください。
-                    </p>
-                  </div>
-                ) : (
-                  meishisInRadius.map((m) => (
-                    <div key={m.id} className="flex items-center gap-3 px-5 py-3 border-b border-line">
-                      <div className="w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center shrink-0">
-                        <Briefcase className="w-5 h-5 text-ink-muted" />
-                      </div>
-                      <button
-                        onClick={() => onSelectMeishi?.(m)}
-                        className="flex-1 min-w-0 text-left"
-                      >
-                        <p className="text-sm font-bold text-ink truncate">{m.name}</p>
-                        <p className="text-xs text-ink-muted truncate">
-                          {[m.position, m.company].filter(Boolean).join(' / ')}
-                        </p>
-                        <p className="text-[10px] text-ink-faint truncate">
-                          約{Math.round(getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng))}m
-                        </p>
-                      </button>
-                      <button
-                        onClick={() => focusOnMeishi(m)}
-                        aria-label="地図で表示"
-                        className="p-2 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors shrink-0"
-                      >
-                        <MapPin className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Location Search Modal */}
       <AnimatePresence>
