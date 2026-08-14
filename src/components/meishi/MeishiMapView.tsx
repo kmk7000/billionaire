@@ -1,16 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Search, Loader2, Check, ArrowLeft, ChevronDown, X, MapPin, AlertCircle, Target, RefreshCw, Minus, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Briefcase, Plus, Search, Loader2, Check, ArrowLeft, ChevronDown, X, MapPin, AlertCircle, Target, RefreshCw, Minus, ChevronUp, Building2, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleMap, useJsApiLoader, Marker as GoogleMarker, InfoWindow, Circle } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, InfoWindow, Circle, OverlayView } from '@react-google-maps/api';
 import type { Meishi } from '../../types/app';
+import { buildGeocodeQuery, geocodeSequentially } from '../../services/geocodeService';
 
 export const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
-export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> = ({ onBack, meishis }) => {
-  const [mapCenter, setMapCenter] = useState({ lat: 35.6894, lng: 139.6917 }); // Tokyo Metropolitan Government Building
+const TOKYO_METROPOLITAN_GOVERNMENT = { lat: 35.6894, lng: 139.6917 };
+
+/** A meishi that has real coordinates and can therefore be drawn. */
+type MappableMeishi = Meishi & { lat: number; lng: number };
+
+/** Several colleagues share one address, so pins are grouped per company. */
+interface CompanyGroup {
+  key: string;
+  company: string;
+  lat: number;
+  lng: number;
+  members: MappableMeishi[];
+}
+
+interface MeishiMapViewProps {
+  onBack: () => void;
+  meishis: Meishi[];
+  /** Persist a resolved address so it is only ever geocoded once. */
+  onGeocoded?: (id: string, lat: number, lng: number) => void;
+  /** Open the full card detail from a pin or the list sheet. */
+  onSelectMeishi?: (meishi: Meishi) => void;
+}
+
+export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
+  onBack, meishis, onGeocoded, onSelectMeishi,
+}) => {
+  const [mapCenter, setMapCenter] = useState(TOKYO_METROPOLITAN_GOVERNMENT);
   const [zoom, setZoom] = useState(15);
-  const [selectedMeishi, setSelectedMeishi] = useState<Meishi | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<CompanyGroup | null>(null);
   const [radius, setRadius] = useState<number>(500);
   const [isRadiusDropdownOpen, setIsRadiusDropdownOpen] = useState(false);
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
@@ -19,121 +44,187 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
   const [searchQuery, setSearchQuery] = useState("");
   const [addressResults, setAddressResults] = useState<google.maps.places.AutocompletePrediction[]>([]);
   const [meishiResults, setMeishiResults] = useState<Meishi[]>([]);
+  const [placesError, setPlacesError] = useState<string | null>(null);
 
-  // 현재 위치 가져오기
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setMapCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.warn("Error getting current location, using default (Tokyo):", error);
-          // 기본 위치(도쿄도청) 유지
-          setMapCenter({ lat: 35.6894, lng: 139.6917 });
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    }
-  }, []);
+  // Group pins by company (default) or show one pin per person.
+  const [groupByCompany, setGroupByCompany] = useState(true);
+  const [isListOpen, setIsListOpen] = useState(false);
+
+  // Coordinates resolved during this session, before the parent persists them.
+  const [resolvedCoords, setResolvedCoords] = useState<Record<string, { lat: number; lng: number }>>({});
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [geocodeFailures, setGeocodeFailures] = useState(0);
+  // Cards we already attempted this session, so a retry press doesn't loop.
+  const attemptedRef = useRef<Set<string>>(new Set());
+
+  // @types/react isn't installed, so hooks infer as `any`. Take an
+  // explicitly typed handle on the list to keep the logic below type-checked.
+  const meishiList: Meishi[] = meishis;
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
-
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey,
-    libraries: GOOGLE_MAPS_LIBRARIES
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
-  const meishisWithCoords = React.useMemo(() => {
-    return meishis.map((m, i) => ({
-      ...m,
-      lat: m.lat || 35.6894 + (Math.random() - 0.5) * 0.005,
-      lng: m.lng || 139.6917 + (Math.random() - 0.5) * 0.005,
-    }));
-  }, [meishis]);
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setMapCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationName("現在地");
+      },
+      (error) => {
+        console.warn("Error getting current location, using default (Tokyo):", error);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, []);
 
-  // Haversine formula to calculate distance between two points in meters
+  /**
+   * Only cards with real coordinates go on the map. Previously missing
+   * coordinates were faked with Math.random() around Tokyo, which put every
+   * pin in the wrong place and moved them on each re-render.
+   */
+  const mappableMeishis = useMemo(() => {
+    const list: MappableMeishi[] = [];
+    meishiList.forEach((m) => {
+      const coords = m.lat && m.lng ? { lat: m.lat, lng: m.lng } : resolvedCoords[m.id];
+      if (coords) list.push({ ...m, lat: coords.lat, lng: coords.lng });
+    });
+    return list;
+  }, [meishiList, resolvedCoords]);
+
+  /** Cards with an address we haven't managed to place yet. */
+  const pendingGeocode = useMemo(() => {
+    return meishiList.filter(
+      (m) =>
+        !(m.lat && m.lng) &&
+        !resolvedCoords[m.id] &&
+        buildGeocodeQuery(m.address, m.detailedAddress).length > 0
+    );
+  }, [meishiList, resolvedCoords]);
+
+  /** Cards that can never be mapped because the card carries no address. */
+  const withoutAddress = useMemo(
+    () =>
+      meishiList.filter(
+        (m) => !(m.lat && m.lng) && !resolvedCoords[m.id] && !buildGeocodeQuery(m.address, m.detailedAddress)
+      ).length,
+    [meishiList, resolvedCoords]
+  );
+
+  const runGeocoding = useCallback(async () => {
+    const todo: Meishi[] = pendingGeocode.filter((m: Meishi) => !attemptedRef.current.has(m.id));
+    if (todo.length === 0 || isGeocoding) return;
+
+    setIsGeocoding(true);
+    todo.forEach((m) => attemptedRef.current.add(m.id));
+
+    const { failed } = await geocodeSequentially<Meishi>(
+      todo,
+      (m) => buildGeocodeQuery(m.address, m.detailedAddress),
+      (m, coords) => {
+        setResolvedCoords((prev) => ({ ...prev, [m.id]: coords }));
+        onGeocoded?.(m.id, coords.lat, coords.lng);
+      }
+    );
+
+    setGeocodeFailures(failed);
+    setIsGeocoding(false);
+  }, [pendingGeocode, isGeocoding, onGeocoded]);
+
+  // Place any un-geocoded addresses as soon as the SDK is ready.
+  useEffect(() => {
+    if (isLoaded && !loadError) void runGeocoding();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, loadError, meishis.length]);
+
+  // Haversine distance in metres.
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371e3; // metres
-    const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // in metres
+    const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  const filteredMeishis = React.useMemo(() => {
-    return meishisWithCoords.filter(m => {
-      if (!m.lat || !m.lng) return false;
-      const dist = getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng);
-      return dist <= radius;
-    });
-  }, [meishisWithCoords, mapCenter, radius]);
+  const meishisInRadius = useMemo(() => {
+    return mappableMeishis.filter(
+      (m) => getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng) <= radius
+    );
+  }, [mappableMeishis, mapCenter, radius]);
 
-  const mapContainerStyle = {
-    width: '100%',
-    height: '100%',
-    minHeight: '400px'
-  };
+  /**
+   * Pins to draw. In company mode colleagues at one address collapse into a
+   * single pin with a count, which stops markers stacking exactly on top of
+   * each other and hiding one another.
+   */
+  const pins = useMemo<CompanyGroup[]>(() => {
+    if (!groupByCompany) {
+      return meishisInRadius.map((m) => ({
+        key: m.id,
+        company: m.name || m.company || '名称未設定',
+        lat: m.lat,
+        lng: m.lng,
+        members: [m],
+      }));
+    }
 
-  const mapOptions = {
-    disableDefaultUI: true,
-    zoomControl: false,
-    gestureHandling: 'greedy',
-    styles: [
-      {
-        featureType: "poi",
-        elementType: "labels",
-        stylers: [{ visibility: "off" }]
-      },
-      {
-        featureType: "transit",
-        elementType: "labels",
-        stylers: [{ visibility: "off" }]
+    const groups = new Map<string, CompanyGroup>();
+    meishisInRadius.forEach((m) => {
+      const company = m.company || '会社名なし';
+      const existing = groups.get(company);
+      if (existing) {
+        existing.members.push(m);
+      } else {
+        groups.set(company, { key: company, company, lat: m.lat, lng: m.lng, members: [m] });
       }
-    ]
-  };
+    });
+    return [...groups.values()];
+  }, [meishisInRadius, groupByCompany]);
 
-  const handleSearchArea = () => {
-    setIsSearching(true);
-    setTimeout(() => setIsSearching(false), 1500);
-  };
+  // Keep the open InfoWindow in sync when the underlying pins change.
+  useEffect(() => {
+    if (!selectedGroup) return;
+    const stillVisible = pins.find((p) => p.key === selectedGroup.key);
+    setSelectedGroup(stillVisible ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pins]);
 
   const handleCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setMapCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setLocationName("現在地");
-          setZoom(15);
-        },
-        (error) => {
-          console.warn("Error getting current location:", error);
-          alert("現在地を取得できませんでした。位置情報へのアクセスが許可されているか確認してください。");
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
+    if (!navigator.geolocation) {
       alert("お使いのブラウザは位置情報機能をサポートしていません。");
+      return;
     }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setMapCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationName("現在地");
+        setZoom(15);
+      },
+      () => alert("現在地を取得できませんでした。位置情報へのアクセスが許可されているか確認してください。"),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
-  const [placesError, setPlacesError] = useState<string | null>(null);
+  /** Re-centre on wherever the map is now, and retry any unplaced addresses. */
+  const handleSearchArea = async () => {
+    if (mapInstance) {
+      const center = mapInstance.getCenter();
+      if (center) {
+        setMapCenter({ lat: center.lat(), lng: center.lng() });
+        setLocationName("この地図の範囲");
+      }
+    }
+    attemptedRef.current.clear();
+    await runGeocoding();
+  };
 
-  // Google Places Autocomplete Search
+  // Places autocomplete for the "change base location" sheet.
   useEffect(() => {
     if (!isLoaded || !searchQuery.trim()) {
       setAddressResults([]);
@@ -143,40 +234,38 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
     }
 
     const timer = setTimeout(() => {
-      // Search Meishis
       const lowerQuery = searchQuery.toLowerCase();
-      const filteredMeishis = meishisWithCoords.filter(m => 
-        m.company?.toLowerCase().includes(lowerQuery) || 
-        m.name.toLowerCase().includes(lowerQuery) ||
-        m.address?.toLowerCase().includes(lowerQuery)
+      setMeishiResults(
+        mappableMeishis.filter(
+          (m) =>
+            m.company?.toLowerCase().includes(lowerQuery) ||
+            m.name.toLowerCase().includes(lowerQuery) ||
+            m.address?.toLowerCase().includes(lowerQuery)
+        )
       );
-      setMeishiResults(filteredMeishis);
 
-      // Search Addresses
       try {
         if (!window.google?.maps?.places) {
           setPlacesError("Places APIが読み込まれていません。");
           return;
         }
-        const autocompleteService = new window.google.maps.places.AutocompleteService();
-        autocompleteService.getPlacePredictions(
+        new window.google.maps.places.AutocompleteService().getPlacePredictions(
           { input: searchQuery, componentRestrictions: { country: 'jp' } },
           (predictions, status) => {
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            const S = window.google.maps.places.PlacesServiceStatus;
+            if (status === S.OK && predictions) {
               setAddressResults(predictions);
               setPlacesError(null);
-            } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+            } else if (status === S.ZERO_RESULTS) {
               setAddressResults([]);
               setPlacesError(null);
             } else {
               setAddressResults([]);
-              if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-                setPlacesError("Google Cloud Consoleで「Places API」を有効にしてください。");
-              } else if (status === window.google.maps.places.PlacesServiceStatus.UNKNOWN_ERROR) {
-                setPlacesError("Places APIが有効になっていない可能性があります。Google Cloud Consoleを確認してください。");
-              } else {
-                setPlacesError(`検索エラーが発生しました (${status})`);
-              }
+              setPlacesError(
+                status === S.REQUEST_DENIED
+                  ? "Google Cloud Consoleで「Places API」を有効にしてください。"
+                  : `検索エラーが発生しました (${status})`
+              );
             }
           }
         );
@@ -184,38 +273,48 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
         console.error("Error in Places Autocomplete:", err);
         setPlacesError("検索中にエラーが発生しました。");
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, isLoaded, meishisWithCoords]);
+  }, [searchQuery, isLoaded, mappableMeishis]);
 
   const handleSelectAddress = (placeId: string, mainText: string) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ placeId: placeId }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+    new google.maps.Geocoder().geocode({ placeId }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
         const location = results[0].geometry.location;
         setMapCenter({ lat: location.lat(), lng: location.lng() });
-        setLocationName(mainText); // Use main text directly as name
+        setLocationName(mainText);
         setIsLocationSearchOpen(false);
         setSearchQuery("");
+      } else if (
+        status === google.maps.GeocoderStatus.REQUEST_DENIED ||
+        status === google.maps.GeocoderStatus.UNKNOWN_ERROR
+      ) {
+        alert("Geocoding APIが有効になっていません。Google Cloud Consoleで「Geocoding API」を有効にしてください。");
       } else {
-        if (status === google.maps.GeocoderStatus.REQUEST_DENIED || status === google.maps.GeocoderStatus.UNKNOWN_ERROR) {
-          alert("Geocoding APIが有効になっていません。Google Cloud Consoleで「Geocoding API」を有効にしてください。");
-        } else {
-          alert(`住所の詳細を取得できませんでした。(${status})`);
-        }
-        console.error("Geocoding error:", status);
+        alert(`住所の詳細を取得できませんでした。(${status})`);
       }
     });
   };
 
-  const handleSelectMeishiLocation = (meishi: Meishi) => {
-    if (meishi.lat && meishi.lng) {
-      setMapCenter({ lat: meishi.lat, lng: meishi.lng });
-      setLocationName(meishi.company || meishi.name);
-      setIsLocationSearchOpen(false);
-      setSearchQuery("");
-    }
+  const focusOnMeishi = (meishi: MappableMeishi) => {
+    setMapCenter({ lat: meishi.lat, lng: meishi.lng });
+    setLocationName(meishi.company || meishi.name);
+    setZoom(17);
+    setIsLocationSearchOpen(false);
+    setIsListOpen(false);
+    setSearchQuery("");
+  };
+
+  const mapContainerStyle = { width: '100%', height: '100%', minHeight: '400px' };
+  const mapOptions = {
+    disableDefaultUI: true,
+    zoomControl: false,
+    gestureHandling: 'greedy',
+    styles: [
+      { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
+    ],
   };
 
   return (
@@ -224,72 +323,64 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[60] flex flex-col max-w-md mx-auto shadow-2xl pt-safe"
+      className="fixed inset-0 bg-surface z-[60] flex flex-col max-w-md mx-auto shadow-2xl pt-safe"
     >
       {/* Header */}
-      <div className="flex items-center p-4 bg-white">
+      <div className="flex items-center p-4 bg-surface">
         <button aria-label="戻る" onClick={onBack} className="p-1 -ml-1">
-          <ArrowLeft className="w-6 h-6 text-gray-900" />
+          <ArrowLeft className="w-6 h-6 text-ink" />
         </button>
-        <h1 className="ml-4 text-lg font-bold text-gray-900">名刺地図</h1>
+        <h1 className="ml-4 text-lg font-bold text-ink">名刺地図</h1>
       </div>
 
       {/* Filters Bar */}
-      <div className="flex justify-between items-center px-4 py-2 bg-[#f5f5f5] border-b border-gray-200 relative z-20">
-        <button 
+      <div className="flex justify-between items-center px-4 py-2 bg-canvas border-b border-line relative z-20">
+        <button
           onClick={() => setIsLocationSearchOpen(true)}
-          className="flex items-center gap-1 text-sm font-medium text-gray-700 max-w-[50%] truncate"
+          className="flex items-center gap-1 text-sm font-medium text-ink-muted max-w-[50%] truncate"
         >
           <span className="truncate">{locationName}</span>
-          <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
+          <ChevronDown className="w-4 h-4 text-ink-faint shrink-0" />
         </button>
         <div className="relative">
-          <button 
+          <button
             onClick={() => setIsRadiusDropdownOpen(!isRadiusDropdownOpen)}
-            className="flex items-center gap-1 text-sm font-medium text-gray-700"
+            className="flex items-center gap-1 text-sm font-medium text-ink-muted"
           >
             <span>半径 {radius >= 1000 ? `${radius / 1000}km` : `${radius}m`}</span>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-ink-faint" />
           </button>
-          
-          {/* Radius Dropdown */}
+
           <AnimatePresence>
             {isRadiusDropdownOpen && (
               <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsRadiusDropdownOpen(false)}
-                />
+                <div className="fixed inset-0 z-40" onClick={() => setIsRadiusDropdownOpen(false)} />
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-48 bg-surface rounded-xl shadow-lg border border-line overflow-hidden z-50"
                 >
-                  {/* Triangle pointer */}
-                  <div className="absolute -top-2 right-6 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45" />
-                  
-                  <div className="relative bg-white z-10">
+                  <div className="absolute -top-2 right-6 w-4 h-4 bg-surface border-t border-l border-line transform rotate-45" />
+                  <div className="relative bg-surface z-10">
                     {[
-                      { label: '500m', value: 500 },
-                      { label: '1km', value: 1000 },
-                      { label: '2km', value: 2000 },
+                      { label: '500m', value: 500, zoom: 15 },
+                      { label: '1km', value: 1000, zoom: 14 },
+                      { label: '2km', value: 2000, zoom: 13 },
                     ].map((option) => (
                       <button
                         key={option.value}
                         onClick={() => {
                           setRadius(option.value);
                           setIsRadiusDropdownOpen(false);
-                          if (option.value === 500) setZoom(15);
-                          else if (option.value === 1000) setZoom(14);
-                          else if (option.value === 2000) setZoom(13);
+                          setZoom(option.zoom);
                         }}
-                        className={`w-full flex items-center justify-between px-4 py-3 text-left text-base hover:bg-gray-50 transition-colors ${
-                          radius === option.value ? 'text-gray-900 font-medium' : 'text-gray-700'
-                        } ${option.value !== 2000 ? 'border-b border-gray-100' : ''}`}
+                        className={`w-full flex items-center justify-between px-4 py-3 text-left text-base hover:bg-canvas transition-colors ${
+                          radius === option.value ? 'text-ink font-medium' : 'text-ink-muted'
+                        } ${option.value !== 2000 ? 'border-b border-line' : ''}`}
                       >
                         <span>{option.label}</span>
-                        {radius === option.value && <Check className="w-5 h-5 text-[#0A0A0A]" />}
+                        {radius === option.value && <Check className="w-5 h-5 text-primary" />}
                       </button>
                     ))}
                   </div>
@@ -301,7 +392,7 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
       </div>
 
       {/* Map Area */}
-      <div className="flex-1 relative bg-[#f8f8f8] overflow-hidden z-0 w-full h-full min-h-0">
+      <div className="flex-1 relative bg-canvas overflow-hidden z-0 w-full h-full min-h-0">
         {isLoaded && !loadError && apiKey ? (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
@@ -310,12 +401,8 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
             options={mapOptions}
             onLoad={(map) => setMapInstance(map)}
             onDragEnd={() => {
-              if (mapInstance) {
-                const newCenter = mapInstance.getCenter();
-                if (newCenter) {
-                  setMapCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
-                }
-              }
+              const newCenter = mapInstance?.getCenter();
+              if (newCenter) setMapCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
             }}
           >
             <Circle
@@ -323,150 +410,257 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
               radius={radius}
               options={{
                 fillColor: '#0A0A0A',
-                fillOpacity: 0.1,
+                fillOpacity: 0.08,
                 strokeColor: '#0A0A0A',
                 strokeOpacity: 0.8,
                 strokeWeight: 1,
                 clickable: false,
-                zIndex: 1
+                zIndex: 1,
               }}
             />
-            {filteredMeishis.map((m) => (
-              <GoogleMarker
-                key={m.id}
-                position={{ lat: m.lat!, lng: m.lng! }}
-                onClick={() => setSelectedMeishi(m)}
-                icon={{
-                  url: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-                  scaledSize: new google.maps.Size(30, 30),
-                }}
-                label={{
-                  text: m.company || '',
-                  className: 'bg-white px-2 py-1 rounded-full shadow-md border border-gray-200 text-[10px] font-bold text-gray-800 -translate-y-10',
-                }}
-              />
+
+            {/* Custom HTML pins: a Marker label can't be styled reliably and
+                collided badly once several cards shared an area. */}
+            {pins.map((group) => (
+              <React.Fragment key={group.key}>
+              <OverlayView
+                position={{ lat: group.lat, lng: group.lng }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={(width, height) => ({
+                  x: -(width / 2),
+                  y: -height,
+                })}
+              >
+                <button
+                  onClick={() => setSelectedGroup(group)}
+                  className="flex flex-col items-center focus:outline-none"
+                >
+                  <span className="max-w-[150px] truncate bg-surface px-2.5 py-1 rounded-full shadow-md border border-line text-[11px] font-bold text-ink">
+                    {group.company}
+                    {group.members.length > 1 && (
+                      <span className="ml-1 text-accent">{group.members.length}</span>
+                    )}
+                  </span>
+                  <span className="w-5 h-5 -mt-0.5 rounded-full bg-accent border-2 border-white shadow-md" />
+                </button>
+              </OverlayView>
+              </React.Fragment>
             ))}
 
-            {selectedMeishi && (
+            {selectedGroup && (
               <InfoWindow
-                position={{ lat: selectedMeishi.lat!, lng: selectedMeishi.lng! }}
-                onCloseClick={() => setSelectedMeishi(null)}
+                position={{ lat: selectedGroup.lat, lng: selectedGroup.lng }}
+                onCloseClick={() => setSelectedGroup(null)}
               >
-                <div className="p-1 min-w-[120px]">
-                  <p className="font-bold text-sm text-gray-900">{selectedMeishi.name}</p>
-                  <p className="text-xs text-gray-500">{selectedMeishi.company}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">{selectedMeishi.position}</p>
+                <div className="p-1 min-w-[160px] max-w-[220px]">
+                  <p className="font-bold text-sm text-gray-900 mb-1">{selectedGroup.company}</p>
+                  {selectedGroup.members.map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => onSelectMeishi?.(m)}
+                      className="w-full text-left py-1.5 border-t border-gray-100 first:border-t-0 hover:bg-gray-50"
+                    >
+                      <p className="text-xs font-medium text-gray-900">{m.name}</p>
+                      {m.position && <p className="text-[10px] text-gray-500">{m.position}</p>}
+                    </button>
+                  ))}
                 </div>
               </InfoWindow>
             )}
           </GoogleMap>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 p-8 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-canvas p-8 text-center">
             {loadError || !apiKey ? (
               <div className="max-w-xs">
-                <div className="w-16 h-16 bg-[#0A0A0A]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-[#0A0A0A]" />
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">地図の読み込みエラー</h3>
-                <p className="text-xs text-gray-500 leading-relaxed mb-4 text-left">
-                  地図を表示できません。以下の点をご確認ください：<br/><br/>
-                  1. <strong>APIキーの設定</strong>: 環境変数 <code className="bg-gray-100 px-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> が正しく設定されているか。<br/>
+                <h3 className="font-bold text-ink mb-2">地図の読み込みエラー</h3>
+                <p className="text-xs text-ink-muted leading-relaxed mb-4 text-left">
+                  地図を表示できません。以下の点をご確認ください：<br /><br />
+                  1. <strong>APIキーの設定</strong>: 環境変数 <code className="bg-primary-soft px-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> が正しく設定されているか。<br />
                   2. <strong>APIの有効化</strong>: Google Cloud Consoleで「<strong>Maps JavaScript API</strong>」が有効になっているか。
                 </p>
-                <div className="p-3 bg-white rounded-xl border border-dashed border-gray-300 text-left">
-                  <p className="text-[10px] text-gray-400 font-mono break-all">
-                    ※ ApiNotActivatedMapError が発生した場合は、Google Cloud Consoleの「APIとサービス」から「Maps JavaScript API」を有効にしてください。
-                  </p>
-                </div>
               </div>
             ) : (
               <div className="text-center">
-                <Loader2 className="w-10 h-10 animate-spin text-[#0A0A0A] mx-auto mb-4" />
-                <p className="text-sm text-gray-400 font-medium">地図を読み込んでいます...</p>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
+                <p className="text-sm text-ink-faint font-medium">地図を読み込んでいます...</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Center Search Radius Indicator (Mock) */}
+        {/* Centre crosshair marking the search origin */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <div className="w-16 h-16 rounded-full border-2 border-[#0A0A0A]/30 bg-[#0A0A0A]/5 flex items-center justify-center">
-            <div className="w-1 h-4 bg-[#0A0A0A]/40 absolute"></div>
-            <div className="h-1 w-4 bg-[#0A0A0A]/40 absolute"></div>
+          <div className="w-16 h-16 rounded-full border-2 border-primary/30 bg-primary/5 flex items-center justify-center">
+            <div className="w-1 h-4 bg-primary/40 absolute" />
+            <div className="h-1 w-4 bg-primary/40 absolute" />
           </div>
         </div>
 
-        {/* Top Left: Current Location */}
         <div className="absolute top-4 left-4 z-[1000]">
-          <button aria-label="現在地を表示" 
+          <button
+            aria-label="現在地を表示"
             onClick={handleCurrentLocation}
-            className="w-11 h-11 bg-white rounded-lg shadow-lg flex items-center justify-center border border-[#0A0A0A] active:scale-95 transition-transform"
+            className="w-11 h-11 bg-surface rounded-lg shadow-lg flex items-center justify-center border border-primary active:scale-95 transition-transform"
           >
-            <Target className="w-7 h-7 text-[#0A0A0A]" />
+            <Target className="w-7 h-7 text-primary" />
           </button>
         </div>
 
-        {/* Top Right: Search this area */}
         <div className="absolute top-4 right-4 z-[1000]">
-          <button 
+          <button
             onClick={handleSearchArea}
-            disabled={isSearching}
-            className="bg-white px-4 py-2.5 rounded-lg shadow-lg border border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            disabled={isGeocoding}
+            className="bg-surface px-4 py-2.5 rounded-lg shadow-lg border border-primary text-xs font-bold text-primary flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
           >
-            {isSearching ? (
+            {isGeocoding ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <div className="relative w-4 h-4">
-                <div className="absolute inset-0 border-2 border-[#0A0A0A]/40 rounded-full"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-[#0A0A0A] rounded-full"></div>
-              </div>
+              <RefreshCw className="w-4 h-4" />
             )}
             この位置で再検索
           </button>
         </div>
 
-        {/* Middle Right: Zoom Controls */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col shadow-lg rounded-lg overflow-hidden border border-gray-200 z-[1000]">
-          <button 
-            onClick={() => setZoom(prev => Math.min(prev + 1, 20))}
-            className="w-12 h-12 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100"
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col shadow-lg rounded-lg overflow-hidden border border-line z-[1000]">
+          <button
+            aria-label="拡大"
+            onClick={() => setZoom((prev) => Math.min(prev + 1, 20))}
+            className="w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors border-b border-line"
           >
             <Plus className="w-6 h-6" />
           </button>
-          <button 
-            onClick={() => setZoom(prev => Math.max(prev - 1, 3))}
-            className="w-12 h-12 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          <button
+            aria-label="縮小"
+            onClick={() => setZoom((prev) => Math.max(prev - 1, 3))}
+            className="w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors"
           >
             <Minus className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Bottom Right: Action Buttons */}
+        {/* Bottom Right: pin grouping toggle + list sheet */}
         <div className="absolute bottom-6 right-4 flex gap-3 z-[1000]">
-          <button className="bg-white px-6 py-3 rounded-xl shadow-xl border border-[#0A0A0A] flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform">
-            <div className="w-4 h-4 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A]"></div>
-            </div>
-            会社
-          </button>
-          <button 
-            onClick={onBack}
-            className="bg-white px-6 py-3 rounded-xl shadow-xl border border-[#0A0A0A] flex items-center gap-2.5 text-sm font-bold text-gray-800 active:scale-95 transition-transform"
+          <button
+            onClick={() => setGroupByCompany((prev) => !prev)}
+            className={`px-5 py-3 rounded-xl shadow-xl border flex items-center gap-2 text-sm font-bold active:scale-95 transition-transform ${
+              groupByCompany
+                ? 'bg-primary border-primary text-white'
+                : 'bg-surface border-primary text-ink'
+            }`}
           >
-            <ChevronUp className="w-5 h-5 text-[#0A0A0A]" />
+            {groupByCompany ? <Building2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+            {groupByCompany ? '会社' : '個人'}
+          </button>
+          <button
+            onClick={() => setIsListOpen(true)}
+            className="bg-surface px-5 py-3 rounded-xl shadow-xl border border-primary flex items-center gap-2 text-sm font-bold text-ink active:scale-95 transition-transform"
+          >
+            <ChevronUp className="w-5 h-5 text-primary" />
             リスト
+            <span className="text-primary">{meishisInRadius.length}</span>
           </button>
         </div>
       </div>
 
-      {/* Footer Status Bar */}
-      <div className="p-4 bg-white flex items-center justify-between border-t border-gray-100 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-[1000]">
-        <span className="text-xs text-gray-600 font-medium">この周辺に検索された名刺がありません。</span>
-        <button className="bg-[#0A0A0A]/5 text-[#0A0A0A] px-5 py-3 rounded-xl text-xs font-bold flex items-center gap-2 opacity-80 cursor-not-allowed">
-          <RefreshCw className="w-4 h-4" />
-          さらに読み込む
+      {/* Footer status: reports what is actually on the map right now.
+          Kept at a low z-index so the list sheet and location search modal
+          layer above it instead of being clipped by it. */}
+      <div className="px-4 py-3 bg-surface flex items-center justify-between border-t border-line shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-20 gap-3">
+        <div className="min-w-0">
+          <p className="text-xs text-ink-muted font-medium">
+            {isGeocoding
+              ? '名刺の住所を地図上に配置しています...'
+              : meishisInRadius.length > 0
+                ? `この周辺に ${meishisInRadius.length}件 の名刺があります。`
+                : 'この周辺に検索された名刺がありません。'}
+          </p>
+          {!isGeocoding && (withoutAddress > 0 || geocodeFailures > 0) && (
+            <p className="text-[10px] text-ink-faint mt-0.5 truncate">
+              住所がない、または特定できない名刺 {withoutAddress + geocodeFailures}件は表示されません。
+            </p>
+          )}
+        </div>
+        <button
+          onClick={handleSearchArea}
+          disabled={isGeocoding || pendingGeocode.length === 0}
+          className="bg-primary/5 text-primary px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-transform"
+        >
+          <RefreshCw className={`w-4 h-4 ${isGeocoding ? 'animate-spin' : ''}`} />
+          住所を再取得
         </button>
       </div>
+
+      {/* List sheet: the meishis currently inside the search radius */}
+      <AnimatePresence>
+        {isListOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-ink/40 z-[75]"
+              onClick={() => setIsListOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+              className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface rounded-t-2xl z-[80] max-h-[70vh] flex flex-col pb-safe"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+                <h2 className="text-base font-bold text-ink">
+                  この周辺の名刺 <span className="text-primary">{meishisInRadius.length}</span>
+                </h2>
+                <button aria-label="閉じる" onClick={() => setIsListOpen(false)} className="p-1 -mr-1 text-ink-muted">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {meishisInRadius.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <p className="text-sm text-ink-faint">
+                      この範囲に名刺がありません。<br />半径を広げるか、地図を移動してください。
+                    </p>
+                  </div>
+                ) : (
+                  meishisInRadius.map((m) => (
+                    <div key={m.id} className="flex items-center gap-3 px-5 py-3 border-b border-line">
+                      <div className="w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center shrink-0">
+                        <Briefcase className="w-5 h-5 text-ink-muted" />
+                      </div>
+                      <button
+                        onClick={() => onSelectMeishi?.(m)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <p className="text-sm font-bold text-ink truncate">{m.name}</p>
+                        <p className="text-xs text-ink-muted truncate">
+                          {[m.position, m.company].filter(Boolean).join(' / ')}
+                        </p>
+                        <p className="text-[10px] text-ink-faint truncate">
+                          約{Math.round(getDistance(mapCenter.lat, mapCenter.lng, m.lat, m.lng))}m
+                        </p>
+                      </button>
+                      <button
+                        onClick={() => focusOnMeishi(m)}
+                        aria-label="地図で表示"
+                        className="p-2 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors shrink-0"
+                      >
+                        <MapPin className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Location Search Modal */}
       <AnimatePresence>
         {isLocationSearchOpen && (
@@ -475,59 +669,55 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[70] flex flex-col max-w-md mx-auto pt-safe"
+            className="fixed inset-0 bg-surface z-[70] flex flex-col max-w-md mx-auto pt-safe"
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">基準位置変更</h2>
-              <button onClick={() => setIsLocationSearchOpen(false)} className="p-1">
-                <X className="w-6 h-6 text-gray-900" />
+            <div className="flex items-center justify-between p-4 bg-surface border-b border-line">
+              <h2 className="text-lg font-bold text-ink">基準位置変更</h2>
+              <button aria-label="閉じる" onClick={() => setIsLocationSearchOpen(false)} className="p-1">
+                <X className="w-6 h-6 text-ink" />
               </button>
             </div>
 
-            {/* Search Input */}
-            <div className="p-4 bg-white border-b border-gray-100">
+            <div className="p-4 bg-surface border-b border-line">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-faint" />
                 <input
                   type="text"
                   placeholder="検索"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-50 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20"
+                  className="w-full bg-canvas rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
 
-            {/* Search Results */}
-            <div className="flex-1 overflow-y-auto bg-white">
+            <div className="flex-1 overflow-y-auto bg-surface">
               {!searchQuery.trim() ? (
                 <div className="h-full flex items-center justify-center p-8 text-center">
-                  <p className="text-gray-500 font-medium leading-relaxed">
+                  <p className="text-ink-muted font-medium leading-relaxed">
                     基準位置となる住所または名刺を<br />検索してください
                   </p>
                 </div>
               ) : (
                 <div className="p-4 space-y-6">
-                  {/* Meishi Results */}
                   <div>
-                    <h3 className="text-xs font-medium text-gray-500 mb-3">私の名刺帳内の名刺検索結果</h3>
+                    <h3 className="text-xs font-medium text-ink-muted mb-3">私の名刺帳内の名刺検索結果</h3>
                     {meishiResults.length === 0 ? (
-                      <p className="text-sm text-gray-400 py-2">検索結果がありません。</p>
+                      <p className="text-sm text-ink-faint py-2">検索結果がありません。</p>
                     ) : (
                       <div className="space-y-3">
                         {meishiResults.map((meishi) => (
                           <button
                             key={meishi.id}
-                            onClick={() => handleSelectMeishiLocation(meishi)}
-                            className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg text-left transition-colors"
+                            onClick={() => focusOnMeishi(meishi as MappableMeishi)}
+                            className="w-full flex items-center gap-3 p-2 hover:bg-canvas rounded-lg text-left transition-colors"
                           >
-                            <div className="w-10 h-10 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center shrink-0">
-                              <Briefcase className="w-5 h-5 text-[#0A0A0A]" />
+                            <div className="w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center shrink-0">
+                              <Briefcase className="w-5 h-5 text-ink-muted" />
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{meishi.company || meishi.name}</p>
-                              <p className="text-xs text-gray-500">{meishi.address || '住所情報なし'}</p>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-ink truncate">{meishi.company || meishi.name}</p>
+                              <p className="text-xs text-ink-muted truncate">{meishi.address || '住所情報なし'}</p>
                             </div>
                           </button>
                         ))}
@@ -535,34 +725,33 @@ export const MeishiMapView: React.FC<{ onBack: () => void, meishis: Meishi[] }> 
                     )}
                   </div>
 
-                  {/* Address Results */}
                   <div>
-                    <h3 className="text-xs font-medium text-gray-500 mb-3">住所検索結果</h3>
+                    <h3 className="text-xs font-medium text-ink-muted mb-3">住所検索結果</h3>
                     {placesError ? (
-                      <div className="p-3 bg-red-50 border border-red-100 rounded-lg">
-                        <p className="text-sm text-red-600 flex items-center gap-2">
+                      <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg">
+                        <p className="text-sm text-danger flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 shrink-0" />
                           {placesError}
                         </p>
                       </div>
                     ) : addressResults.length === 0 ? (
-                      <p className="text-sm text-gray-400 py-2">検索結果がありません。</p>
+                      <p className="text-sm text-ink-faint py-2">検索結果がありません。</p>
                     ) : (
                       <div className="space-y-4">
                         {addressResults.map((prediction) => (
                           <button
                             key={prediction.place_id}
                             onClick={() => handleSelectAddress(prediction.place_id, prediction.structured_formatting.main_text)}
-                            className="w-full flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg text-left transition-colors"
+                            className="w-full flex items-start gap-4 p-2 hover:bg-canvas rounded-lg text-left transition-colors"
                           >
-                            <div className="w-12 h-12 rounded-full bg-[#0A0A0A] flex items-center justify-center shrink-0 mt-1">
+                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
                               <MapPin className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-base font-medium text-gray-900 truncate">
+                              <p className="text-base font-medium text-ink truncate">
                                 {prediction.structured_formatting.main_text}
                               </p>
-                              <p className="text-sm text-gray-600 truncate mt-0.5">
+                              <p className="text-sm text-ink-muted truncate mt-0.5">
                                 {prediction.structured_formatting.secondary_text}
                               </p>
                             </div>

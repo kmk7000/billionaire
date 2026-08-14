@@ -1508,9 +1508,20 @@ export default function App() {
 
       <AnimatePresence>
         {isMeishiMapOpen && (
-          <MeishiMapView 
-            onBack={() => setIsMeishiMapOpen(false)} 
-            meishis={meishis} 
+          <MeishiMapView
+            onBack={() => setIsMeishiMapOpen(false)}
+            meishis={meishis}
+            onGeocoded={(id, lat, lng) => {
+              // Cache the resolved position on the card so the address is
+              // only ever sent to the Geocoding API once.
+              setMeishis(prev => prev.map(m => m.id === id ? { ...m, lat, lng } : m));
+              updateDoc(doc(db, 'meishi', id), { lat, lng })
+                .catch(error => handleFirestoreError(error, OperationType.UPDATE, `meishi/${id}`));
+            }}
+            onSelectMeishi={(meishi) => {
+              setIsMeishiMapOpen(false);
+              setSelectedMeishiForDetail(meishi);
+            }}
           />
         )}
       </AnimatePresence>
