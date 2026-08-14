@@ -117,6 +117,8 @@ export default function App() {
   const [isMeishiCameraOpen, setIsMeishiCameraOpen] = useState(false);
   const [isMeishiOtherMethodsOpen, setIsMeishiOtherMethodsOpen] = useState(false);
   const [isMeishiDirectInputOpen, setIsMeishiDirectInputOpen] = useState(false);
+  // Whether the scanner should open on the camera or straight in the album.
+  const [meishiCaptureMode, setMeishiCaptureMode] = useState<'camera' | 'album'>('camera');
   const [meishiDirectInputData, setMeishiDirectInputData] = useState({
     name: '',
     position: '',
@@ -507,12 +509,21 @@ export default function App() {
   const handleOpenMeishiCamera = () => {
     setIsRegisteringMyMeishi(false);
     setIsMeishiOtherMethodsOpen(false);
+    setMeishiCaptureMode('camera');
+    setIsMeishiCameraOpen(true);
+  };
+
+  const handleOpenMeishiAlbum = () => {
+    setIsRegisteringMyMeishi(false);
+    setIsMeishiOtherMethodsOpen(false);
+    setMeishiCaptureMode('album');
     setIsMeishiCameraOpen(true);
   };
 
   const handleOpenMyMeishiCamera = () => {
     setIsRegisteringMyMeishi(true);
     setIsMeishiOtherMethodsOpen(false);
+    setMeishiCaptureMode('camera');
     setIsMeishiCameraOpen(true);
   };
 
@@ -1175,7 +1186,14 @@ export default function App() {
 
       <LanguageModals language={language} />
 
-      <SettingsModals settings={accountSettings} user={user} onOpenProfileManagement={() => { setProfileTab(1); setIsProfileOpen(true); }} />
+      <SettingsModals
+        settings={accountSettings}
+        user={user}
+        onOpenProfileManagement={() => { setProfileTab(1); setIsProfileOpen(true); }}
+        onOpenAlbumImport={handleOpenMeishiAlbum}
+        onOpenDirectInput={() => setIsMeishiDirectInputOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
+      />
       <WebsiteModals website={website} />
 
       <LectureModals lecture={lecture} />
@@ -1229,10 +1247,7 @@ export default function App() {
                 </button>
 
                 <button 
-                  onClick={() => {
-                    setIsMeishiOtherMethodsOpen(false);
-                    handleOpenMeishiCamera();
-                  }}
+                  onClick={handleOpenMeishiAlbum}
                   className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
@@ -1272,6 +1287,7 @@ export default function App() {
         onSaveMeishi={processMeishiOcrAndSave}
         isProcessing={isMeishiOcrProcessing}
         isRegisteringMyMeishi={isRegisteringMyMeishi}
+        startInAlbumMode={meishiCaptureMode === 'album'}
         onOpenDirectInput={() => {
           setIsMeishiCameraOpen(false);
           setIsMeishiDirectInputOpen(true);

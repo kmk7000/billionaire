@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   ArrowLeft, Megaphone, HelpCircle, Headset, Settings, UserCircle, ChevronRight,
-  Image as ImageIcon, CreditCard, Phone, BarChart2, UserPlus, Briefcase, Users,
-  BookOpen, ThumbsUp, Check,
+  Image as ImageIcon, CreditCard, Phone, BookOpen, ThumbsUp, Check,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -13,9 +12,36 @@ interface SettingsModalsProps {
   settings: AccountSettings;
   user: FirebaseUser | null;
   onOpenProfileManagement: () => void;
+  onOpenAlbumImport: () => void;
+  onOpenDirectInput: () => void;
+  onOpenNotifications: () => void;
 }
 
-export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, user, onOpenProfileManagement }) => (
+/** Share the app; falls back to the clipboard where the Web Share API is absent. */
+async function shareApp() {
+  const url = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareData = {
+    title: 'Billionaire（ビリオネア）',
+    text: '名刺管理とビジネスコミュニティのアプリ「Billionaire」',
+    url,
+  };
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    alert('アプリのリンクをコピーしました。');
+  } catch (error) {
+    // A user dismissing the share sheet lands here too, so stay quiet.
+    console.warn('Share cancelled or failed:', error);
+  }
+}
+
+export const SettingsModals: React.FC<SettingsModalsProps> = ({
+  settings: s, user, onOpenProfileManagement,
+  onOpenAlbumImport, onOpenDirectInput, onOpenNotifications,
+}) => (
   <>
     {/* More Page Overlay */}
     <AnimatePresence>
@@ -38,7 +64,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
           <div className="flex-1 overflow-y-auto no-scrollbar">
             {/* Top Icons Grid */}
             <div className="grid grid-cols-4 gap-4 p-6 border-b border-gray-100">
-              <button className="flex flex-col items-center gap-2">
+              <button
+                onClick={() => { s.closeMorePage(); onOpenNotifications(); }}
+                className="flex flex-col items-center gap-2"
+              >
                 <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center">
                   <Megaphone className="w-6 h-6 text-gray-700" />
                 </div>
@@ -92,14 +121,20 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
               <div className="px-4 py-2">
                 <h3 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">便利な機能</h3>
               </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => { s.closeMorePage(); onOpenAlbumImport(); }}
+                className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <ImageIcon className="w-6 h-6 text-gray-700" />
                   <span className="text-[15px] font-bold text-gray-900">アルバムから名刺を取り込む</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => { s.closeMorePage(); onOpenDirectInput(); }}
+                className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <CreditCard className="w-6 h-6 text-gray-700" />
                   <span className="text-[15px] font-bold text-gray-900">名刺を直接入力</span>
@@ -110,48 +145,6 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
                 <div className="flex items-center gap-3">
                   <Phone className="w-6 h-6 text-gray-700" />
                   <span className="text-[15px] font-bold text-gray-900">着信時に相手の名刺情報を表示</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-
-            {/* Business Services Section */}
-            <div className="py-4">
-              <div className="px-4 py-2">
-                <h3 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">企業用サービス</h3>
-              </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <BarChart2 className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">会社員向けアンケート</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Megaphone className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">会社員ターゲット広告</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <UserPlus className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">Rememberヘッドハンティングサービス</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">キャリア採用ソリューション</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Users className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">チーム名刺帳</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
@@ -169,10 +162,13 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({ settings: s, use
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={shareApp}
+                className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <ThumbsUp className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">Rememberを推薦する</span>
+                  <span className="text-[15px] font-bold text-gray-900">このアプリを友だちに紹介する</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>

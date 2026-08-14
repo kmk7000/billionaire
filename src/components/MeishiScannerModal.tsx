@@ -25,6 +25,8 @@ export interface MeishiScannerModalProps {
   onSaveMeishi: (capturedImage: string, capturedBack: string | null, settings: 'send' | 'save') => Promise<void>;
   isProcessing: boolean;
   isRegisteringMyMeishi?: boolean;
+  /** Open straight into the photo picker instead of the camera viewfinder. */
+  startInAlbumMode?: boolean;
   onOpenDirectInput?: () => void;
   onViewSavedMeishis?: () => void;
 }
@@ -35,6 +37,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
   onSaveMeishi,
   isProcessing,
   isRegisteringMyMeishi = false,
+  startInAlbumMode = false,
   onOpenDirectInput,
   onViewSavedMeishis,
 }) => {
@@ -63,6 +66,13 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
     handleFileChange,
     handleClose,
   } = useMeishiScanner({ isOpen, onClose });
+
+  // Entry points that promise the album (the もっと見る shortcut, the
+  // "album" option in the capture sheet) should land on the picker rather
+  // than making the user tap through the viewfinder first.
+  React.useEffect(() => {
+    if (isOpen && startInAlbumMode) handleAlbumClick();
+  }, [isOpen, startInAlbumMode, handleAlbumClick]);
 
   const handleConfirmMeishi = () => {
     setMeishiStep('settings');
