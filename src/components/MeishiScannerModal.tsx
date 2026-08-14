@@ -8,6 +8,7 @@ import {
   RotateCw, 
   Wand2, 
   Crop, 
+  ScanLine, 
   ChevronRight, 
   ChevronLeft, 
   Send, 
@@ -45,6 +46,10 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
     meishiSide,
     capturedMeishiImage,
     capturedMeishiBack,
+    isScanning,
+    useScanned,
+    scanDetected,
+    toggleUseScanned,
     meishiSettings,
     setMeishiSettings,
     isFlashOn,
@@ -183,25 +188,50 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
         {meishiStep === 'preview' && (
           <div className="flex-1 flex flex-col bg-black">
             {/* Header */}
-            <div className="p-4 flex items-center justify-between text-white">
-              <div className="flex gap-6">
-                <button aria-label="再撮影" className="text-white hover:opacity-80"><RotateCw className="w-6 h-6" /></button>
-                <button aria-label="画質を調整" className="text-white hover:opacity-80"><Wand2 className="w-6 h-6" /></button>
-                <button aria-label="トリミング" className="text-white hover:opacity-80"><Crop className="w-6 h-6" /></button>
-              </div>
+            <div className="p-4 flex items-center justify-end text-white">
               <button aria-label="閉じる" onClick={handleClose}>
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center p-4">
-              <div className="w-full max-w-sm aspect-[1.6/1] rounded-lg overflow-hidden shadow-2xl border border-white/20 bg-white">
-                <img 
-                  src={meishiSide === 'front' ? capturedMeishiImage! : capturedMeishiBack!} 
-                  alt="Captured Meishi" 
-                  className="w-full h-full object-cover"
+              <div className="relative w-full max-w-sm min-h-[140px] rounded-lg overflow-hidden shadow-2xl border border-white/20 bg-white flex items-center justify-center">
+                <img
+                  src={meishiSide === 'front' ? capturedMeishiImage! : capturedMeishiBack!}
+                  alt="Captured Meishi"
+                  className="w-full h-auto max-h-[46vh] object-contain"
                 />
+                {isScanning && (
+                  <div className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center gap-2 text-white">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="text-xs font-medium">名刺を読み取っています...</span>
+                  </div>
+                )}
               </div>
+
+              {/* Scan result control. Hidden until the scan finishes so the
+                  user is never offered a toggle that does nothing. */}
+              {!isScanning && (
+                <div className="mt-4 w-full max-w-sm">
+                  <button
+                    onClick={toggleUseScanned}
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-white active:scale-95 transition-transform"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-bold">
+                      <ScanLine className="w-4 h-4" />
+                      {useScanned ? 'スキャン補正' : '撮影した原本'}
+                    </span>
+                    <span className="text-xs text-white/70">
+                      {useScanned ? '原本に戻す' : '補正を使う'}
+                    </span>
+                  </button>
+                  <p className="mt-2 text-[11px] text-white/50 text-center leading-relaxed">
+                    {scanDetected
+                      ? '名刺の輪郭を検出して、傾きと影を補正しました。'
+                      : '名刺の輪郭を検出できませんでした。枠内いっぱいに収めて再撮影すると精度が上がります。'}
+                  </p>
+                </div>
+              )}
 
               {meishiSide === 'front' && !capturedMeishiBack && (
                 <button 

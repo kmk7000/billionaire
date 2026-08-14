@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { resizeImage } from '../utils/imageUtils';
+import { autoScanCard } from '../services/cardScanService';
 
 export type MeishiStep = 'camera' | 'preview' | 'settings' | 'success';
 export type MeishiSide = 'front' | 'back';
@@ -13,8 +14,15 @@ export interface UseMeishiScannerOptions {
 export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
   const [meishiStep, setMeishiStep] = useState<MeishiStep>('camera');
   const [meishiSide, setMeishiSide] = useState<MeishiSide>('front');
-  const [capturedMeishiImage, setCapturedMeishiImage] = useState<string | null>(null);
-  const [capturedMeishiBack, setCapturedMeishiBack] = useState<string | null>(null);
+  // Auto-scan keeps the untouched photo alongside the flattened version so the
+  // user can fall back when corner detection guesses wrong.
+  const [scannedMeishiImage, setScannedMeishiImage] = useState<string | null>(null);
+  const [scannedMeishiBack, setScannedMeishiBack] = useState<string | null>(null);
+  const [originalMeishiImage, setOriginalMeishiImage] = useState<string | null>(null);
+  const [originalMeishiBack, setOriginalMeishiBack] = useState<string | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [useScanned, setUseScanned] = useState(true);
+  const [scanDetected, setScanDetected] = useState(false);
   const [meishiSettings, setMeishiSettings] = useState<MeishiSettingsOption>('save');
   const [meishiCameraStream, setMeishiCameraStream] = useState<MediaStream | null>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
@@ -79,6 +87,31 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     }
   }, [meishiCameraStream, isFlashOn]);
 
+  /** Store the raw photo, then replace it with the auto-scanned version. */
+  const applyCapturedImage = useCallback(
+    (rawImage: string) => {
+      const isFront = meishiSide === 'front';
+      if (isFront) {
+        setOriginalMeishiImage(rawImage);
+        setScannedMeishiImage(null);
+      } else {
+        setOriginalMeishiBack(rawImage);
+        setScannedMeishiBack(null);
+      }
+
+      setIsScanning(true);
+      autoScanCard(rawImage)
+        .then(({ scanned, detected }) => {
+          setScanDetected(detected);
+          setUseScanned(true);
+          if (isFront) setScannedMeishiImage(scanned);
+          else setScannedMeishiBack(scanned);
+        })
+        .finally(() => setIsScanning(false));
+    },
+    [meishiSide]
+  );
+
   const captureImage = useCallback(async () => {
     if (!videoRef.current) return;
 
@@ -130,8 +163,8 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Apply Color Scan filter
-    ctx.filter = 'contrast(1.3) brightness(1.05) saturate(1.2)';
+    // No cosmetic filter here — enhanceScan() does the real correction and
+    // stacking both would crush the contrast.
 
     // Draw only the exact guide area from the video
     ctx.drawImage(
@@ -143,15 +176,10 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     const imageData = canvas.toDataURL('image/jpeg', 0.95);
     const resizedImageData = await resizeImage(imageData);
 
-    if (meishiSide === 'front') {
-      setCapturedMeishiImage(resizedImageData);
-    } else {
-      setCapturedMeishiBack(resizedImageData);
-    }
-
+    applyCapturedImage(resizedImageData);
     setMeishiStep('preview');
     stopCamera();
-  }, [meishiSide, stopCamera]);
+  }, [meishiSide, stopCamera, applyCapturedImage]);
 
   const addBackSide = useCallback(async () => {
     setMeishiSide('back');
@@ -169,24 +197,39 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
         const resizedBase64 = await resizeImage(base64);
-        if (meishiSide === 'front') {
-          setCapturedMeishiImage(resizedBase64);
-        } else {
-          setCapturedMeishiBack(resizedBase64);
-        }
+        applyCapturedImage(resizedBase64);
         setMeishiStep('preview');
         stopCamera();
       };
       reader.readAsDataURL(file);
     }
-  }, [meishiSide, stopCamera]);
+  }, [meishiSide, stopCamera, applyCapturedImage]);
+
+  // Everything downstream (preview and the saved record) reads these, so the
+  // toggle changes what is persisted, not just what is shown.
+  const capturedMeishiImage = useScanned
+    ? scannedMeishiImage ?? originalMeishiImage
+    : originalMeishiImage;
+  const capturedMeishiBack = useScanned
+    ? scannedMeishiBack ?? originalMeishiBack
+    : originalMeishiBack;
+
+  /** Swap the preview (and what gets saved) between scanned and original. */
+  const toggleUseScanned = useCallback(() => {
+    setUseScanned((prev) => !prev);
+  }, []);
 
   const resetAll = useCallback(() => {
     stopCamera();
     setMeishiStep('camera');
     setMeishiSide('front');
-    setCapturedMeishiImage(null);
-    setCapturedMeishiBack(null);
+    setScannedMeishiImage(null);
+    setScannedMeishiBack(null);
+    setOriginalMeishiImage(null);
+    setOriginalMeishiBack(null);
+    setIsScanning(false);
+    setUseScanned(true);
+    setScanDetected(false);
     setIsFlashOn(false);
     setIsCapturing(false);
     setIsMeishiMoreOptionsOpen(false);
@@ -205,6 +248,12 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     meishiSide,
     capturedMeishiImage,
     capturedMeishiBack,
+    originalMeishiImage,
+    originalMeishiBack,
+    isScanning,
+    useScanned,
+    scanDetected,
+    toggleUseScanned,
     meishiSettings,
     setMeishiSettings,
     isFlashOn,
