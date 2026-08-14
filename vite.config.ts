@@ -1,15 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import {defineConfig} from 'vite';
 
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
+    // GEMINI_API_KEY is intentionally NOT defined here — it must never reach
+    // the client bundle. OCR calls go through /api/ocr/* server routes
+    // instead (see server.ts), which read it from process.env directly.
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

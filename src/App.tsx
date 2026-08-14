@@ -60,6 +60,7 @@ import { ProfileOverlay } from './components/profile/ProfileOverlay';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
+import { ocrMeishi } from './services/ocrClient';
 import { PublicCardModal } from './components/profile/PublicCardModal';
 import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
@@ -525,46 +526,10 @@ export default function App() {
     if (!frontImage) return;
     setIsMeishiOcrProcessing(true);
     try {
-      const { GoogleGenAI, Type } = await import("@google/genai");
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      const base64Image = frontImage.split(',')[1];
-      
-      const parts: any[] = [
-        { text: "Extract information from this business card. Return JSON with name, company, position, email, phone. If a field is not found, use an empty string. Language is Japanese. If there are two images, the second one is the back side of the card." },
-        { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
-      ];
+      // OCR runs server-side (see server.ts /api/ocr/meishi) so the Gemini
+      // API key never reaches the client bundle.
+      const result = await ocrMeishi(frontImage, backImage);
 
-      if (backImage) {
-        const base64Back = backImage.split(',')[1];
-        parts.push({ inlineData: { data: base64Back, mimeType: "image/jpeg" } });
-      }
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [{ parts }],
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              company: { type: Type.STRING },
-              position: { type: Type.STRING },
-              department: { type: Type.STRING },
-              email: { type: Type.STRING },
-              phone: { type: Type.STRING },
-              mobile: { type: Type.STRING },
-              fax: { type: Type.STRING },
-              address: { type: Type.STRING },
-              detailedAddress: { type: Type.STRING }
-            },
-            required: ["name", "company", "position", "email", "phone"]
-          }
-        }
-      });
-
-      const result = JSON.parse(response.text);
-      
       if (user) {
         const newMeishiId = doc(collection(db, 'meishi')).id;
         const newMeishi: Meishi = {

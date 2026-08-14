@@ -1,11 +1,10 @@
 // Locates the business card inside a photo so it can be cropped and
-// flattened. Reuses the Gemini model the OCR step already depends on rather
-// than pulling a computer-vision runtime into the bundle.
+// flattened. Corner detection runs through the server's /api/ocr/card-corners
+// route (server.ts) rather than calling Gemini from the browser, so the API
+// key never reaches the client bundle.
 
 import { orderCorners, scanDocument, type Quad } from '../utils/documentScan';
-
-/** Gemini expresses image coordinates on a normalized 0-1000 grid. */
-const COORD_SCALE = 1000;
+import { detectCardCornersRemote } from './ocrClient';
 
 function imageSize(dataUrl: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -16,61 +15,17 @@ function imageSize(dataUrl: string): Promise<{ width: number; height: number }> 
   });
 }
 
+/** Gemini expresses image coordinates on a normalized 0-1000 grid. */
+const COORD_SCALE = 1000;
+
 /**
- * Ask Gemini for the four corners of the card. Returns null whenever the
+ * Ask the server for the four corners of the card. Returns null whenever the
  * answer is missing or implausible so the caller can fall back to the photo
  * as-is instead of showing a mangled crop.
  */
 export async function detectCardCorners(dataUrl: string): Promise<Quad | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return null;
-
   try {
-    const { GoogleGenAI, Type } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: [
-        {
-          parts: [
-            {
-              text:
-                'Find the single business card in this photo. Return the four ' +
-                'outer corners of the card itself (not the photo border), as ' +
-                'points on a 0-1000 normalized grid where x is measured left to ' +
-                'right and y top to bottom. Order them clockwise starting from ' +
-                'the card\'s top-left corner. If no card is clearly visible, ' +
-                'return an empty list.',
-            },
-            { inlineData: { data: dataUrl.split(',')[1], mimeType: 'image/jpeg' } },
-          ],
-        },
-      ],
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            corners: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  x: { type: Type.NUMBER },
-                  y: { type: Type.NUMBER },
-                },
-                required: ['x', 'y'],
-              },
-            },
-          },
-          required: ['corners'],
-        },
-      },
-    });
-
-    const parsed = JSON.parse(response.text) as { corners?: { x: number; y: number }[] };
-    const corners = parsed.corners;
+    const { corners } = await detectCardCornersRemote(dataUrl);
     if (!Array.isArray(corners) || corners.length !== 4) return null;
 
     const { width, height } = await imageSize(dataUrl);
