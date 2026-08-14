@@ -4,6 +4,7 @@ import {
   indexedDBLocalPersistence,
   browserLocalPersistence,
   inMemoryPersistence,
+  browserPopupRedirectResolver,
   GoogleAuthProvider,
   EmailAuthProvider,
 } from 'firebase/auth';
@@ -20,6 +21,10 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 // in-memory so auth state always resolves.
 export const auth = initializeAuth(app, {
   persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
+  // signInWithPopup/signInWithRedirect throw auth/argument-error unless a
+  // resolver is explicitly supplied — getAuth() includes this by default,
+  // but initializeAuth() does not.
+  popupRedirectResolver: browserPopupRedirectResolver,
 });
 export const googleProvider = new GoogleAuthProvider();
 export { EmailAuthProvider };
