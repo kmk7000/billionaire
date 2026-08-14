@@ -403,9 +403,22 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
             zoom={zoom}
             options={mapOptions}
             onLoad={(map) => setMapInstance(map)}
-            onDragEnd={() => {
-              const newCenter = mapInstance?.getCenter();
-              if (newCenter) setMapCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+            /*
+              Sync on idle rather than only on drag end: zooming also moves the
+              viewport, and when the stored centre drifted from the real one
+              the radius circle (drawn at the stored centre) no longer sat
+              under the crosshair, so the highlighted area disagreed with the
+              cards actually being counted.
+            */
+            onIdle={() => {
+              const next = mapInstance?.getCenter();
+              if (!next) return;
+              const lat = next.lat();
+              const lng = next.lng();
+              // Ignore sub-metre jitter, otherwise the controlled `center`
+              // prop and this handler bounce off each other forever.
+              if (Math.abs(lat - mapCenter.lat) < 1e-6 && Math.abs(lng - mapCenter.lng) < 1e-6) return;
+              setMapCenter({ lat, lng });
             }}
           >
             <CircleF
@@ -504,7 +517,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         {/* Centre marker for the search origin: a plain thin cross, with no
             ring around it so it can't be mistaken for the radius circle. */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <Plus className="w-6 h-6 text-primary/50" strokeWidth={1} />
+          <Plus className="w-6 h-6 text-primary/50" strokeWidth={2} />
         </div>
 
         <div className="absolute top-4 left-4 z-[1000]">
