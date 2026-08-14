@@ -426,22 +426,29 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
               <OverlayView
                 position={{ lat: group.lat, lng: group.lng }}
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                getPixelPositionOffset={(width, height) => ({
-                  x: -(width / 2),
-                  y: -height,
-                })}
               >
+                {/*
+                  The library forces the overlay container to width:0;height:0
+                  for position-based overlays, which makes its
+                  getPixelPositionOffset callback receive (0, 0) and resolve to
+                  no offset at all. Content then spilled out of that zero-size
+                  box, sitting a fixed number of pixels down-and-right of the
+                  real coordinate — a constant pixel error that turns into a
+                  huge geographic one as you zoom out, so pins looked stuck to
+                  the screen. Anchoring in CSS against that 0x0 origin instead
+                  keeps the dot exactly on its coordinate at every zoom level.
+                */}
                 <button
                   onClick={() => setSelectedGroup(group)}
-                  className="flex flex-col items-center focus:outline-none"
+                  className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 focus:outline-none"
                 >
-                  <span className="max-w-[150px] truncate bg-surface px-2.5 py-1 rounded-full shadow-md border border-line text-[11px] font-bold text-ink">
+                  <span className="block w-5 h-5 rounded-full bg-accent border-2 border-white shadow-md" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 max-w-[150px] truncate bg-surface px-2.5 py-1 rounded-full shadow-md border border-line text-[11px] font-bold text-ink whitespace-nowrap">
                     {group.company}
                     {group.members.length > 1 && (
                       <span className="ml-1 text-accent">{group.members.length}</span>
                     )}
                   </span>
-                  <span className="w-5 h-5 -mt-0.5 rounded-full bg-accent border-2 border-white shadow-md" />
                 </button>
               </OverlayView>
               </React.Fragment>
