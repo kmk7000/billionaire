@@ -5,12 +5,14 @@ import type { CommunityPost } from '../types/db';
 import { BoardChipBar } from '../components/community/BoardChipBar';
 import { BestPostsSection } from '../components/community/BestPostsSection';
 import { PostCard } from '../components/community/PostCard';
+import { PostCardSkeleton } from '../components/community/PostCardSkeleton';
 import { RecommendedSidebar } from '../components/community/RecommendedSidebar';
 
 type FeedMode = 'feed' | 'best' | 'recommended';
 
 interface CommunityScreenProps {
   posts: CommunityPost[];
+  loading?: boolean;
   selectedBoard: string;
   onSelectBoard: (boardId: string) => void;
   onSelectPost: (postId: string) => void;
@@ -18,7 +20,7 @@ interface CommunityScreenProps {
 }
 
 export const CommunityScreen: React.FC<CommunityScreenProps> = ({
-  posts, selectedBoard, onSelectBoard, onSelectPost, onOpenWrite,
+  posts, loading = false, selectedBoard, onSelectBoard, onSelectPost, onOpenWrite,
 }) => {
   const [feedMode, setFeedMode] = useState<FeedMode>('feed');
 
@@ -45,6 +47,7 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
         showViewAll={feedMode !== 'best'}
         onViewAll={() => setFeedMode('best')}
         onSelectPost={onSelectPost}
+        loading={loading}
       />
 
       <div className="flex border-b border-gray-100 bg-white lg:hidden">
@@ -72,7 +75,9 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
         </div>
       ) : (
         <div>
-          {filteredPosts.length === 0 ? (
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => <PostCardSkeleton key={i} />)
+          ) : filteredPosts.length === 0 ? (
             <p className="text-center text-sm text-gray-400 py-16">まだ投稿がありません</p>
           ) : (
             (feedMode === 'best' ? [...filteredPosts].sort((a, b) => b.likeCount - a.likeCount) : filteredPosts).map((post) => (

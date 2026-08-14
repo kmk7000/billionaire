@@ -151,7 +151,7 @@ export default function App() {
   const myMeishi = meishis.find(m => m.isMyCard);
   const [selectedCommunityBoard, setSelectedCommunityBoard] = useState<string>('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const { posts } = useCommunityPosts(selectedCommunityBoard);
+  const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard);
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
@@ -911,6 +911,7 @@ export default function App() {
             <CommunityScreen
               key="forum"
               posts={posts}
+              loading={communityLoading}
               selectedBoard={selectedCommunityBoard}
               onSelectBoard={setSelectedCommunityBoard}
               onSelectPost={setSelectedPostId}

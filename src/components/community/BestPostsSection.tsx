@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Trophy, Eye, ThumbsUp, MessageSquare } from 'lucide-react';
 import type { CommunityPost } from '../../types/db';
 import { getCommunityBoardLabel } from '../../constants/communityBoards';
+import { BestPostRowSkeleton } from './PostCardSkeleton';
 
 interface BestPostsSectionProps {
   posts: CommunityPost[];
@@ -9,10 +10,11 @@ interface BestPostsSectionProps {
   showViewAll?: boolean;
   onViewAll?: () => void;
   onSelectPost: (postId: string) => void;
+  loading?: boolean;
 }
 
 export const BestPostsSection: React.FC<BestPostsSectionProps> = ({
-  posts, count = 3, showViewAll = true, onViewAll, onSelectPost,
+  posts, count = 3, showViewAll = true, onViewAll, onSelectPost, loading = false,
 }) => {
   const ranked = useMemo(
     () => [...posts].sort((a, b) => b.likeCount - a.likeCount).slice(0, count),
@@ -33,7 +35,9 @@ export const BestPostsSection: React.FC<BestPostsSectionProps> = ({
         )}
       </div>
       <div>
-        {ranked.length === 0 ? (
+        {loading ? (
+          Array.from({ length: count }).map((_, i) => <BestPostRowSkeleton key={i} />)
+        ) : ranked.length === 0 ? (
           <p className="px-4 pb-4 text-sm text-gray-400">まだ投稿がありません</p>
         ) : (
           ranked.map((post) => (
