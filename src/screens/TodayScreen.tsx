@@ -5,24 +5,28 @@ import type { User as FirebaseUser } from 'firebase/auth';
 
 interface TodayScreenProps {
   user: FirebaseUser;
+  photoURL?: string;
   completedProfileSteps: number[];
-  toggleProfileStep: (step: number) => void;
   onOpenProfile: () => void;
   onOpenIntroEdit: () => void;
   onOpenCareerList: () => void;
   onOpenEducationEdit: () => void;
+  onOpenSkillEdit: () => void;
+  onPickProfilePhoto: () => void;
   onOpenMyMeishiCamera: () => void;
   onOpenMeishiCamera: () => void;
 }
 
 export const TodayScreen: React.FC<TodayScreenProps> = ({
   user,
+  photoURL,
   completedProfileSteps,
-  toggleProfileStep,
   onOpenProfile,
   onOpenIntroEdit,
   onOpenCareerList,
   onOpenEducationEdit,
+  onOpenSkillEdit,
+  onPickProfilePhoto,
   onOpenMyMeishiCamera,
   onOpenMeishiCamera,
 }) => (
@@ -38,8 +42,8 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-ink-faint rounded-full flex items-center justify-center overflow-hidden">
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            {photoURL ? (
+              <img src={photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
               <User className="w-6 h-6 text-white" />
             )}
@@ -80,7 +84,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
               あなたを代表するプロフィール写真を追加してください
             </p>
             <button
-              onClick={() => toggleProfileStep(1)}
+              onClick={onPickProfilePhoto}
               className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(1) ? 'bg-primary-soft text-ink-muted' : 'bg-primary text-white'}`}
             >
               {completedProfileSteps.includes(1) ? '完了' : '写真を追加'}
@@ -131,7 +135,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
               総経歴年数を教えてください
             </p>
             <button
-              onClick={() => toggleProfileStep(4)}
+              onClick={onOpenCareerList}
               className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(4) ? 'bg-primary-soft text-ink-muted' : 'bg-primary text-white'}`}
             >
               {completedProfileSteps.includes(4) ? '完了' : '経歴年数を入力'}
@@ -148,7 +152,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
               職務スキルを教えてください
             </p>
             <button
-              onClick={() => toggleProfileStep(5)}
+              onClick={onOpenSkillEdit}
               className={`w-full font-bold py-2 rounded text-xs ${completedProfileSteps.includes(5) ? 'bg-primary-soft text-ink-muted' : 'bg-primary text-white'}`}
             >
               {completedProfileSteps.includes(5) ? '完了' : 'スキルを追加'}

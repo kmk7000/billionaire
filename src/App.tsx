@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserPlus, ThumbsUp, BookOpen, Megaphone, HelpCircle, Headset, UserCircle, CreditCard, MessageSquare, User, Plus, Search, Bell, TrendingUp, Building2, Clock, ChevronRight, Camera, Mail, Loader2, Check, Home, Contact, Share2, BarChart2, GraduationCap, ArrowLeft, Settings, Edit2, UserCog, ChevronDown, X, Trash2, XCircle, Menu, MapPin, Edit3, Users, Download, Phone, History, Sparkles, PenSquare, ShieldCheck, Bookmark, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { signInWithPopup, signInWithCredential, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, User as FirebaseUser } from 'firebase/auth';
+import { signInWithPopup, signInWithCredential, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, createUserWithEmailAndPassword, signInWithEmailAndPassword, User as FirebaseUser } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
@@ -59,6 +59,8 @@ import { useAccountSettings } from './hooks/useAccountSettings';
 import { ProfileOverlay } from './components/profile/ProfileOverlay';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
+import { SearchOverlay } from './components/SearchOverlay';
+import { NotificationsPanel } from './components/NotificationsPanel';
 
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -158,7 +160,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [completedProfileSteps, setCompletedProfileSteps] = useState<number[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleDeleteSelectedMeishis = () => {
     if (selectedMeishis.length === 0) return;
@@ -236,11 +239,41 @@ export default function App() {
     setSelectedMeishis([]);
   };
 
-  const toggleProfileStep = (step: number) => {
-    setCompletedProfileSteps(prev =>
-      prev.includes(step) ? prev.filter(s => s !== step) : [...prev, step]
-    );
+  // Profile completion is derived from actual saved data, so it survives
+  // reloads and can't drift from reality (previously it was a local toggle
+  // that reset on every refresh).
+  const completedProfileSteps = React.useMemo(() => {
+    const steps: number[] = [];
+    if (userProfile?.photoURL || user?.photoURL) steps.push(1);
+    if (userProfile?.introduction) steps.push(2);
+    if (userProfile?.careers?.length) steps.push(3);
+    if (userProfile?.totalCareerYears) steps.push(4);
+    if (userProfile?.skills?.length) steps.push(5);
+    if (userProfile?.educations?.length) steps.push(6);
+    return steps;
+  }, [userProfile, user]);
+
+  // Editors still call this after saving; completion now derives from data,
+  // so there is nothing left to toggle manually.
+  const toggleProfileStep = (_step: number) => {};
+
+  const profilePhotoInputRef = React.useRef<HTMLInputElement>(null);
+  const handleProfilePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !user) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const resized = await resizeImage(reader.result as string, 400, 400);
+        await updateDoc(doc(db, 'users', user.uid), { photoURL: resized });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+      }
+    };
+    reader.readAsDataURL(file);
   };
+  const openProfilePhotoPicker = () => profilePhotoInputRef.current?.click();
 
   const career = useCareerEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
   const education = useEducationEditor(user, userProfile, completedProfileSteps, toggleProfileStep);
@@ -591,38 +624,41 @@ export default function App() {
 
 
 
+  const headerActions = (
+    <>
+      <button aria-label="検索" onClick={() => setIsSearchOpen(true)} className="p-0 leading-none">
+        <Search className="w-6 h-6 text-ink-muted" />
+      </button>
+      <button aria-label="お知らせ" onClick={() => setIsNotificationsOpen(true)} className="p-0 leading-none">
+        <Bell className="w-6 h-6 text-ink-muted" />
+      </button>
+    </>
+  );
+
   const renderHeader = () => {
     switch (activeTab) {
       case 'today':
         return (
-          <header className="bg-white px-4 h-[52px] flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
-            <h1 className="text-2xl font-bold font-serif tracking-tighter text-[#0A0A0A]">Billionaire</h1>
+          <header className="bg-surface px-4 h-[52px] flex items-center justify-between sticky top-0 z-10 border-b border-line">
+            <h1 className="text-2xl font-bold font-serif tracking-tighter text-primary">Billionaire</h1>
             <div className="flex items-center gap-4">
-              <Search className="w-6 h-6 text-gray-700" />
-              <div className="relative">
-                <Bell className="w-6 h-6 text-gray-700" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">6</div>
-              </div>
+              {headerActions}
               <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
-                <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
+                <Menu className="w-6 h-6 text-ink-muted cursor-pointer" />
               </button>
             </div>
           </header>
         );
       case 'meishi':
         return (
-          <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
+          <header className="sticky top-0 z-10 bg-surface border-b border-line">
             <div className="px-4 h-[52px] flex justify-between items-center">
-              <h1 className="text-xl font-black tracking-tight text-gray-900">名刺帳</h1>
+              <h1 className="text-xl font-black tracking-tight text-ink">名刺帳</h1>
               <div className="flex gap-4">
-                <Search className="w-6 h-6 text-gray-700" />
-                <div className="relative">
-                  <Bell className="w-6 h-6 text-gray-700" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#0A0A0A] rounded-full flex items-center justify-center text-[10px] text-white font-bold">99+</div>
-                </div>
+                {headerActions}
                 <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
-                <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
-              </button>
+                  <Menu className="w-6 h-6 text-ink-muted cursor-pointer" />
+                </button>
               </div>
             </div>
 
@@ -632,16 +668,16 @@ export default function App() {
                 { id: 'team', label: 'チーム名刺帳' },
                 { id: 'group', label: 'グループ連絡先' }
               ].map((tab) => (
-                <button 
+                <button
                   key={tab.id}
                   onClick={() => setActiveMeishiTab(tab.id as 'my' | 'team' | 'group')}
-                  className={`relative text-sm font-bold whitespace-nowrap pb-2 transition-colors ${activeMeishiTab === tab.id ? 'text-gray-900' : 'text-gray-400'}`}
+                  className={`relative text-sm font-bold whitespace-nowrap pb-2 transition-colors ${activeMeishiTab === tab.id ? 'text-ink' : 'text-ink-faint'}`}
                 >
                   {tab.label}
                   {activeMeishiTab === tab.id && (
                     <motion.div
                       layoutId="meishiTabIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -652,20 +688,12 @@ export default function App() {
         );
       case 'community':
         return (
-          <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
+          <header className="sticky top-0 z-10 bg-surface border-b border-line">
             <div className="px-4 h-[52px] flex justify-between items-center">
-              <h1 className="text-xl font-black tracking-tight text-gray-900">コミュニティ</h1>
+              <h1 className="text-xl font-black tracking-tight text-ink">コミュニティ</h1>
               <div className="flex gap-4">
-                <Search className="w-6 h-6 text-gray-700" />
-                <Bell className="w-6 h-6 text-gray-700" />
+                {headerActions}
               </div>
-            </div>
-            <div className="flex gap-4 overflow-x-auto px-4 pb-2 no-scrollbar text-sm font-bold text-gray-400">
-              <span className="text-gray-900 border-b-2 border-gray-900 pb-1 whitespace-nowrap">ホーム</span>
-              <span className="whitespace-nowrap">キャリア</span>
-              <span className="whitespace-nowrap">給与・年収</span>
-              <span className="whitespace-nowrap">職場環境</span>
-              <span className="whitespace-nowrap">転職相談</span>
             </div>
           </header>
         );
@@ -673,10 +701,32 @@ export default function App() {
   };
 
   const handleEmailSignupComplete = async (email: string, pass: string) => {
-    // In a real app, we'd use createUserWithEmailAndPassword
-    // For this demo, we'll just simulate a login
-    console.log('Signup with:', email, pass);
-    handleLogin(); // Fallback to google login for demo purposes or just mock it
+    setLoginError(null);
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass);
+    } catch (error: any) {
+      if (error?.code === 'auth/email-already-in-use') {
+        // Existing account: treat the flow as a login attempt instead.
+        try {
+          await signInWithEmailAndPassword(auth, email, pass);
+          return;
+        } catch (loginErr: any) {
+          console.error('Email login failed:', loginErr);
+          setLoginError(loginErr?.code === 'auth/invalid-credential' || loginErr?.code === 'auth/wrong-password'
+            ? 'このメールアドレスは登録済みです。パスワードが正しくありません。'
+            : loginErr?.message || String(loginErr));
+          setLoginView('main');
+          return;
+        }
+      }
+      console.error('Email signup failed:', error);
+      setLoginError(
+        error?.code === 'auth/weak-password' ? 'パスワードは8文字以上で設定してください。'
+        : error?.code === 'auth/invalid-email' ? 'メールアドレスの形式が正しくありません。'
+        : error?.message || String(error)
+      );
+      setLoginView('main');
+    }
   };
 
   if (publicHandle) {
@@ -749,15 +799,16 @@ export default function App() {
               <h1 className="text-2xl font-black font-serif tracking-tight text-white">Billionaire</h1>
             </div>
 
-            {/* Global Web Search Input */}
-            <div className="relative w-72 xl:w-80">
+            {/* Global Web Search (opens the shared search overlay) */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="relative w-72 xl:w-80 text-left cursor-text"
+            >
               <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="会社名、お名前、職種、キーワードで検索..."
-                className="w-full bg-white/10 border border-transparent focus:border-white/30 focus:bg-white/15 text-white placeholder:text-gray-400 text-xs pl-9 pr-4 py-2 rounded-full outline-none transition-all"
-              />
-            </div>
+              <span className="block w-full bg-white/10 border border-transparent hover:bg-white/15 text-gray-400 text-xs pl-9 pr-4 py-2 rounded-full transition-all">
+                会社名、お名前、職種、キーワードで検索...
+              </span>
+            </button>
           </div>
 
           {/* Main Top Web Navigation Tabs */}
@@ -807,10 +858,13 @@ export default function App() {
               投稿する
             </button>
 
-            <div className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer">
+            <button
+              aria-label="お知らせ"
+              onClick={() => setIsNotificationsOpen(true)}
+              className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer"
+            >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-            </div>
+            </button>
 
             <button
               onClick={() => setActiveTab('profile')}
@@ -923,12 +977,14 @@ export default function App() {
             <TodayScreen
               key="today"
               user={user}
+              photoURL={userProfile?.photoURL || user.photoURL || undefined}
               completedProfileSteps={completedProfileSteps}
-              toggleProfileStep={toggleProfileStep}
               onOpenProfile={() => setIsProfileOpen(true)}
               onOpenIntroEdit={() => setIsIntroEditOpen(true)}
               onOpenCareerList={() => career.openList()}
               onOpenEducationEdit={() => education.open()}
+              onOpenSkillEdit={() => skill.open()}
+              onPickProfilePhoto={openProfilePhotoPicker}
               onOpenMyMeishiCamera={handleOpenMyMeishiCamera}
               onOpenMeishiCamera={handleOpenMeishiCamera}
             />
@@ -941,7 +997,7 @@ export default function App() {
         {activeTab === 'community' ? (
           <RecommendedSidebar posts={posts} onSelectPost={setSelectedPostId} />
         ) : (
-          <DesktopSidebar onNavigateCommunity={() => setActiveTab('community')} />
+          <DesktopSidebar posts={posts} onSelectPost={(postId) => setSelectedPostId(postId)} />
         )}
       </div>
 
@@ -958,6 +1014,34 @@ export default function App() {
       </AnimatePresence>
 
       <WritePostModal write={communityWrite} onPosted={(postId) => setSelectedPostId(postId)} />
+
+      <AnimatePresence>
+        {isSearchOpen && (
+          <SearchOverlay
+            key="search"
+            meishis={meishis}
+            posts={posts}
+            onClose={() => setIsSearchOpen(false)}
+            onSelectMeishi={(meishi) => setSelectedMeishiForDetail(meishi)}
+            onSelectPost={(postId) => setSelectedPostId(postId)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNotificationsOpen && (
+          <NotificationsPanel key="notifications" onClose={() => setIsNotificationsOpen(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Hidden profile-photo picker (triggered from Today card / profile overlay) */}
+      <input
+        ref={profilePhotoInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleProfilePhotoSelected}
+      />
 
       {/* Bottom Navigation (Mobile Only) */}
       <BottomNav
@@ -976,7 +1060,7 @@ export default function App() {
         profileTab={profileTab}
         onChangeProfileTab={setProfileTab}
         completedProfileSteps={completedProfileSteps}
-        toggleProfileStep={toggleProfileStep}
+        onPickProfilePhoto={openProfilePhotoPicker}
         onOpenIntroEdit={() => setIsIntroEditOpen(true)}
         onOpenCamera={handleOpenMyMeishiCamera}
         onDeleteMyMeishi={() => setIsMyMeishiDeleteDialogOpen(true)}
@@ -992,6 +1076,8 @@ export default function App() {
         awards={awards}
         certificates={certificates}
         personalInfo={personalInfo}
+        myPosts={posts.filter(p => p.authorId === user.uid)}
+        onSelectPost={(postId) => setSelectedPostId(postId)}
       />
 
       {/* My Meishi Delete Confirmation */}
@@ -1383,11 +1469,18 @@ export default function App() {
       </AnimatePresence>
       <AnimatePresence>
         {selectedMeishiForDetail && (
-          <MeishiDetailView 
-            meishi={selectedMeishiForDetail} 
-            onBack={() => setSelectedMeishiForDetail(null)} 
+          <MeishiDetailView
+            meishi={selectedMeishiForDetail}
+            onBack={() => setSelectedMeishiForDetail(null)}
             onEdit={() => setIsMeishiEditOpen(true)}
             onDelete={handleDeleteMeishi}
+            onSaveMemo={(memo) => {
+              const updated = { ...selectedMeishiForDetail, memo };
+              setMeishis(prev => prev.map(m => m.id === updated.id ? updated : m));
+              setSelectedMeishiForDetail(updated);
+              updateDoc(doc(db, 'meishi', updated.id), { memo, updatedAt: serverTimestamp() })
+                .catch(error => handleFirestoreError(error, OperationType.UPDATE, `meishi/${updated.id}`));
+            }}
           />
         )}
       </AnimatePresence>

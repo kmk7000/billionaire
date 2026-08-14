@@ -21,7 +21,7 @@ interface ProfileDetailsTabProps {
   userProfile: UserProfile | null;
   myMeishi: Meishi | undefined;
   completedProfileSteps: number[];
-  toggleProfileStep: (step: number) => void;
+  onPickProfilePhoto: () => void;
   onOpenIntroEdit: () => void;
   career: CareerEditor;
   education: EducationEditor;
@@ -38,7 +38,7 @@ interface ProfileDetailsTabProps {
 }
 
 export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
-  userProfile, myMeishi, completedProfileSteps, toggleProfileStep, onOpenIntroEdit,
+  userProfile, myMeishi, completedProfileSteps, onPickProfilePhoto, onOpenIntroEdit,
   career, education, job, skill, language, website, lecture, publication, article,
   awards, certificates, personalInfo,
 }) => (
@@ -66,7 +66,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
             会員様を代表するプロフィール写真を追加してください
           </p>
           <button
-            onClick={() => toggleProfileStep(1)}
+            onClick={onPickProfilePhoto}
             className={`w-full border text-xs font-bold py-2 rounded ${completedProfileSteps.includes(1) ? 'bg-primary-soft border-line text-ink-muted' : 'bg-surface border-line text-ink'}`}
           >
             {completedProfileSteps.includes(1) ? '完了' : '写真追加'}
@@ -114,7 +114,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
             総経歴年数を教えてください
           </p>
           <button
-            onClick={() => toggleProfileStep(4)}
+            onClick={() => career.openList()}
             className={`w-full border text-xs font-bold py-2 rounded ${completedProfileSteps.includes(4) ? 'bg-primary-soft border-line text-ink-muted' : 'bg-surface border-line text-ink'}`}
           >
             {completedProfileSteps.includes(4) ? '完了' : '年数入力'}
@@ -130,7 +130,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
             職務スキルを教えてください
           </p>
           <button
-            onClick={() => toggleProfileStep(5)}
+            onClick={() => skill.open()}
             className={`w-full border text-xs font-bold py-2 rounded ${completedProfileSteps.includes(5) ? 'bg-primary-soft border-line text-ink-muted' : 'bg-surface border-line text-ink'}`}
           >
             {completedProfileSteps.includes(5) ? '完了' : 'スキル追加'}

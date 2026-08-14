@@ -90,6 +90,7 @@ export interface Meishi {
   detailedAddress?: string;
   imageUrl?: string;
   imageUrlBack?: string;
+  memo?: string;
   isMyCard?: boolean;
   updatedAt: string;
   createdAt?: any;

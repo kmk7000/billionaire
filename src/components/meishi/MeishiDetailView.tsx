@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, ChevronRight, Mail, ArrowLeft, Edit2, Trash2, MoreHorizontal, Download, Phone, MoreVertical, Gift } from 'lucide-react';
+import { MessageSquare, ChevronRight, Mail, ArrowLeft, Edit2, Trash2, MoreHorizontal, Download, Phone, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Tab, Meishi } from '../../types/app';
 
@@ -8,10 +8,13 @@ export const MeishiDetailView: React.FC<{
   onBack: () => void;
   onEdit: () => void;
   onDelete: (id: string) => void;
-}> = ({ meishi, onBack, onEdit, onDelete }) => {
+  onSaveMemo: (memo: string) => void;
+}> = ({ meishi, onBack, onEdit, onDelete, onSaveMemo }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'memo'>('info');
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+  const [memoDraft, setMemoDraft] = useState(meishi.memo ?? '');
+  const memoDirty = memoDraft !== (meishi.memo ?? '');
 
   const handleSaveToContacts = () => {
     const vCard = [
@@ -73,20 +76,32 @@ export const MeishiDetailView: React.FC<{
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="px-6 flex justify-between items-center mb-10">
-        <button aria-label="電話をかける" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
+      {/* Action Buttons — real tel:/sms:/mailto: links when the data exists */}
+      <div className="px-6 flex justify-around items-center mb-10">
+        <a
+          aria-label="電話をかける"
+          href={meishi.phone ? `tel:${meishi.phone}` : undefined}
+          aria-disabled={!meishi.phone}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
+        >
           <Phone className="w-6 h-6" />
-        </button>
-        <button aria-label="メッセージを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
+        </a>
+        <a
+          aria-label="メッセージを送る"
+          href={meishi.phone ? `sms:${meishi.phone}` : undefined}
+          aria-disabled={!meishi.phone}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
+        >
           <MessageSquare className="w-6 h-6" />
-        </button>
-        <button aria-label="メールを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.email ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
+        </a>
+        <a
+          aria-label="メールを送る"
+          href={meishi.email ? `mailto:${meishi.email}` : undefined}
+          aria-disabled={!meishi.email}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.email ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
+        >
           <Mail className="w-6 h-6" />
-        </button>
-        <button aria-label="ギフトを送る" className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white hover:opacity-90 transition-colors duration-200">
-          <Gift className="w-6 h-6" />
-        </button>
+        </a>
       </div>
 
       {/* Tabs */}
@@ -215,8 +230,22 @@ export const MeishiDetailView: React.FC<{
             </div>
           </div>
         ) : (
-          <div className="px-6 py-10 text-center">
-            <p className="text-ink-faint text-sm">メモがありません</p>
+          <div className="px-6 pb-10">
+            <textarea
+              value={memoDraft}
+              onChange={(e) => setMemoDraft(e.target.value)}
+              placeholder="出会った場所、話した内容、フォローアップ事項などをメモしておきましょう"
+              className="w-full min-h-[180px] border border-line rounded-lg p-4 text-[15px] text-ink placeholder-ink-faint focus:outline-none focus:border-primary resize-none"
+            />
+            <button
+              onClick={() => onSaveMemo(memoDraft)}
+              disabled={!memoDirty}
+              className={`w-full mt-3 py-3.5 rounded-lg font-bold transition-colors duration-200 ${
+                memoDirty ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint cursor-not-allowed'
+              }`}
+            >
+              メモを保存する
+            </button>
           </div>
         )}
       </div>

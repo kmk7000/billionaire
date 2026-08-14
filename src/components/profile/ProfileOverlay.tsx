@@ -1,8 +1,11 @@
 import React from 'react';
-import { ArrowLeft, UserCog, Edit2, Plus, User, Camera, Mail } from 'lucide-react';
+import { ArrowLeft, UserCog, Edit2, Plus, User, Camera, Mail, Eye, ThumbsUp, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { Meishi, UserProfile } from '../../types/app';
+import type { CommunityPost } from '../../types/db';
+import { getCommunityBoardLabel } from '../../constants/communityBoards';
+import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { MyMeishiTab } from './MyMeishiTab';
 import { ProfileDetailsTab } from './ProfileDetailsTab';
 import type { CareerEditor } from '../../hooks/useCareerEditor';
@@ -29,7 +32,7 @@ interface ProfileOverlayProps {
   profileTab: number;
   onChangeProfileTab: (tab: number) => void;
   completedProfileSteps: number[];
-  toggleProfileStep: (step: number) => void;
+  onPickProfilePhoto: () => void;
   onOpenIntroEdit: () => void;
   onOpenCamera: () => void;
   onDeleteMyMeishi: () => void;
@@ -45,13 +48,15 @@ interface ProfileOverlayProps {
   awards: AwardsEditor;
   certificates: CertificatesEditor;
   personalInfo: PersonalInfoEditor;
+  myPosts: CommunityPost[];
+  onSelectPost: (postId: string) => void;
 }
 
 export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
   isOpen, onClose, user, userProfile, myMeishi, profileTab, onChangeProfileTab,
-  completedProfileSteps, toggleProfileStep, onOpenIntroEdit, onOpenCamera, onDeleteMyMeishi,
+  completedProfileSteps, onPickProfilePhoto, onOpenIntroEdit, onOpenCamera, onDeleteMyMeishi,
   career, education, job, skill, language, website, lecture, publication, article,
-  awards, certificates, personalInfo,
+  awards, certificates, personalInfo, myPosts, onSelectPost,
 }) => (
   <AnimatePresence>
     {isOpen && (
@@ -97,21 +102,17 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               </div>
             )}
 
-            <div className="text-sm text-ink-faint font-medium">
-              フォロワー <span className="font-bold text-white">128</span> <span className="mx-2 text-ink-muted">|</span> フォロー中 <span className="font-bold text-white">129</span>
-            </div>
-
             {/* Profile Avatar */}
             <div className="absolute bottom-6 right-6">
               <div className="relative">
                 <div className="w-20 h-20 bg-primary-soft rounded-full border-4 border-primary flex items-center justify-center overflow-hidden shadow-inner">
-                  {user?.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  {(userProfile?.photoURL || user?.photoURL) ? (
+                    <img src={userProfile?.photoURL || user?.photoURL || ''} alt={user?.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
                     <User className="w-12 h-12 text-ink-faint" />
                   )}
                 </div>
-                <button aria-label="写真を変更" className="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-2 border-primary shadow-lg hover:opacity-90 transition-colors">
+                <button aria-label="写真を変更" onClick={onPickProfilePhoto} className="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-2 border-primary shadow-lg hover:opacity-90 transition-colors">
                   <Camera className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>
@@ -131,23 +132,6 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
                 <span className="text-[10px] text-ink-muted mt-2 font-medium">{stat.label}</span>
               </div>
             ))}
-          </div>
-
-          {/* Notification Banner */}
-          <div className="bg-primary/5 rounded-xl p-4 flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center relative">
-                <Mail className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-ink">{user?.displayName || 'ユーザー'}様、</p>
-                <p className="text-sm font-bold text-ink">新しい提案が届きました！</p>
-              </div>
-            </div>
-            <button className="bg-primary text-white text-xs font-bold px-4 py-2 rounded relative">
-              確認する
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">1</span>
-            </button>
           </div>
 
           {/* Tabs */}
@@ -177,7 +161,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               userProfile={userProfile}
               myMeishi={myMeishi}
               completedProfileSteps={completedProfileSteps}
-              toggleProfileStep={toggleProfileStep}
+              onPickProfilePhoto={onPickProfilePhoto}
               onOpenIntroEdit={onOpenIntroEdit}
               career={career}
               education={education}
@@ -192,8 +176,38 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               certificates={certificates}
               personalInfo={personalInfo}
             />
+          ) : profileTab === 4 ? (
+            /* My Posts Tab — anonymous community posts written by this user */
+            <div>
+              <p className="text-xs text-ink-faint mb-4 leading-relaxed">
+                コミュニティに匿名で投稿した記事の一覧です。他のユーザーには匿名ニックネームのみ表示されます。
+              </p>
+              {myPosts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-ink-faint">
+                  <p className="text-sm">まだ投稿がありません</p>
+                </div>
+              ) : (
+                myPosts.map((post) => (
+                  <button
+                    key={post.id}
+                    onClick={() => onSelectPost(post.id)}
+                    className="w-full text-left py-3 border-b border-line hover:bg-canvas transition-colors duration-200"
+                  >
+                    <p className="text-sm font-bold text-ink line-clamp-1">{post.title}</p>
+                    <p className="text-xs text-ink-muted line-clamp-1 mt-0.5">{post.body}</p>
+                    <div className="flex items-center gap-3 mt-1.5 text-[10px] text-ink-faint">
+                      <span>{getCommunityBoardLabel(post.boardId)}</span>
+                      <span>{formatRelativeTime(post.createdAt)}</span>
+                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {post.viewCount ?? 0}</span>
+                      <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" /> {post.likeCount}</span>
+                      <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {post.commentCount}</span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           ) : (
-            /* Other Tabs Placeholder */
+            /* 履歴書管理 / お知らせ — genuinely not built yet */
             <div className="flex flex-col items-center justify-center py-20 text-ink-faint">
               <p className="text-sm">準備中です</p>
             </div>
