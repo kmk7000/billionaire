@@ -7,9 +7,11 @@ interface MyMeishiTabProps {
   userProfile: UserProfile | null;
   onOpenCamera: () => void;
   onDeleteMyMeishi: () => void;
+  onOpenPublicCard: () => void;
+  publicHandle: string | null;
 }
 
-export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi }) => (
+export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle }) => (
   <div className="space-y-6">
     {/* Business Card Registration Box */}
     {!myMeishi ? (
@@ -44,10 +46,16 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
           </div>
         </div>
 
-        <button className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform mb-10">
+        <button
+          onClick={onOpenPublicCard}
+          className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform mb-2"
+        >
           <Share2 className="w-4 h-4" />
           <span>マイ名刺を共有する</span>
         </button>
+        <p className="text-[11px] text-ink-faint text-center mb-10">
+          {publicHandle ? `公開URL: @${publicHandle}` : '公開IDを設定すると、URLひとつで名刺を渡せます'}
+        </p>
 
         {/* 名刺情報 (Business Card Information) */}
         <div className="pt-8 border-t border-line">

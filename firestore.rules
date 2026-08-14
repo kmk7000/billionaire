@@ -103,6 +103,14 @@ service cloud.firestore {
              data.company is string && data.company.size() > 0 && data.company.size() < 100;
     }
 
+    function isValidDigitalCard(data) {
+      return hasRequiredFields(['userId', 'handle', 'isPublic']) &&
+             data.userId == request.auth.uid &&
+             data.handle is string && data.handle.size() >= 3 && data.handle.size() <= 30 &&
+             data.handle.matches('^[a-z0-9_]+$') &&
+             data.isPublic is bool;
+    }
+
     function isValidPost(data) {
       return hasRequiredFields(['boardId', 'authorId', 'anonHandle', 'authorLabel', 'title', 'body']) &&
              data.authorId == request.auth.uid &&
@@ -139,6 +147,30 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidMeishi(request.resource.data);
       allow update: if isAuthenticated() && resource.data.ownerUid == request.auth.uid && isValidMeishi(request.resource.data);
       allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // Public digital business cards, keyed by owner uid so no list query is
+    // ever needed. Reading a card its owner has published is intentionally
+    // open to anonymous visitors — that is the whole point of a shareable
+    // card link. Unpublished cards stay private to their owner.
+    match /my_cards/{uid} {
+      allow get: if resource.data.isPublic == true || isOwner(uid);
+      allow create: if isOwner(uid) && isValidDigitalCard(request.resource.data);
+      allow update: if (isOwner(uid) && isValidDigitalCard(request.resource.data)) ||
+        // Anonymous visitors may only bump the view counter on a public card.
+        (resource.data.isPublic == true && onlyCountersChanged(['viewCount']));
+      allow delete: if isOwner(uid);
+    }
+
+    // Handle reservations. The document ID *is* the handle, so `create`
+    // (which Firestore only permits when the document does not yet exist)
+    // gives us atomic uniqueness without a transaction.
+    match /handles/{handle} {
+      allow get: if true;
+      allow create: if isAuthenticated() &&
+        hasRequiredFields(['uid', 'cardId']) &&
+        request.resource.data.uid == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
     }
 
     match /posts/{postId} {

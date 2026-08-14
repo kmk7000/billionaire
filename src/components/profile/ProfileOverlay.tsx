@@ -50,13 +50,15 @@ interface ProfileOverlayProps {
   personalInfo: PersonalInfoEditor;
   myPosts: CommunityPost[];
   onSelectPost: (postId: string) => void;
+  onOpenPublicCard: () => void;
+  publicHandle: string | null;
 }
 
 export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
   isOpen, onClose, user, userProfile, myMeishi, profileTab, onChangeProfileTab,
   completedProfileSteps, onPickProfilePhoto, onOpenIntroEdit, onOpenCamera, onDeleteMyMeishi,
   career, education, job, skill, language, website, lecture, publication, article,
-  awards, certificates, personalInfo, myPosts, onSelectPost,
+  awards, certificates, personalInfo, myPosts, onSelectPost, onOpenPublicCard, publicHandle,
 }) => (
   <AnimatePresence>
     {isOpen && (
@@ -154,6 +156,8 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               userProfile={userProfile}
               onOpenCamera={onOpenCamera}
               onDeleteMyMeishi={onDeleteMyMeishi}
+              onOpenPublicCard={onOpenPublicCard}
+              publicHandle={publicHandle}
             />
           ) : profileTab === 1 ? (
             /* Profile Tab (Existing Content) */

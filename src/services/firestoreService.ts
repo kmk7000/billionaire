@@ -105,59 +105,145 @@ export const contactService = {
 
 // --- Digital Cards API (マイ名刺) ---
 export const digitalCardService = {
-  // Get user's active digital cards
-  async getMyCards(userId: string): Promise<DigitalCard[]> {
+  // A user has exactly one digital card, stored under their own uid.
+  async getMyCard(userId: string): Promise<DigitalCard | null> {
     try {
-      const q = query(collection(db, 'my_cards'), where('userId', '==', userId));
-      const snap = await getDocs(q);
-      return snap.docs.map((d) => ({ id: d.id, ...d.data() })) as DigitalCard[];
+      const snap = await getDoc(doc(db, 'my_cards', userId));
+      return snap.exists() ? ({ id: snap.id, ...snap.data() } as DigitalCard) : null;
     } catch (error) {
-      handleFirestoreError(error as Error, OperationType.LIST, 'my_cards');
-      return [];
+      handleFirestoreError(error as Error, OperationType.GET, `my_cards/${userId}`);
+      return null;
     }
   },
 
-  // Save / Update digital card
-  async saveMyCard(card: Omit<DigitalCard, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<string> {
+  subscribeMyCard(
+    userId: string,
+    onData: (card: DigitalCard | null) => void,
+    onError?: (error: Error) => void
+  ): Unsubscribe {
+    return onSnapshot(
+      doc(db, 'my_cards', userId),
+      (snap) => onData(snap.exists() ? ({ id: snap.id, ...snap.data() } as DigitalCard) : null),
+      (error) => onError?.(error as Error)
+    );
+  },
+
+  async saveMyCard(
+    userId: string,
+    card: Partial<Omit<DigitalCard, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+  ): Promise<void> {
     try {
-      if (card.id) {
-        const docRef = doc(db, 'my_cards', card.id);
-        await updateDoc(docRef, {
-          ...card,
-          updatedAt: serverTimestamp(),
-        });
-        return card.id;
-      } else {
-        const docRef = await addDoc(collection(db, 'my_cards'), {
-          ...card,
-          viewCount: 0,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        return docRef.id;
-      }
+      await setDoc(
+        doc(db, 'my_cards', userId),
+        { ...card, userId, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
     } catch (error) {
-      handleFirestoreError(error as Error, OperationType.WRITE, 'my_cards');
+      handleFirestoreError(error as Error, OperationType.WRITE, `my_cards/${userId}`);
       throw error;
     }
   },
 
-  // Fetch public digital card by handle
+  // Resolve a public card from its handle. Runs for signed-out visitors, so
+  // it must only ever touch documents the public rules allow.
   async getCardByHandle(handle: string): Promise<DigitalCard | null> {
+    const normalized = normalizeHandle(handle);
     try {
-      const q = query(collection(db, 'my_cards'), where('handle', '==', handle), limit(1));
-      const snap = await getDocs(q);
-      if (snap.empty) return null;
-      const cardDoc = snap.docs[0];
-      // Increment view count asynchronously
-      updateDoc(doc(db, 'my_cards', cardDoc.id), {
-        viewCount: increment(1),
-      }).catch(() => {});
-      return { id: cardDoc.id, ...cardDoc.data() } as DigitalCard;
+      const reservation = await getDoc(doc(db, 'handles', normalized));
+      if (!reservation.exists()) return null;
+
+      const { uid } = reservation.data() as { uid: string };
+      const cardSnap = await getDoc(doc(db, 'my_cards', uid));
+      if (!cardSnap.exists()) return null;
+
+      const card = { id: cardSnap.id, ...cardSnap.data() } as DigitalCard;
+      if (!card.isPublic) return null;
+
+      // Fire-and-forget: a failed counter bump must not break the page.
+      updateDoc(doc(db, 'my_cards', uid), { viewCount: increment(1) }).catch(() => {});
+      return card;
     } catch (error) {
-      handleFirestoreError(error as Error, OperationType.GET, `my_cards/handle/${handle}`);
+      console.error('Failed to resolve card handle:', error);
       return null;
     }
+  },
+};
+
+// --- Public handle reservations (@handle) ---
+
+export const HANDLE_PATTERN = /^[a-z0-9_]{3,30}$/;
+
+export function normalizeHandle(handle: string): string {
+  return handle.trim().toLowerCase();
+}
+
+/** Handles that would collide with routes or impersonate the product. */
+const RESERVED_HANDLES = new Set([
+  'admin', 'billionaire', 'support', 'help', 'about', 'terms', 'privacy',
+  'login', 'signup', 'settings', 'api', 'app', 'www', 'official', 'me',
+]);
+
+// A plain optional field rather than a discriminated union: this project's
+// tsconfig has strictNullChecks off, which breaks narrowing on `ok`.
+export interface HandleCheck {
+  ok: boolean;
+  reason?: 'format' | 'reserved' | 'taken';
+}
+
+export const handleService = {
+  validateFormat(handle: string): HandleCheck {
+    const normalized = normalizeHandle(handle);
+    if (!HANDLE_PATTERN.test(normalized)) return { ok: false, reason: 'format' };
+    if (RESERVED_HANDLES.has(normalized)) return { ok: false, reason: 'reserved' };
+    return { ok: true };
+  },
+
+  /** Format check plus a lookup for whether someone else already holds it. */
+  async check(handle: string, currentUid?: string): Promise<HandleCheck> {
+    const format = handleService.validateFormat(handle);
+    if (!format.ok) return format;
+
+    const normalized = normalizeHandle(handle);
+    const snap = await getDoc(doc(db, 'handles', normalized));
+    if (snap.exists() && (snap.data() as { uid: string }).uid !== currentUid) {
+      return { ok: false, reason: 'taken' };
+    }
+    return { ok: true };
+  },
+
+  /**
+   * Reserve a handle for a user. `create` is rejected by the security rules
+   * when the document already exists, so two users racing for the same
+   * handle cannot both succeed.
+   */
+  async claim(handle: string, uid: string, previousHandle?: string): Promise<HandleCheck> {
+    const normalized = normalizeHandle(handle);
+    const format = handleService.validateFormat(normalized);
+    if (!format.ok) return format;
+
+    if (previousHandle && normalizeHandle(previousHandle) === normalized) {
+      return { ok: true };
+    }
+
+    try {
+      await setDoc(doc(db, 'handles', normalized), {
+        uid,
+        cardId: uid,
+        createdAt: serverTimestamp(),
+      });
+    } catch {
+      // Either someone else holds it, or the rules rejected an overwrite.
+      return { ok: false, reason: 'taken' };
+    }
+
+    if (previousHandle) {
+      await deleteDoc(doc(db, 'handles', normalizeHandle(previousHandle))).catch(() => {});
+    }
+    return { ok: true };
+  },
+
+  async release(handle: string): Promise<void> {
+    await deleteDoc(doc(db, 'handles', normalizeHandle(handle))).catch(() => {});
   },
 };
 

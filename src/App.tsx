@@ -60,6 +60,8 @@ import { ProfileOverlay } from './components/profile/ProfileOverlay';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
+import { PublicCardModal } from './components/profile/PublicCardModal';
+import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
 
 export default function App() {
@@ -161,6 +163,7 @@ export default function App() {
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isPublicCardOpen, setIsPublicCardOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleDeleteSelectedMeishis = () => {
@@ -288,6 +291,7 @@ export default function App() {
   const certificates = useCertificatesEditor(user, userProfile);
   const personalInfo = usePersonalInfoEditor(user, userProfile);
   const accountSettings = useAccountSettings(user, setActiveTab);
+  const publicCard = usePublicCard(user, userProfile, myMeishi);
 
   const sortedMeishis = React.useMemo(() => {
     return [...meishis].sort((a, b) => {
@@ -911,7 +915,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={() => setPublicHandle('billionaire_demo')}
+              onClick={() => setIsPublicCardOpen(true)}
               className="w-full py-2 bg-primary-soft text-primary font-bold text-xs rounded-lg hover:bg-line transition-colors duration-200 flex items-center justify-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -1034,6 +1038,14 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <PublicCardModal
+        isOpen={isPublicCardOpen}
+        onClose={() => setIsPublicCardOpen(false)}
+        publicCard={publicCard}
+        onPreview={(handle) => { setIsPublicCardOpen(false); setPublicHandle(handle); }}
+        hasMyMeishi={!!myMeishi}
+      />
+
       {/* Hidden profile-photo picker (triggered from Today card / profile overlay) */}
       <input
         ref={profilePhotoInputRef}
@@ -1078,6 +1090,8 @@ export default function App() {
         personalInfo={personalInfo}
         myPosts={posts.filter(p => p.authorId === user.uid)}
         onSelectPost={(postId) => setSelectedPostId(postId)}
+        onOpenPublicCard={() => setIsPublicCardOpen(true)}
+        publicHandle={publicCard.handle}
       />
 
       {/* My Meishi Delete Confirmation */}
