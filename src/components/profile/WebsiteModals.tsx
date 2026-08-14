@@ -11,22 +11,22 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-white z-50 flex flex-col pt-safe"
+        className="fixed inset-0 bg-surface z-50 flex flex-col pt-safe"
       >
-        <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
+        <div className="sticky top-0 bg-surface z-20 border-b border-line">
           <div className="flex items-center justify-between p-4 relative">
             <div className="flex items-center gap-3">
               <button aria-label="戻る"
                 onClick={w.close}
                 className="p-1 -ml-1"
               >
-                <ArrowLeft className="w-6 h-6 text-gray-900" />
+                <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
-              <h2 className="text-lg font-bold text-gray-900">ウェブサイト・ブログ編集</h2>
+              <h2 className="text-lg font-bold text-ink">ウェブサイト・ブログ編集</h2>
             </div>
             <button
               onClick={w.handleSave}
-              className="font-bold text-[#0A0A0A] text-sm"
+              className="font-bold text-primary text-sm"
             >
               保存
             </button>
@@ -36,7 +36,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
         <div className="flex-1 overflow-y-auto px-4 py-6">
           <div className="space-y-6">
             <div className="space-y-4">
-              <label className="text-sm font-bold text-gray-900">
+              <label className="text-sm font-bold text-ink">
                 リンク・URL
               </label>
               {w.websiteUrls.map((url, index) => (
@@ -46,7 +46,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
                     value={url}
                     onChange={(e) => w.changeUrl(index, e.target.value)}
                     placeholder="ウェブサイトやブログのリンクを入力"
-                    className="w-full h-[45px] px-4 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-black focus:ring-0"
+                    className="w-full h-[45px] px-4 border border-line rounded-md bg-surface text-ink placeholder-ink-faint focus:outline-none focus:border-primary focus:ring-0"
                   />
                 </div>
               ))}
@@ -54,9 +54,9 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
 
             <button
               onClick={w.addUrlInput}
-              className="flex items-center gap-2 text-gray-900 font-bold py-2"
+              className="flex items-center gap-2 text-ink font-bold py-2"
             >
-              <div className="w-6 h-6 rounded-full bg-[#0A0A0A] flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                 <Plus className="w-4 h-4 text-white" />
               </div>
               追加

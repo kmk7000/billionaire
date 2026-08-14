@@ -22,14 +22,14 @@ export const BestPostsSection: React.FC<BestPostsSectionProps> = ({
   );
 
   return (
-    <div className="bg-white border-b border-gray-100">
+    <div className="bg-surface border-b border-line">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-amber-500" />
-          <h2 className="font-bold text-gray-900 text-sm">ベスト投稿</h2>
+          <Trophy className="w-4 h-4 text-warning" />
+          <h2 className="font-bold text-ink text-sm">ベスト投稿</h2>
         </div>
         {showViewAll && (
-          <button onClick={onViewAll} className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2">
+          <button onClick={onViewAll} className="text-xs text-ink-faint hover:text-ink-muted underline underline-offset-2 transition-colors duration-200">
             すべて見る
           </button>
         )}
@@ -38,18 +38,18 @@ export const BestPostsSection: React.FC<BestPostsSectionProps> = ({
         {loading ? (
           Array.from({ length: count }).map((_, i) => <BestPostRowSkeleton key={i} />)
         ) : ranked.length === 0 ? (
-          <p className="px-4 pb-4 text-sm text-gray-400">まだ投稿がありません</p>
+          <p className="px-4 pb-4 text-sm text-ink-faint">まだ投稿がありません</p>
         ) : (
           ranked.map((post) => (
             <div
               key={post.id}
               onClick={() => onSelectPost(post.id)}
-              className="px-4 py-3 border-t border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="px-4 py-3 border-t border-line cursor-pointer hover:bg-canvas transition-colors duration-200"
             >
-              <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mb-1">{post.title}</h3>
+              <h3 className="font-bold text-ink text-sm line-clamp-1 mb-1">{post.title}</h3>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-gray-400">{getCommunityBoardLabel(post.boardId)}</span>
-                <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                <span className="text-xs text-ink-faint">{getCommunityBoardLabel(post.boardId)}</span>
+                <div className="flex items-center gap-3 text-xs text-ink-faint">
                   <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {post.viewCount ?? 0}</span>
                   <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" /> {post.likeCount}</span>
                   <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {post.commentCount}</span>

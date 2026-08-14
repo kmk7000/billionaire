@@ -14,56 +14,56 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
           {/* Header */}
-          <div className="flex items-center p-4 bg-white sticky top-0 z-10">
+          <div className="flex items-center p-4 bg-surface sticky top-0 z-10">
             <button aria-label="戻る" onClick={c.closeList} className="mr-3">
-              <ArrowLeft className="w-6 h-6 text-gray-900" />
+              <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
-            <h2 className="text-lg font-bold text-gray-900">経歴編集</h2>
+            <h2 className="text-lg font-bold text-ink">経歴編集</h2>
           </div>
 
           <div className="flex flex-col">
             {/* Total Years */}
-            <div className="p-4 bg-white">
-              <label className="block text-sm font-bold text-gray-400 mb-2">
+            <div className="p-4 bg-surface">
+              <label className="block text-sm font-bold text-ink-faint mb-2">
                 総経歴年数
               </label>
-              <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+              <div className="flex items-center justify-between border-b border-line pb-2">
                 <input
                   type="text"
                   value={c.totalCareerYears}
                   onChange={(e) => c.setTotalCareerYears(e.target.value)}
                   onBlur={() => c.handleSaveTotalCareerYears(c.totalCareerYears)}
                   placeholder="例) 15"
-                  className="w-full text-gray-900 placeholder-gray-300 focus:outline-none text-lg"
+                  className="w-full text-ink placeholder-ink-faint focus:outline-none text-lg"
                 />
-                <ChevronRight className="w-5 h-5 text-gray-900 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-ink flex-shrink-0" />
               </div>
             </div>
 
             {/* Divider */}
-            <div className="h-2 bg-gray-50 w-full"></div>
+            <div className="h-2 bg-canvas w-full"></div>
 
             {/* Add Career */}
-            <div className="p-4 bg-white">
-              <h3 className="text-sm font-bold text-gray-400 mb-4">経歴追加</h3>
+            <div className="p-4 bg-surface">
+              <h3 className="text-sm font-bold text-ink-faint mb-4">経歴追加</h3>
               <button
                 onClick={c.openNewCareer}
-                className="w-full flex items-center justify-between py-3 border-b border-gray-100"
+                className="w-full flex items-center justify-between py-3 border-b border-line"
               >
                 <div className="flex items-center gap-3">
-                  <Edit3 className="w-5 h-5 text-gray-900" />
-                  <span className="font-bold text-gray-900">直接入力する</span>
+                  <Edit3 className="w-5 h-5 text-ink" />
+                  <span className="font-bold text-ink">直接入力する</span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-900" />
+                <ChevronRight className="w-5 h-5 text-ink" />
               </button>
             </div>
 
             {/* Career List */}
             {c.careers.length > 0 && (
-              <div className="p-4 bg-white pt-0">
+              <div className="p-4 bg-surface pt-0">
                 <div className="space-y-6">
                   {c.careers.map((careerItem) => (
                     <div
@@ -72,10 +72,10 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                       className="flex flex-col cursor-pointer group"
                     >
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-gray-900 text-lg mb-1">{careerItem.companyName}</h4>
-                        <ChevronRight className="w-5 h-5 text-gray-900 flex-shrink-0" />
+                        <h4 className="font-bold text-ink text-lg mb-1">{careerItem.companyName}</h4>
+                        <ChevronRight className="w-5 h-5 text-ink flex-shrink-0" />
                       </div>
-                      <p className="text-sm text-gray-400 mb-3">
+                      <p className="text-sm text-ink-faint mb-3">
                         {careerItem.startDate.replace('-', '.')} ~ {careerItem.isCurrent ? '現在' : careerItem.endDate?.replace('-', '.')} ({calculateCareerDuration(careerItem.startDate, careerItem.endDate, careerItem.isCurrent)})
                       </p>
                     </div>
@@ -96,20 +96,20 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+          <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <button onClick={() => c.setIsEditOpen(false)}>
-                <ArrowLeft className="w-6 h-6 text-gray-900" />
+                <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
-              <h2 className="text-lg font-bold text-gray-900">{c.editingCareerId ? '経歴編集' : '経歴追加'}</h2>
+              <h2 className="text-lg font-bold text-ink">{c.editingCareerId ? '経歴編集' : '経歴追加'}</h2>
             </div>
             <button
               onClick={c.handleSaveCareer}
               disabled={!c.company || !c.startDate || (!c.isCurrent && !c.endDate)}
-              className={`font-bold text-sm ${(!c.company || !c.startDate || (!c.isCurrent && !c.endDate)) ? 'text-gray-300' : 'text-[#0A0A0A]'}`}
+              className={`font-bold text-sm ${(!c.company || !c.startDate || (!c.isCurrent && !c.endDate)) ? 'text-ink-faint' : 'text-primary'}`}
             >
               完了
             </button>
@@ -118,17 +118,17 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           <div className="p-4">
             {/* Company Field */}
             <div className="mb-6">
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                会社 <span className="text-red-500">*</span>
+              <label className="block text-sm font-bold text-ink mb-2">
+                会社 <span className="text-danger">*</span>
               </label>
               <div
                 onClick={() => c.setIsCompanySearchOpen(true)}
-                className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
+                className="w-full border border-line rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
               >
-                <span className={c.company ? 'text-gray-900' : 'text-gray-400'}>
+                <span className={c.company ? 'text-ink' : 'text-ink-faint'}>
                   {c.company || '例）LINEヤフー'}
                 </span>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <ChevronRight className="w-5 h-5 text-ink-faint" />
               </div>
 
               <div className="mt-3 flex items-center gap-2">
@@ -136,10 +136,10 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                   onClick={() => c.setIsCurrent(!c.isCurrent)}
                   className="flex items-center gap-2"
                 >
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${c.isCurrent ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${c.isCurrent ? 'border-primary bg-primary' : 'border-line'}`}>
                     {c.isCurrent && <Check className="w-3 h-3 text-white" />}
                   </div>
-                  <span className="text-sm text-gray-900">在職中</span>
+                  <span className="text-sm text-ink">在職中</span>
                 </button>
               </div>
             </div>
@@ -147,34 +147,34 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
             {/* Date Fields */}
             <div className="flex gap-4 mb-6">
               <div className="flex-1">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  入社 <span className="text-red-500">*</span>
+                <label className="block text-sm font-bold text-ink mb-2">
+                  入社 <span className="text-danger">*</span>
                 </label>
                 <div
                   onClick={() => c.openDatePicker('start')}
-                  className="w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
+                  className="w-full border border-line rounded-md h-[45px] px-4 flex justify-between items-center cursor-pointer"
                 >
-                  <span className={c.startDate ? 'text-gray-900' : 'text-gray-400'}>
+                  <span className={c.startDate ? 'text-ink' : 'text-ink-faint'}>
                     {c.startDate ? `${c.startDate.split('-')[0]}年 ${c.startDate.split('-')[1]}月` : '入社年月'}
                   </span>
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronDown className="w-5 h-5 text-ink-faint" />
                 </div>
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  退社 {!c.isCurrent && <span className="text-red-500">*</span>}
+                <label className="block text-sm font-bold text-ink mb-2">
+                  退社 {!c.isCurrent && <span className="text-danger">*</span>}
                 </label>
                 <div
                   onClick={() => {
                     if (!c.isCurrent) c.openDatePicker('end');
                   }}
-                  className={`w-full border border-gray-200 rounded-md h-[45px] px-4 flex justify-between items-center ${c.isCurrent ? 'bg-gray-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`w-full border border-line rounded-md h-[45px] px-4 flex justify-between items-center ${c.isCurrent ? 'bg-canvas cursor-not-allowed' : 'cursor-pointer'}`}
                 >
-                  <span className={c.endDate && !c.isCurrent ? 'text-gray-900' : 'text-gray-400'}>
+                  <span className={c.endDate && !c.isCurrent ? 'text-ink' : 'text-ink-faint'}>
                     {c.isCurrent ? '退社年月' : (c.endDate ? `${c.endDate.split('-')[0]}年 ${c.endDate.split('-')[1]}月` : '退社年月')}
                   </span>
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronDown className="w-5 h-5 text-ink-faint" />
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
               <>
                 {/* Title Field */}
                 <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-ink mb-2">
                     役職
                   </label>
                   <input
@@ -192,13 +192,13 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                     value={c.title}
                     onChange={(e) => c.setTitle(e.target.value)}
                     placeholder="例）チームリーダー/課長"
-                    className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900"
+                    className="w-full border border-line rounded-md h-[45px] px-4 text-ink placeholder-ink-faint focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 {/* Department Field */}
                 <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-ink mb-2">
                     部署
                   </label>
                   <input
@@ -206,14 +206,14 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                     value={c.department}
                     onChange={(e) => c.setDepartment(e.target.value)}
                     placeholder="例）企画戦略室"
-                    className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900"
+                    className="w-full border border-line rounded-md h-[45px] px-4 text-ink placeholder-ink-faint focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 {/* Description Field */}
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-sm font-bold text-gray-900">
+                    <label className="block text-sm font-bold text-ink">
                       業務説明
                     </label>
                   </div>
@@ -222,13 +222,13 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                       value={c.description}
                       onChange={(e) => c.setDescription(e.target.value)}
                       placeholder="例）プロジェクト管理およびチームリーダーの役割を遂行&#10;・顧客の要件分析および解決策の提案&#10;・データ分析を通じたインサイトの導出"
-                      className="w-full border border-gray-200 rounded-md p-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 min-h-[200px] resize-none"
+                      className="w-full border border-line rounded-md p-4 text-ink placeholder-ink-faint focus:outline-none focus:border-primary min-h-[200px] resize-none"
                       maxLength={5000}
                     />
-                    <div className="absolute bottom-3 left-4 text-xs text-gray-400">
+                    <div className="absolute bottom-3 left-4 text-xs text-ink-faint">
                       専門性のために50文字以上を推奨します
                     </div>
-                    <div className="absolute bottom-3 right-4 text-xs text-gray-400">
+                    <div className="absolute bottom-3 right-4 text-xs text-ink-faint">
                       {c.description.length}/5000字
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
 
                 {/* Location Field */}
                 <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-ink mb-2">
                     会社所在地
                   </label>
                   <div className="flex gap-3">
@@ -249,15 +249,15 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                             c.setLocationCountry('');
                           }
                         }}
-                        className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 appearance-none focus:outline-none focus:border-gray-900 bg-white"
+                        className="w-full border border-line rounded-md h-[45px] px-4 text-ink appearance-none focus:outline-none focus:border-primary bg-surface"
                       >
-                        <option value="" disabled hidden className="text-gray-400">地域を選択</option>
+                        <option value="" disabled hidden className="text-ink-faint">地域を選択</option>
                         {PREFECTURES.map(pref => (
                           <option key={pref} value={pref}>{pref}</option>
                         ))}
                         <option value="海外">海外</option>
                       </select>
-                      <ChevronRight className="w-5 h-5 text-gray-900 absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
+                      <ChevronRight className="w-5 h-5 text-ink absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
                     </div>
 
                     {c.locationRegion === '海外' && (
@@ -265,14 +265,14 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                         <select
                           value={c.locationCountry}
                           onChange={(e) => c.setLocationCountry(e.target.value)}
-                          className="w-full border border-gray-200 rounded-md h-[45px] px-4 text-gray-900 appearance-none focus:outline-none focus:border-gray-900 bg-white"
+                          className="w-full border border-line rounded-md h-[45px] px-4 text-ink appearance-none focus:outline-none focus:border-primary bg-surface"
                         >
-                          <option value="" disabled hidden className="text-gray-400">国家</option>
+                          <option value="" disabled hidden className="text-ink-faint">国家</option>
                           {COUNTRIES.map(country => (
                             <option key={country} value={country}>{country}</option>
                           ))}
                         </select>
-                        <ChevronRight className="w-5 h-5 text-gray-900 absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
+                        <ChevronRight className="w-5 h-5 text-ink absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
                       </div>
                     )}
                   </div>
@@ -283,7 +283,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                   <div className="mt-12 mb-8 flex justify-center">
                     <button
                       onClick={c.handleDeleteCareer}
-                      className="text-gray-500 font-medium hover:text-red-500 transition-colors"
+                      className="text-ink-muted font-medium hover:text-danger transition-colors"
                     >
                       経歴を削除
                     </button>
@@ -304,11 +304,11 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-white z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+          className="fixed inset-0 bg-surface z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
-          <div className="p-4 flex items-center gap-3 border-b border-gray-100">
-            <div className="flex-1 bg-gray-50 rounded-lg flex items-center px-3 py-2">
-              <Search className="w-5 h-5 text-gray-400 mr-2" />
+          <div className="p-4 flex items-center gap-3 border-b border-line">
+            <div className="flex-1 bg-canvas rounded-lg flex items-center px-3 py-2">
+              <Search className="w-5 h-5 text-ink-faint mr-2" />
               <input
                 type="text"
                 value={c.companySearchQuery}
@@ -319,7 +319,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
               />
               {c.companySearchQuery && (
                 <button onClick={() => c.setCompanySearchQuery('')}>
-                  <X className="w-4 h-4 text-gray-400 bg-gray-200 rounded-full p-0.5" />
+                  <X className="w-4 h-4 text-ink-faint bg-primary-soft rounded-full p-0.5" />
                 </button>
               )}
             </div>
@@ -345,27 +345,27 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                       c.setIsCompanySearchOpen(false);
                       c.setCompanySearchQuery('');
                     }}
-                    className="py-3 border-b border-gray-100 text-sm cursor-pointer"
+                    className="py-3 border-b border-line text-sm cursor-pointer"
                   >
                     {companyName}
                   </div>
                 ))}
                 <div className="text-center mt-8">
-                  <p className="text-sm text-gray-500 mb-2">お探しの会社名がありませんか？</p>
+                  <p className="text-sm text-ink-muted mb-2">お探しの会社名がありませんか？</p>
                   <button
                     onClick={() => {
                       c.setCompany(c.companySearchQuery);
                       c.setIsCompanySearchOpen(false);
                       c.setCompanySearchQuery('');
                     }}
-                    className="text-[#0A0A0A] text-sm font-medium underline"
+                    className="text-primary text-sm font-medium underline"
                   >
                     '{c.companySearchQuery}' を直接入力
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-center text-sm text-gray-400 mt-8">
+              <div className="text-center text-sm text-ink-faint mt-8">
                 最近検索した会社名がありません
               </div>
             )}
@@ -383,25 +383,25 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => c.setIsDatePickerOpen(null)}
-            className="fixed inset-0 bg-black/40 z-[80] max-w-md mx-auto"
+            className="fixed inset-0 bg-primary/40 z-[80] max-w-md mx-auto"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 bg-white z-[90] rounded-t-2xl max-w-md mx-auto"
+            className="fixed bottom-0 left-0 right-0 bg-surface z-[90] rounded-t-2xl max-w-md mx-auto"
           >
-            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+            <div className="flex justify-between items-center p-4 border-b border-line">
               <button
                 onClick={c.clearDate}
-                className="text-[#0A0A0A] font-medium"
+                className="text-primary font-medium"
               >
                 削除
               </button>
               <button
                 onClick={c.confirmDate}
-                className="text-[#0A0A0A] font-medium"
+                className="text-primary font-medium"
               >
                 完了
               </button>
@@ -414,7 +414,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                   <div
                     key={year}
                     onClick={() => c.setTempDate(prev => ({ ...prev, year }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.year === year ? 'text-xl font-bold text-gray-900' : 'text-gray-400'}`}
+                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.year === year ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
                   >
                     {year}年
                   </div>
@@ -427,7 +427,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                   <div
                     key={month}
                     onClick={() => c.setTempDate(prev => ({ ...prev, month }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.month === month ? 'text-xl font-bold text-gray-900' : 'text-gray-400'}`}
+                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.month === month ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
                   >
                     {month}月
                   </div>
@@ -435,7 +435,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                 <div className="h-20"></div>
               </div>
               {/* Selection Highlight */}
-              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-gray-100 rounded-lg -z-10 pointer-events-none"></div>
+              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-primary-soft rounded-lg -z-10 pointer-events-none"></div>
             </div>
           </motion.div>
         </>

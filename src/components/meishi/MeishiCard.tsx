@@ -2,7 +2,7 @@ import React from 'react';
 import { CheckCircle2, Circle as CircleIcon } from 'lucide-react';
 import type { Meishi } from '../../types/app';
 
-export const MeishiCard: React.FC<{ 
+export const MeishiCard: React.FC<{
   meishi: Meishi;
   isEditMode?: boolean;
   isSelected?: boolean;
@@ -14,8 +14,8 @@ export const MeishiCard: React.FC<{
     : '';
 
   return (
-    <div 
-      className={`bg-white px-5 py-4 border-b border-gray-100 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer h-[130px] ${isSelected ? 'bg-[#0A0A0A]/5' : ''} ${meishi.isMyCard ? 'bg-gray-50/30' : ''}`}
+    <div
+      className={`bg-surface px-5 py-4 border-b border-line flex items-center gap-4 hover:bg-canvas transition-colors duration-200 cursor-pointer h-[130px] ${isSelected ? 'bg-primary/5' : ''} ${meishi.isMyCard ? 'bg-canvas/30' : ''}`}
       onClick={() => {
         if (isEditMode) {
           onSelect && onSelect(meishi.id);
@@ -27,31 +27,31 @@ export const MeishiCard: React.FC<{
       {isEditMode && (
         <div className="flex-shrink-0 mr-2">
           {isSelected ? (
-            <CheckCircle2 className="w-6 h-6 text-[#0A0A0A] fill-[#0A0A0A]" stroke="white" />
+            <CheckCircle2 className="w-6 h-6 text-primary fill-primary" stroke="white" />
           ) : (
-            <CircleIcon className="w-6 h-6 text-gray-300" />
+            <CircleIcon className="w-6 h-6 text-ink-faint" />
           )}
         </div>
       )}
       <div className="flex-1">
         {formattedDate && (
-          <p className="text-[13px] font-bold text-gray-400 mb-2">{formattedDate}</p>
+          <p className="text-[13px] font-bold text-ink-faint mb-2">{formattedDate}</p>
         )}
         <div className="flex items-center gap-2 mb-2">
-          <h3 className="text-[18px] font-bold text-gray-900">{meishi.name || '名前なし'}</h3>
+          <h3 className="text-[18px] font-bold text-ink">{meishi.name || '名前なし'}</h3>
           {meishi.isMyCard && (
-            <span className="text-[10px] font-bold text-[#0A0A0A] bg-[#0A0A0A]/10 px-2 py-0.5 rounded-full border border-[#0A0A0A]/20">本人</span>
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">本人</span>
           )}
         </div>
-        <p className="text-[12px] font-bold text-gray-500 mb-0.5">
+        <p className="text-[12px] font-bold text-ink-muted mb-0.5">
           {meishi.position || '職位なし'} {meishi.department && `/ ${meishi.department}`}
         </p>
-        <p className="text-[12px] font-bold text-gray-500">{meishi.company || '会社名なし'}</p>
+        <p className="text-[12px] font-bold text-ink-muted">{meishi.company || '会社名なし'}</p>
       </div>
-      <div className="w-[120px] h-[70px] bg-gray-50 rounded border border-gray-200 overflow-hidden flex-shrink-0">
-        <img 
-          src={meishi.imageUrl || `https://picsum.photos/seed/${meishi.id}/200/120`} 
-          alt="Meishi" 
+      <div className="w-[120px] h-[70px] bg-canvas rounded border border-line overflow-hidden flex-shrink-0">
+        <img
+          src={meishi.imageUrl || `https://picsum.photos/seed/${meishi.id}/200/120`}
+          alt="Meishi"
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
         />

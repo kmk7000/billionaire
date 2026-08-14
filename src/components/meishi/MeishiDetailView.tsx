@@ -3,9 +3,9 @@ import { MessageSquare, ChevronRight, Mail, ArrowLeft, Edit2, Trash2, MoreHorizo
 import { motion, AnimatePresence } from 'motion/react';
 import type { Tab, Meishi } from '../../types/app';
 
-export const MeishiDetailView: React.FC<{ 
-  meishi: Meishi; 
-  onBack: () => void; 
+export const MeishiDetailView: React.FC<{
+  meishi: Meishi;
+  onBack: () => void;
   onEdit: () => void;
   onDelete: (id: string) => void;
 }> = ({ meishi, onBack, onEdit, onDelete }) => {
@@ -44,29 +44,29 @@ export const MeishiDetailView: React.FC<{
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
+      className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
     >
       {/* Header */}
-      <div className="sticky top-0 bg-white px-4 py-3 flex items-center justify-between z-10">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-gray-900">
+      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10">
+        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={() => setIsMoreOptionsOpen(true)} className="p-1">
-          <MoreVertical className="w-6 h-6 text-gray-900" />
+          <MoreVertical className="w-6 h-6 text-ink" />
         </button>
       </div>
 
       {/* Profile Section */}
       <div className="px-6 pt-4 pb-8 flex justify-between items-start">
         <div className="flex-1 pr-4">
-          <h2 className="text-[28px] font-bold text-gray-900 mb-1">{meishi.name}</h2>
-          <p className="text-[16px] text-gray-900 font-medium mb-1">{meishi.position}</p>
-          <p className="text-[16px] text-gray-400 font-medium">{meishi.company}</p>
+          <h2 className="text-[28px] font-bold text-ink mb-1">{meishi.name}</h2>
+          <p className="text-[16px] text-ink font-medium mb-1">{meishi.position}</p>
+          <p className="text-[16px] text-ink-faint font-medium">{meishi.company}</p>
         </div>
-        <div className="w-20 h-20 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
-          <img 
-            src={meishi.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${meishi.id}`} 
-            alt="Profile" 
+        <div className="w-20 h-20 rounded-full bg-primary-soft border border-line overflow-hidden flex-shrink-0">
+          <img
+            src={meishi.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${meishi.id}`}
+            alt="Profile"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -75,43 +75,43 @@ export const MeishiDetailView: React.FC<{
 
       {/* Action Buttons */}
       <div className="px-6 flex justify-between items-center mb-10">
-        <button aria-label="電話をかける" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="電話をかける" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
           <Phone className="w-6 h-6" />
         </button>
-        <button aria-label="メッセージを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.phone ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="メッセージを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
           <MessageSquare className="w-6 h-6" />
         </button>
-        <button aria-label="メールを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${meishi.email ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+        <button aria-label="メールを送る" className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.email ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint hover:bg-line'}`}>
           <Mail className="w-6 h-6" />
         </button>
-        <button aria-label="ギフトを送る" className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+        <button aria-label="ギフトを送る" className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white hover:opacity-90 transition-colors duration-200">
           <Gift className="w-6 h-6" />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 px-6 mb-6">
-        <button 
+      <div className="flex border-b border-line px-6 mb-6">
+        <button
           onClick={() => setActiveTab('info')}
-          className={`flex-1 py-3 text-[15px] font-bold transition-colors relative ${activeTab === 'info' ? 'text-black' : 'text-gray-400'}`}
+          className={`flex-1 py-3 text-[15px] font-bold transition-colors duration-200 relative ${activeTab === 'info' ? 'text-ink' : 'text-ink-faint'}`}
         >
           名刺情報
           {activeTab === 'info' && (
-            <motion.div 
+            <motion.div
               layoutId="detailTabIndicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" 
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
             />
           )}
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('memo')}
-          className={`flex-1 py-3 text-[15px] font-bold transition-colors relative ${activeTab === 'memo' ? 'text-black' : 'text-gray-400'}`}
+          className={`flex-1 py-3 text-[15px] font-bold transition-colors duration-200 relative ${activeTab === 'memo' ? 'text-ink' : 'text-ink-faint'}`}
         >
           メモ
           {activeTab === 'memo' && (
-            <motion.div 
+            <motion.div
               layoutId="detailTabIndicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" 
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
             />
           )}
         </button>
@@ -124,38 +124,38 @@ export const MeishiDetailView: React.FC<{
             {/* Information Section */}
             <div className="px-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[17px] font-bold text-gray-900">情報</h3>
-                <button onClick={onEdit} className="text-[14px] text-gray-400 flex items-center gap-1">
+                <h3 className="text-[17px] font-bold text-ink">情報</h3>
+                <button onClick={onEdit} className="text-[14px] text-ink-faint flex items-center gap-1">
                   編集 <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <span className="w-24 text-[15px] text-gray-400 font-medium">会社</span>
-                  <span className="flex-1 text-[15px] text-gray-900 font-medium">{meishi.company}</span>
+                  <span className="w-24 text-[15px] text-ink-faint font-medium">会社</span>
+                  <span className="flex-1 text-[15px] text-ink font-medium">{meishi.company}</span>
                 </div>
                 {meishi.department && (
                   <div className="flex items-start">
-                    <span className="w-24 text-[15px] text-gray-400 font-medium">部署</span>
-                    <span className="flex-1 text-[15px] text-gray-900 font-medium">{meishi.department}</span>
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">部署</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{meishi.department}</span>
                   </div>
                 )}
                 {meishi.phone && (
                   <div className="flex items-start">
-                    <span className="w-24 text-[15px] text-gray-400 font-medium">電話番号</span>
-                    <span className="flex-1 text-[15px] text-gray-900 font-medium">{meishi.phone}</span>
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">電話番号</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{meishi.phone}</span>
                   </div>
                 )}
                 {meishi.email && (
                   <div className="flex items-start">
-                    <span className="w-24 text-[15px] text-gray-400 font-medium">メール</span>
-                    <span className="flex-1 text-[15px] text-gray-900 font-medium">{meishi.email}</span>
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">メール</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{meishi.email}</span>
                   </div>
                 )}
                 {meishi.address && (
                   <div className="flex items-start">
-                    <span className="w-24 text-[15px] text-gray-400 font-medium">住所</span>
-                    <span className="flex-1 text-[15px] text-gray-900 font-medium">
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">住所</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">
                       {meishi.address}
                       {meishi.detailedAddress && <><br />{meishi.detailedAddress}</>}
                     </span>
@@ -165,58 +165,58 @@ export const MeishiDetailView: React.FC<{
             </div>
 
             {/* Group Section */}
-            <div className="px-6 pt-6 border-t border-gray-50">
+            <div className="px-6 pt-6 border-t border-line">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[17px] font-bold text-gray-900">グループ</h3>
-                <button className="text-[14px] text-gray-400 flex items-center gap-1">
+                <h3 className="text-[17px] font-bold text-ink">グループ</h3>
+                <button className="text-[14px] text-ink-faint flex items-center gap-1">
                   設定 <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-[15px] text-gray-300 font-medium">
+              <p className="text-[15px] text-ink-faint font-medium">
                 保存されたグループがありません
               </p>
             </div>
 
             {/* Registration Date Section */}
-            <div className="px-6 pt-6 border-t border-gray-50">
-              <h3 className="text-[17px] font-bold text-gray-900 mb-4">名刺登録日</h3>
-              <p className="text-[17px] text-gray-900 font-medium">
-                {meishi.createdAt 
+            <div className="px-6 pt-6 border-t border-line">
+              <h3 className="text-[17px] font-bold text-ink mb-4">名刺登録日</h3>
+              <p className="text-[17px] text-ink font-medium">
+                {meishi.createdAt
                   ? (meishi.createdAt.toDate ? meishi.createdAt.toDate() : new Date(meishi.createdAt)).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
-                  : meishi.updatedAt 
+                  : meishi.updatedAt
                     ? new Date(meishi.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
                     : '2026年3月22日'}
               </p>
             </div>
 
             {/* Sharing Section */}
-            <div className="px-6 pt-6 border-t border-gray-50 pb-10">
-              <h3 className="text-[17px] font-bold text-gray-900 mb-6">名刺を渡す</h3>
+            <div className="px-6 pt-6 border-t border-line pb-10">
+              <h3 className="text-[17px] font-bold text-ink mb-6">名刺を渡す</h3>
               <div className="flex gap-10">
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-white">
+                  <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white">
                     <MessageSquare className="w-6 h-6" />
                   </div>
-                  <span className="text-[13px] text-gray-900 font-medium">メッセージ</span>
+                  <span className="text-[13px] text-ink font-medium">メッセージ</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-14 h-14 rounded-full bg-[#06C755] flex items-center justify-center text-white">
                     <span className="font-bold text-sm">LINE</span>
                   </div>
-                  <span className="text-[13px] text-gray-900 font-medium">LINE</span>
+                  <span className="text-[13px] text-ink font-medium">LINE</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                  <div className="w-14 h-14 rounded-full bg-primary-soft flex items-center justify-center text-ink-faint">
                     <MoreHorizontal className="w-6 h-6" />
                   </div>
-                  <span className="text-[13px] text-gray-900 font-medium">その他</span>
+                  <span className="text-[13px] text-ink font-medium">その他</span>
                 </div>
               </div>
             </div>
           </div>
         ) : (
           <div className="px-6 py-10 text-center">
-            <p className="text-gray-400 text-sm">メモがありません</p>
+            <p className="text-ink-faint text-sm">メモがありません</p>
           </div>
         )}
       </div>
@@ -228,7 +228,7 @@ export const MeishiDetailView: React.FC<{
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[200] flex items-end"
+            className="fixed inset-0 bg-ink/50 z-[200] flex items-end"
             onClick={() => setIsMoreOptionsOpen(false)}
           >
             <motion.div
@@ -236,49 +236,49 @@ export const MeishiDetailView: React.FC<{
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-white w-full rounded-t-3xl p-6 pb-12"
+              className="bg-surface w-full rounded-t-3xl p-6 pb-12"
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-8" />
-              
+              <div className="w-12 h-1.5 bg-line rounded-full mx-auto mb-8" />
+
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={() => {
                     setIsMoreOptionsOpen(false);
                     onEdit();
                   }}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors group"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-canvas transition-colors duration-200 group"
                 >
                   <div className="flex items-center gap-4">
-                    <Edit2 className="w-6 h-6 text-gray-900" />
-                    <span className="font-bold text-gray-900">名刺情報の編集</span>
+                    <Edit2 className="w-6 h-6 text-ink" />
+                    <span className="font-bold text-ink">名刺情報の編集</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900" />
+                  <ChevronRight className="w-5 h-5 text-ink-faint group-hover:text-ink" />
                 </button>
 
-                <button 
+                <button
                   onClick={handleSaveToContacts}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors group"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-canvas transition-colors duration-200 group"
                 >
                   <div className="flex items-center gap-4">
-                    <Download className="w-6 h-6 text-gray-900" />
-                    <span className="font-bold text-gray-900">携帯の連絡先に保存</span>
+                    <Download className="w-6 h-6 text-ink" />
+                    <span className="font-bold text-ink">携帯の連絡先に保存</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900" />
+                  <ChevronRight className="w-5 h-5 text-ink-faint group-hover:text-ink" />
                 </button>
 
-                <button 
+                <button
                   onClick={() => {
                     setIsConfirmDeleteDialogOpen(true);
                     setIsMoreOptionsOpen(false);
                   }}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors group"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-canvas transition-colors duration-200 group"
                 >
                   <div className="flex items-center gap-4">
-                    <Trash2 className="w-6 h-6 text-red-500" />
-                    <span className="font-bold text-red-500">名刺の削除</span>
+                    <Trash2 className="w-6 h-6 text-danger" />
+                    <span className="font-bold text-danger">名刺の削除</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900" />
+                  <ChevronRight className="w-5 h-5 text-ink-faint group-hover:text-ink" />
                 </button>
               </div>
             </motion.div>
@@ -294,25 +294,25 @@ export const MeishiDetailView: React.FC<{
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-[300]"
+              className="fixed inset-0 bg-ink/50 z-[300]"
               onClick={() => setIsConfirmDeleteDialogOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
               exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
-              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-white rounded-2xl z-[310] p-6 text-center shadow-xl"
+              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-surface rounded-2xl z-[310] p-6 text-center shadow-lg"
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-ink mb-2">
                 名刺を削除しますか？
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-ink-muted mb-6">
                 削除した名刺は復元できません。
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsConfirmDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50"
+                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas transition-colors duration-200"
                 >
                   キャンセル
                 </button>
@@ -321,7 +321,7 @@ export const MeishiDetailView: React.FC<{
                     onDelete(meishi.id);
                     setIsConfirmDeleteDialogOpen(false);
                   }}
-                  className="flex-1 py-3 px-4 bg-[#FF4B4B] text-white rounded-xl font-bold hover:bg-red-600"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90 transition-colors duration-200"
                 >
                   削除
                 </button>

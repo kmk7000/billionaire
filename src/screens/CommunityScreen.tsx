@@ -50,19 +50,19 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
         loading={loading}
       />
 
-      <div className="flex border-b border-gray-100 bg-white lg:hidden">
+      <div className="flex border-b border-line bg-surface lg:hidden">
         <button
           onClick={() => setFeedMode('feed')}
-          className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
-            feedMode === 'feed' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-400'
+          className={`flex-1 py-2.5 text-xs font-bold transition-colors duration-200 ${
+            feedMode === 'feed' ? 'text-ink border-b-2 border-ink' : 'text-ink-faint'
           }`}
         >
           新着投稿
         </button>
         <button
           onClick={() => setFeedMode('recommended')}
-          className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
-            feedMode === 'recommended' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-400'
+          className={`flex-1 py-2.5 text-xs font-bold transition-colors duration-200 ${
+            feedMode === 'recommended' ? 'text-ink border-b-2 border-ink' : 'text-ink-faint'
           }`}
         >
           推薦投稿
@@ -78,7 +78,7 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => <PostCardSkeleton key={i} />)
           ) : filteredPosts.length === 0 ? (
-            <p className="text-center text-sm text-gray-400 py-16">まだ投稿がありません</p>
+            <p className="text-center text-sm text-ink-faint py-16">まだ投稿がありません</p>
           ) : (
             (feedMode === 'best' ? [...filteredPosts].sort((a, b) => b.likeCount - a.likeCount) : filteredPosts).map((post) => (
               <PostCard key={post.id} post={post} onSelect={onSelectPost} />
@@ -89,7 +89,7 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
 
       <button aria-label="投稿を作成"
         onClick={onOpenWrite}
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-black text-white flex items-center justify-center shadow-lg z-20 lg:hidden"
+        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg z-20 lg:hidden"
       >
         <PenSquare className="w-5 h-5" />
       </button>

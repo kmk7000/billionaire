@@ -13,14 +13,14 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-white z-50 flex flex-col pt-safe"
+        className="fixed inset-0 bg-surface z-50 flex flex-col pt-safe"
       >
-        <div className="sticky top-0 bg-white z-20">
+        <div className="sticky top-0 bg-surface z-20">
           <div className="px-4 py-4 flex items-center justify-between relative">
             <div className="w-6" />
-            <h2 className="text-lg font-bold text-gray-900">専門分野・スキル選択</h2>
+            <h2 className="text-lg font-bold text-ink">専門分野・スキル選択</h2>
             <button aria-label="閉じる" onClick={s.close} className="p-1 -mr-1">
-              <X className="w-6 h-6 text-gray-900" />
+              <X className="w-6 h-6 text-ink" />
             </button>
           </div>
 
@@ -29,9 +29,9 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
             <div className="px-4 pb-4">
               <div className="flex flex-wrap gap-2">
                 {s.selectedSkills.map((skill, idx) => (
-                  <span key={idx} className="px-3 py-1.5 bg-black text-white rounded-full text-sm font-medium flex items-center gap-1">
+                  <span key={idx} className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-medium flex items-center gap-1">
                     {skill}
-                    <button onClick={() => s.setSelectedSkills(prev => prev.filter(sk => sk !== skill))} className="p-0.5 hover:bg-gray-800 rounded-full">
+                    <button onClick={() => s.setSelectedSkills(prev => prev.filter(sk => sk !== skill))} className="p-0.5 hover:opacity-90 rounded-full">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -42,13 +42,13 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
 
           <div className="px-4 pb-4">
             <div className="relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-5 h-5 text-ink-faint absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="スキルを検索"
                 value={s.skillSearchQuery}
                 onChange={(e) => s.setSkillSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 h-[45px] bg-gray-100 border-transparent rounded-md text-sm focus:bg-white focus:border-black focus:ring-0 transition-colors"
+                className="w-full pl-10 pr-4 h-[45px] bg-primary-soft border-transparent rounded-md text-sm focus:bg-surface focus:border-primary focus:ring-0 transition-colors"
               />
             </div>
           </div>
@@ -68,14 +68,14 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
                         key={idx}
                         onClick={() => s.toggleSkill(skill)}
                         className={`w-full flex items-center justify-between p-4 rounded-xl border ${
-                          isSelected ? 'border-black bg-gray-50' : 'border-gray-200 bg-white'
+                          isSelected ? 'border-primary bg-canvas' : 'border-line bg-surface'
                         }`}
                       >
-                        <span className={`text-sm font-medium ${isSelected ? 'text-black' : 'text-gray-700'}`}>
+                        <span className={`text-sm font-medium ${isSelected ? 'text-ink' : 'text-ink-muted'}`}>
                           {skill}
                         </span>
                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                          isSelected ? 'border-black bg-black' : 'border-gray-300'
+                          isSelected ? 'border-primary bg-primary' : 'border-line'
                         }`}>
                           {isSelected && <Check className="w-3 h-3 text-white" />}
                         </div>
@@ -89,7 +89,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
                 {(() => {
                   if (!userProfile?.jobs || userProfile.jobs.length === 0) {
                     return (
-                      <div className="text-center py-8 text-gray-500 text-sm">
+                      <div className="text-center py-8 text-ink-muted text-sm">
                         職務を追加すると、おすすめのスキルが表示されます。
                       </div>
                     );
@@ -107,7 +107,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
 
                   if (uniqueSkills.length === 0) {
                     return (
-                      <div className="text-center py-8 text-gray-500 text-sm">
+                      <div className="text-center py-8 text-ink-muted text-sm">
                         おすすめのスキルがありません。
                       </div>
                     );
@@ -115,7 +115,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
 
                   return (
                     <div className="space-y-4">
-                      <h3 className="text-base font-bold text-gray-900">専門分野・スキル推薦</h3>
+                      <h3 className="text-base font-bold text-ink">専門分野・スキル推薦</h3>
                       <div className="flex flex-wrap gap-2">
                         {uniqueSkills.map((skill, skillIdx) => {
                           const isSelected = s.selectedSkills.includes(skill);
@@ -125,8 +125,8 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
                               onClick={() => s.toggleSkill(skill)}
                               className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                                 isSelected
-                                  ? 'bg-black text-white border-black'
-                                  : 'bg-white text-gray-600 border-dashed border-gray-300 hover:border-gray-400'
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-surface text-ink-muted border-dashed border-line hover:border-ink-faint'
                               }`}
                             >
                               {skill}
@@ -142,17 +142,17 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface border-t border-line">
           <div className="flex gap-3 max-w-md mx-auto">
             <button
               onClick={s.clearSelection}
-              className="flex-1 py-3.5 border border-gray-300 rounded-lg font-bold text-gray-900 bg-white hover:bg-gray-50 transition-colors"
+              className="flex-1 py-3.5 border border-line rounded-lg font-bold text-ink bg-surface hover:bg-canvas transition-colors"
             >
               選択初期化
             </button>
             <button
               onClick={s.handleSave}
-              className="flex-1 py-3.5 rounded-lg font-bold text-white bg-black hover:bg-gray-900 transition-colors"
+              className="flex-1 py-3.5 rounded-lg font-bold text-white bg-primary hover:opacity-90 transition-colors"
             >
               適用
             </button>
