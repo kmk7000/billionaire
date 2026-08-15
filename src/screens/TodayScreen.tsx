@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User, ChevronRight, FileText, Briefcase, Clock, BarChart2, GraduationCap, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -29,7 +29,12 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
   onPickProfilePhoto,
   onOpenMyMeishiCamera,
   onOpenMeishiCamera,
-}) => (
+}) => {
+  // Purely presentational: the checklist is long on small screens and the
+  // 折りたたむ control existed but did nothing.
+  const [isCompletionOpen, setIsCompletionOpen] = useState(true);
+
+  return (
   <motion.div
     key="today"
     initial={{ opacity: 0, y: 10 }}
@@ -62,11 +67,18 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-ink text-xs">プロフィールを完成させる <span className="text-ink-faint font-normal">({completedProfileSteps.length}/6)</span></h3>
-          <button className="flex items-center text-ink-faint text-xs gap-1">
-            折りたたむ <ChevronRight className="w-3 h-3 -rotate-90" />
+          <button
+            onClick={() => setIsCompletionOpen((open) => !open)}
+            aria-expanded={isCompletionOpen}
+            className="flex items-center text-ink-faint text-xs gap-1"
+          >
+            {isCompletionOpen ? '折りたたむ' : '広げる'}
+            <ChevronRight className={`w-3 h-3 transition-transform ${isCompletionOpen ? "-rotate-90" : "rotate-90"}`} />
           </button>
         </div>
 
+        {isCompletionOpen && (
+        <>
         <div className="flex gap-1 mb-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`h-1 flex-1 rounded-full ${i <= completedProfileSteps.length ? 'bg-primary' : 'bg-primary-soft'}`}></div>
@@ -176,6 +188,8 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             </button>
           </div>
         </div>
+        </>
+        )}
       </div>
 
       {/* Tips Section */}
@@ -219,4 +233,5 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       名刺登録
     </button>
   </motion.div>
-);
+  );
+};

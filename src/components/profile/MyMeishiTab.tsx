@@ -9,9 +9,13 @@ interface MyMeishiTabProps {
   onDeleteMyMeishi: () => void;
   onOpenPublicCard: () => void;
   publicHandle: string | null;
+  /** Opens the card editor — it covers both 名刺情報 and 連絡先 fields. */
+  onEditMeishi: () => void;
+  /** 誕生日 lives on the user profile, not the card, so it opens 個人情報. */
+  onEditBirthday: () => void;
 }
 
-export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle }) => (
+export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle, onEditMeishi, onEditBirthday }) => (
   <div className="space-y-6">
     {/* Business Card Registration Box */}
     {!myMeishi ? (
@@ -61,7 +65,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
         <div className="pt-8 border-t border-line">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-ink">名刺情報</h3>
-            <button className="text-sm text-ink-faint font-medium">編集</button>
+            <button onClick={onEditMeishi} className="text-sm text-ink-faint font-medium">編集</button>
           </div>
           <div className="space-y-4">
             <div className="flex items-start">
@@ -83,7 +87,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
         <div className="mt-10 pt-8 border-t border-line">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-ink">連絡先</h3>
-            <button className="text-sm text-ink-faint font-medium">編集</button>
+            <button onClick={onEditMeishi} className="text-sm text-ink-faint font-medium">編集</button>
           </div>
           <div className="space-y-4">
             <div className="flex items-start">
@@ -175,7 +179,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
         <div className="mt-10 pt-8 border-t border-line">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-[18px] font-bold text-ink">誕生日</h3>
-            <button className="text-sm text-ink-muted">編集</button>
+            <button onClick={onEditBirthday} className="text-sm text-ink-muted">編集</button>
           </div>
           <div className="flex items-center gap-3 pl-1">
             <div className="w-1 h-1 bg-primary rounded-full"></div>

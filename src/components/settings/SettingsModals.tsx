@@ -236,7 +236,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 <span className="text-[15px] font-bold text-gray-900">パスワード再設定</span>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={s.openSimpleLoginSettings}
+                className="w-full flex items-center justify-between px-4 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors"
+              >
                 <span className="text-[15px] font-bold text-gray-900">簡易ログイン設定</span>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>

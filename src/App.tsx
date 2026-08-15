@@ -151,7 +151,10 @@ export default function App() {
   const [meishis, setMeishis] = useState<Meishi[]>([]);
   const [meishiSortOrder, setMeishiSortOrder] = useState<'desc' | 'asc'>('desc');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isMeishiEditOpen, setIsMeishiEditOpen] = useState(false);
+  // The card currently being edited. Kept separate from selectedMeishiForDetail
+  // so the editor can also be opened straight from マイ名刺 in the profile,
+  // without dragging the card-detail overlay open underneath it.
+  const [editingMeishi, setEditingMeishi] = useState<Meishi | null>(null);
   const [selectedMeishis, setSelectedMeishis] = useState<string[]>([]);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -1070,6 +1073,8 @@ export default function App() {
         onSelectPost={(postId) => setSelectedPostId(postId)}
         onOpenPublicCard={() => setIsPublicCardOpen(true)}
         publicHandle={publicCard.handle}
+        onOpenSettings={accountSettings.openSettingsPage}
+        onEditMeishi={() => { if (myMeishi) setEditingMeishi(myMeishi); }}
       />
 
       {/* My Meishi Delete Confirmation */}
@@ -1469,7 +1474,7 @@ export default function App() {
           <MeishiDetailView
             meishi={selectedMeishiForDetail}
             onBack={() => setSelectedMeishiForDetail(null)}
-            onEdit={() => setIsMeishiEditOpen(true)}
+            onEdit={() => setEditingMeishi(selectedMeishiForDetail)}
             onDelete={handleDeleteMeishi}
             onSaveMemo={(memo) => {
               const updated = { ...selectedMeishiForDetail, memo };
@@ -1482,14 +1487,16 @@ export default function App() {
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {isMeishiEditOpen && selectedMeishiForDetail && (
-          <MeishiEditView 
-            meishi={selectedMeishiForDetail}
-            onBack={() => setIsMeishiEditOpen(false)}
+        {editingMeishi && (
+          <MeishiEditView
+            meishi={editingMeishi}
+            onBack={() => setEditingMeishi(null)}
             onSave={(updated) => {
               setMeishis(prev => prev.map(m => m.id === updated.id ? updated : m));
-              setSelectedMeishiForDetail(updated);
-              setIsMeishiEditOpen(false);
+              // Only refresh the detail overlay if it is showing this same card;
+              // when the editor was opened from マイ名刺 there is no detail view.
+              setSelectedMeishiForDetail(prev => (prev && prev.id === updated.id ? updated : prev));
+              setEditingMeishi(null);
               updateDoc(doc(db, 'meishi', updated.id), {
                 ...updated,
                 updatedAt: serverTimestamp()

@@ -404,7 +404,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
     <section className="pb-10 pt-8 border-t border-line">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-bold text-ink">誕生日</h3>
-        <button className="text-sm text-ink-faint hover:text-ink-muted">編集</button>
+        <button onClick={personalInfo.open} className="text-sm text-ink-faint hover:text-ink-muted">編集</button>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-1.5 h-1.5 bg-line rounded-full"></div>

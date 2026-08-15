@@ -52,6 +52,8 @@ interface ProfileOverlayProps {
   onSelectPost: (postId: string) => void;
   onOpenPublicCard: () => void;
   publicHandle: string | null;
+  onOpenSettings: () => void;
+  onEditMeishi: () => void;
 }
 
 export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
@@ -59,6 +61,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
   completedProfileSteps, onPickProfilePhoto, onOpenIntroEdit, onOpenCamera, onDeleteMyMeishi,
   career, education, job, skill, language, website, lecture, publication, article,
   awards, certificates, personalInfo, myPosts, onSelectPost, onOpenPublicCard, publicHandle,
+  onOpenSettings, onEditMeishi,
 }) => (
   <AnimatePresence>
     {isOpen && (
@@ -77,7 +80,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
             </button>
             <h1 className="text-lg font-bold text-ink">{user?.displayName || 'ユーザー'}</h1>
           </div>
-          <button aria-label="設定" className="p-1 hover:bg-primary-soft rounded-full transition-colors">
+          <button aria-label="設定" onClick={onOpenSettings} className="p-1 hover:bg-primary-soft rounded-full transition-colors">
             <UserCog className="w-6 h-6 text-ink" />
           </button>
         </div>
@@ -158,6 +161,8 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               onDeleteMyMeishi={onDeleteMyMeishi}
               onOpenPublicCard={onOpenPublicCard}
               publicHandle={publicHandle}
+              onEditMeishi={onEditMeishi}
+              onEditBirthday={personalInfo.open}
             />
           ) : profileTab === 1 ? (
             /* Profile Tab (Existing Content) */
