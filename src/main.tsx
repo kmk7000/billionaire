@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Capacitor} from '@capacitor/core';
 import App from './App.tsx';
+import { ToastProvider } from './components/Toast';
 import './index.css';
 
 // iOS zooms the entire page whenever a focused input's font-size is under
@@ -26,6 +27,8 @@ if (Capacitor.isNativePlatform()) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ToastProvider>
+      <App />
+    </ToastProvider>
   </StrictMode>,
 );

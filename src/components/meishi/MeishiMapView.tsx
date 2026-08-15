@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // stale radius circle behind at the previous centre.
 import { GoogleMap, useJsApiLoader, InfoWindowF, CircleF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import type { Meishi } from '../../types/app';
+import { useToast } from '../Toast';
 import { buildGeocodeQuery, geocodeSequentially } from '../../services/geocodeService';
 
 export const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
@@ -36,6 +37,7 @@ interface MeishiMapViewProps {
 export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
   onBack, meishis, onGeocoded, onSelectMeishi,
 }) => {
+  const toast = useToast();
   const [mapCenter, setMapCenter] = useState(TOKYO_METROPOLITAN_GOVERNMENT);
   const [zoom, setZoom] = useState(15);
   const [selectedGroup, setSelectedGroup] = useState<CompanyGroup | null>(null);
@@ -207,7 +209,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
 
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("お使いのブラウザは位置情報機能をサポートしていません。");
+      toast.error("お使いの端末は位置情報機能に対応していません。");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -216,7 +218,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         setLocationName("現在地");
         setZoom(15);
       },
-      () => alert("現在地を取得できませんでした。位置情報へのアクセスが許可されているか確認してください。"),
+      () => toast.error("現在地を取得できませんでした。\n位置情報へのアクセスが許可されているかご確認ください。"),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
@@ -300,9 +302,9 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         status === google.maps.GeocoderStatus.REQUEST_DENIED ||
         status === google.maps.GeocoderStatus.UNKNOWN_ERROR
       ) {
-        alert("Geocoding APIが有効になっていません。Google Cloud Consoleで「Geocoding API」を有効にしてください。");
+        toast.error("Geocoding APIが有効になっていません。\nGoogle Cloud Consoleで有効にしてください。");
       } else {
-        alert(`住所の詳細を取得できませんでした。(${status})`);
+        toast.error(`住所の詳細を取得できませんでした。(${status})`);
       }
     });
   };

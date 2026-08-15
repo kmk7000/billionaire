@@ -21,6 +21,8 @@ interface MyMeishiTabProps {
 
 export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle, onEditMeishi, onEditBirthday, onOpenMap, history, onDeleteHistoryEntry }) => {
   const [isHistoryEditing, setIsHistoryEditing] = useState(false);
+  // id of the entry awaiting confirmation; deleting a card is irreversible.
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
   <div className="space-y-6">
@@ -149,7 +151,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
             <h3 className="text-[18px] font-bold text-ink">名刺ヒストリー</h3>
             {history.length > 0 && (
               <button
-                onClick={() => setIsHistoryEditing((editing) => !editing)}
+                onClick={() => { setIsHistoryEditing((editing) => !editing); setPendingDeleteId(null); }}
                 className="text-sm text-ink-muted"
               >
                 {isHistoryEditing ? '完了' : '編集'}
@@ -175,12 +177,29 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
                         : ''}
                     </p>
                     {isHistoryEditing && (
-                      <button
-                        onClick={() => onDeleteHistoryEntry(entry.id)}
-                        className="mt-2 text-xs font-bold text-danger"
-                      >
-                        この履歴を削除
-                      </button>
+                      pendingDeleteId === entry.id ? (
+                        <span className="mt-2 flex items-center gap-3">
+                          <button
+                            onClick={() => { onDeleteHistoryEntry(entry.id); setPendingDeleteId(null); }}
+                            className="text-xs font-bold text-danger"
+                          >
+                            本当に削除する
+                          </button>
+                          <button
+                            onClick={() => setPendingDeleteId(null)}
+                            className="text-xs text-ink-muted"
+                          >
+                            キャンセル
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setPendingDeleteId(entry.id)}
+                          className="mt-2 text-xs font-bold text-danger"
+                        >
+                          この履歴を削除
+                        </button>
+                      )
                     )}
                   </div>
 

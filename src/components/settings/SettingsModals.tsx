@@ -10,6 +10,7 @@ import SimpleLoginSettings from '../SimpleLoginSettings';
 import { InquiryPage } from './InquiryPage';
 import { CallerIdInfoSheet } from './CallerIdInfoSheet';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
+import { useToast } from '../Toast';
 
 // Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
 // full explanation. Hidden on Android/web rather than shown disabled: there
@@ -26,8 +27,10 @@ interface SettingsModalsProps {
   onOpenNotifications: () => void;
 }
 
-/** Share the app; falls back to the clipboard where the Web Share API is absent. */
-async function shareApp() {
+/** Share the app; falls back to the clipboard where the Web Share API is absent.
+    Takes the notifier as an argument because this lives outside the component
+    and so cannot call useToast() itself. */
+async function shareApp(onCopied: (message: string) => void) {
   const url = typeof window !== 'undefined' ? window.location.origin : '';
   const shareData = {
     title: 'Billionaire（ビリオネア）',
@@ -40,7 +43,7 @@ async function shareApp() {
       return;
     }
     await navigator.clipboard.writeText(url);
-    alert('アプリのリンクをコピーしました。');
+    onCopied('アプリのリンクをコピーしました。');
   } catch (error) {
     // A user dismissing the share sheet lands here too, so stay quiet.
     console.warn('Share cancelled or failed:', error);
@@ -51,6 +54,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
   settings: s, user, onOpenProfileManagement,
   onOpenAlbumImport, onOpenDirectInput, onOpenNotifications,
 }) => {
+  const toast = useToast();
   const [isCallerIdSheetOpen, setIsCallerIdSheetOpen] = useState(false);
 
   return (
@@ -183,7 +187,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
               <button
-                onClick={shareApp}
+                onClick={() => shareApp(toast.success)}
                 className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center gap-3">

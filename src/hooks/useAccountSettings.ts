@@ -7,9 +7,11 @@ import {
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { auth, EmailAuthProvider, handleFirestoreError, OperationType } from '../firebase';
+import { useToast } from '../components/Toast';
 import type { Tab } from '../types/app';
 
 export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab: Tab) => void) {
+  const toast = useToast();
   const [isMorePageOpen, setIsMorePageOpen] = useState(false);
   const [isSettingsPageOpen, setIsSettingsPageOpen] = useState(false);
   const [isAccountManagementOpen, setIsAccountManagementOpen] = useState(false);
@@ -86,7 +88,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
 
   const handleChangePassword = async () => {
     if (!currentPassword || !password || !confirmPassword) {
-      alert('すべての項目を入力してください');
+      toast.error('すべての項目を入力してください。');
       return;
     }
     if (password !== confirmPassword) {
@@ -111,7 +113,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
 
   const handleSetPasswordForSocialUser = async () => {
     if (password !== confirmPassword) {
-      alert('パスワードが一致しません');
+      toast.error('パスワードが一致しません。');
       return;
     }
     if (!user || !user.email) return;
@@ -125,7 +127,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
       setConfirmPassword('');
     } catch (error) {
       console.error('Password reset failed:', error);
-      alert('パスワード設定に失敗しました');
+      toast.error('パスワードの設定に失敗しました。時間をおいて再度お試しください。');
     }
   };
 

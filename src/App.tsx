@@ -28,6 +28,7 @@ import { useCommunityPosts } from './hooks/useCommunityPosts';
 import { useCommunityWrite } from './hooks/useCommunityWrite';
 import { useNativePush } from './hooks/useNativePush';
 import { useCallerIdSync } from './hooks/useCallerIdSync';
+import { useToast } from './components/Toast';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
 import { EducationModals } from './components/profile/EducationModals';
@@ -166,6 +167,7 @@ export default function App() {
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
   useCallerIdSync(meishis);
+  const toast = useToast();
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');
@@ -398,7 +400,7 @@ export default function App() {
       );
 
       if (!authWindow) {
-        alert('ポップアップがブロックされました。LINEログインを続けるにはポップアップを許可してください。');
+        toast.error('ポップアップがブロックされました。\nLINEログインを続けるにはポップアップを許可してください。');
       }
     } catch (error) {
       console.error('LINE login error:', error);
@@ -574,7 +576,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("OCR error:", error);
-      alert("名刺の認識に失敗しました。");
+      toast.error("名刺の認識に失敗しました。\n明るい場所で、名刺全体が入るように撮影してください。");
     } finally {
       setIsMeishiOcrProcessing(false);
     }
@@ -633,7 +635,7 @@ export default function App() {
       setIsRegisteringMyMeishi(false);
     } catch (error) {
       console.error("Error saving manual meishi:", error);
-      alert("名刺の保存に失敗しました。");
+      toast.error("名刺の保存に失敗しました。時間をおいて再度お試しください。");
     } finally {
       setIsMeishiOcrProcessing(false);
     }
