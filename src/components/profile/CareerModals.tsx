@@ -306,7 +306,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           className="fixed inset-0 bg-surface z-[70] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
         >
-          <div className="p-4 flex items-center gap-3 border-b border-line">
+          <div className="p-4 flex items-center gap-3 border-b border-line bg-surface sticky top-0 z-10">
             <div className="flex-1 bg-canvas rounded-lg flex items-center px-3 py-2">
               <Search className="w-5 h-5 text-ink-faint mr-2" />
               <input
