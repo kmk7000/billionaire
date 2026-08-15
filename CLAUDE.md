@@ -123,6 +123,12 @@ src/
     - **`[ FirebaseAuthentication ] <FirebaseAuthenticationPlugin.RuntimeError>` 로그 1줄은 정상이다.** 플러그인이 초기화 때 `addIDTokenDidChangeListener`를 걸고 그 리스너가 `getIdToken()`을 부르는데, `skipNativeAuth: true`(8번·위 설계 참고)라 네이티브 Firebase Auth에는 설계상 유저가 없으므로 "No user is signed in."이 반환된다. 플러그인은 이를 로그만 찍고 `return`한다. **버그가 아니고 앱 코드로 없앨 수도 없다.**
     - **`onSnapshot` 에러 콜백에서 `handleFirestoreError`를 쓰면 안 된다.** 이 함수는 로그 후 `throw`하는데, 리스너 콜백은 try/catch 밖이라 예외가 그대로 튀어나가 Capacitor가 "STARTUP JS ERROR"로 잡고, 더 나쁜 건 그 아래 `if (onError) onError(error)` 폴백이 **도달 불가능한 죽은 코드**가 된다는 점이다. 비throw 버전 `logFirestoreError`(`src/firebase.ts`)를 쓸 것. 현재 `subscribeContacts`/`subscribePosts` 두 곳에 적용돼 있다.
     - **로그인 전에는 인증이 필요한 컬렉션을 구독하지 말 것.** `useCommunityPosts`가 마운트 즉시 `posts`를 구독하고 있어서, 규칙상 인증이 필요한 탓에 **모든 방문자가 로그인 화면에서 PERMISSION_DENIED를 보고 있었다**. `isEnabled` 인자를 추가해 `!!user`일 때만 구독한다. 새 구독 훅을 만들 때도 같은 게이팅을 할 것.
+15. **iOS 키보드/뷰포트 관련 (2026-08)** — 입력란이 있는 화면을 만들 때 반드시 알아야 할 두 가지. 둘 다 실기기에서만 재현된다.
+    - **자동 확대**: iOS는 포커스된 입력의 `font-size`가 **16px 미만**이면 페이지 전체를 확대하고, viewport에 `maximum-scale`이 없으면 되돌릴 방법이 없다. 이 앱은 입력 66개가 대부분 13~15px 디자인이라, 전부 16px로 키우는 대신 **네이티브에서만 viewport 배율을 잠갔다**(`src/main.tsx`, `Capacitor.isNativePlatform()` 분기). WKWebView는 배율 제한을 존중한다(Capacitor가 `ignoresViewportScaleLimits`를 건드리지 않아 WebKit 기본값 `false`). **웹 빌드는 확대를 유지**한다 — 웹에서 줌 차단은 실제 접근성 저하다. 참고로 Capacitor의 `ios.zoomEnabled`는 `scrollViewWillBeginZooming`에서 핀치 제스처만 끄므로 **포커스 자동 확대에는 무력**하다.
+    - **키보드가 올라오면 fixed 오버레이가 밀려 올라간다 → `@capacitor/keyboard`의 `resize: Native`가 필수다.** 이 플러그인이 없으면 WKWebView가 전체 높이를 유지한 채 iOS가 **문서를 스크롤**해 입력을 보이게 하는데, `position: fixed`는 (축소된 시각 뷰포트가 아니라) 레이아웃 뷰포트 기준이라 전체화면 오버레이가 통째로 화면 밖으로 밀린다. 사용자에게는 "오버레이 아래쪽 빈 영역이 먼저 보이고 위로 스크롤해야 입력란이 나옴"으로 보인다.
+      - **측정값이 진단의 핵심이었다**(학교 검색 오버레이 열린 상태): `documentElement.scrollTop === 595`인데 `오버레이.scrollTop === 0` — 즉 **오버레이는 스크롤되지 않았고 문서가 스크롤됐다**. 비슷한 증상이 또 나오면 추측하지 말고 이 두 값을 먼저 찍어볼 것.
+      - 이 문제를 오버레이 CSS로 고치려는 시도는 헛수고다(sticky 헤더로 안 고쳐진다 — 실제로 한 번 헛짚었음). 원인이 오버레이 내부 스크롤이 아니기 때문이다.
+    - **전체화면 오버레이는 헤더를 `sticky top-0 z-10 bg-surface`로 고정할 것.** 위 키보드 문제와는 별개의 결함이지만, 고정하지 않으면 스크롤 시 검색 입력·저장 버튼이 화면 밖으로 사라진다. `src/`의 `fixed inset-0 … overflow-y-auto` 오버레이 16개를 전수 점검했고 현재 미고정은 0개다. 새 오버레이를 만들 때도 이 패턴을 지킬 것.
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 

@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'com.billionaire.app',
@@ -18,6 +19,23 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   plugins: {
+    Keyboard: {
+      // Without this the WKWebView keeps its full height when the keyboard
+      // opens. iOS then scrolls the *document* to reveal the focused field,
+      // and because `position: fixed` is anchored to the layout viewport
+      // (not the shrunken visual one), every full-screen overlay visually
+      // slides up with it — the user lands on the blank bottom of the
+      // overlay with the field pushed off screen.
+      //
+      // Measured on-device 2026-08 with the 学歴追加 school search open:
+      // documentElement.scrollTop was 595 while the overlay's own scrollTop
+      // was 0, i.e. the overlay never scrolled — the document did.
+      //
+      // `Native` resizes the web view itself to the area above the keyboard,
+      // so `fixed inset-0` matches what is actually visible and iOS has no
+      // reason to scroll anything.
+      resize: KeyboardResize.Native,
+    },
     FirebaseAuthentication: {
       // signInWithPopup doesn't work in a native WKWebView (no window.open
       // support, and Google blocks embedded-webview OAuth outright) — this
