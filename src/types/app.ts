@@ -92,11 +92,20 @@ export interface Meishi {
   imageUrlBack?: string;
   memo?: string;
   isMyCard?: boolean;
+  /**
+   * A previous マイ名刺, kept for 名刺ヒストリー after the user registered a
+   * newer one. Archived cards stay as their own documents rather than being
+   * embedded in the current card: images are stored as data URLs, and a few
+   * of them nested in one document would run straight into Firestore's 1MB
+   * per-document ceiling.
+   */
+  isPastMyCard?: boolean;
+  /** When this card stopped being the current マイ名刺 (ISO string). */
+  archivedAt?: string;
   updatedAt: string;
   createdAt?: any;
   lat?: number;
   lng?: number;
-  history?: Meishi[];
 }
 
 export interface Post {

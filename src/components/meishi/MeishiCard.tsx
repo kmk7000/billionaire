@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle as CircleIcon } from 'lucide-react';
+import { CheckCircle2, Circle as CircleIcon, IdCard } from 'lucide-react';
 import type { Meishi } from '../../types/app';
 
 export const MeishiCard: React.FC<{
@@ -48,13 +48,21 @@ export const MeishiCard: React.FC<{
         </p>
         <p className="text-[12px] font-bold text-ink-muted">{meishi.company || '会社名なし'}</p>
       </div>
+      {/* Cards entered by hand have no photo. This used to fall back to a
+          random picsum.photos image, which showed an unrelated stock photo in
+          the slot where the card scan belongs. */}
       <div className="w-[120px] h-[70px] bg-canvas rounded border border-line overflow-hidden flex-shrink-0">
-        <img
-          src={meishi.imageUrl || `https://picsum.photos/seed/${meishi.id}/200/120`}
-          alt="Meishi"
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
+        {meishi.imageUrl ? (
+          <img
+            src={meishi.imageUrl}
+            alt={`${meishi.company || ''} ${meishi.name || ''}`.trim() || '名刺'}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="w-full h-full flex items-center justify-center">
+            <IdCard className="w-5 h-5 text-ink-faint" />
+          </span>
+        )}
       </div>
     </div>
   );

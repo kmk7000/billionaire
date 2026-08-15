@@ -159,7 +159,7 @@ export default function App() {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMyMeishiDeleteDialogOpen, setIsMyMeishiDeleteDialogOpen] = useState(false);
-  const myMeishi = meishis.find(m => m.isMyCard);
+  const myMeishi = meishis.find(m => m.isMyCard && !m.isPastMyCard);
   const [selectedCommunityBoard, setSelectedCommunityBoard] = useState<string>('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard, undefined, !!user);
@@ -301,8 +301,17 @@ export default function App() {
   const accountSettings = useAccountSettings(user, setActiveTab);
   const publicCard = usePublicCard(user, userProfile, myMeishi);
 
+  /** Past マイ名刺, newest first — shown as 名刺ヒストリー in マイ名刺. */
+  const myMeishiHistory: Meishi[] = React.useMemo(
+    () => meishis
+      .filter(m => m.isPastMyCard)
+      .sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime()),
+    [meishis]
+  );
+
   const sortedMeishis = React.useMemo(() => {
-    return [...meishis].sort((a, b) => {
+    // Retired マイ名刺 belong to 名刺ヒストリー, not the contact list.
+    return meishis.filter(m => !m.isPastMyCard).sort((a, b) => {
       // Prioritize My Card
       if (a.isMyCard && !b.isMyCard) return -1;
       if (!a.isMyCard && b.isMyCard) return 1;
@@ -547,6 +556,7 @@ export default function App() {
       const result = await ocrMeishi(frontImage, backImage);
 
       if (user) {
+        if (isRegisteringMyMeishi) await archiveCurrentMyMeishi();
         const newMeishiId = doc(collection(db, 'meishi')).id;
         const newMeishi: Meishi = {
           id: newMeishiId,
@@ -570,10 +580,34 @@ export default function App() {
     }
   };
 
+  /**
+   * Demotes the current マイ名刺 before a new one replaces it, so the old card
+   * becomes a 名刺ヒストリー entry instead of a second card also flagged
+   * isMyCard (which is what happened before — `meishis.find(m => m.isMyCard)`
+   * would then pick whichever happened to sort first).
+   */
+  const archiveCurrentMyMeishi = async () => {
+    if (!myMeishi) return;
+    const archivedAt = new Date().toISOString();
+    setMeishis(prev => prev.map(m =>
+      m.id === myMeishi.id ? { ...m, isMyCard: false, isPastMyCard: true, archivedAt } : m
+    ));
+    try {
+      await updateDoc(doc(db, 'meishi', myMeishi.id), {
+        isMyCard: false,
+        isPastMyCard: true,
+        archivedAt,
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `meishi/${myMeishi.id}`);
+    }
+  };
+
   const handleSaveMeishiDirect = async () => {
     if (!userProfile) return;
     setIsMeishiOcrProcessing(true);
     try {
+      if (isRegisteringMyMeishi) await archiveCurrentMyMeishi();
       const newMeishiId = doc(collection(db, 'meishi')).id;
       const newMeishi: Meishi = {
         id: newMeishiId,
@@ -1075,6 +1109,9 @@ export default function App() {
         publicHandle={publicCard.handle}
         onOpenSettings={accountSettings.openSettingsPage}
         onEditMeishi={() => { if (myMeishi) setEditingMeishi(myMeishi); }}
+        onOpenMap={() => setIsMeishiMapOpen(true)}
+        myMeishiHistory={myMeishiHistory}
+        onDeleteHistoryEntry={handleDeleteMeishi}
       />
 
       {/* My Meishi Delete Confirmation */}

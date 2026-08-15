@@ -54,6 +54,9 @@ interface ProfileOverlayProps {
   publicHandle: string | null;
   onOpenSettings: () => void;
   onEditMeishi: () => void;
+  onOpenMap: () => void;
+  myMeishiHistory: Meishi[];
+  onDeleteHistoryEntry: (id: string) => void;
 }
 
 export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
@@ -61,7 +64,7 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
   completedProfileSteps, onPickProfilePhoto, onOpenIntroEdit, onOpenCamera, onDeleteMyMeishi,
   career, education, job, skill, language, website, lecture, publication, article,
   awards, certificates, personalInfo, myPosts, onSelectPost, onOpenPublicCard, publicHandle,
-  onOpenSettings, onEditMeishi,
+  onOpenSettings, onEditMeishi, onOpenMap, myMeishiHistory, onDeleteHistoryEntry,
 }) => (
   <AnimatePresence>
     {isOpen && (
@@ -163,6 +166,9 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
               publicHandle={publicHandle}
               onEditMeishi={onEditMeishi}
               onEditBirthday={personalInfo.open}
+              onOpenMap={onOpenMap}
+              history={myMeishiHistory}
+              onDeleteHistoryEntry={onDeleteHistoryEntry}
             />
           ) : profileTab === 1 ? (
             /* Profile Tab (Existing Content) */

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus, Share2, MapPin, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Share2, MapPin, Trash2, ChevronRight, IdCard } from 'lucide-react';
 import type { Meishi, UserProfile } from '../../types/app';
 
 interface MyMeishiTabProps {
@@ -13,9 +13,16 @@ interface MyMeishiTabProps {
   onEditMeishi: () => void;
   /** 誕生日 lives on the user profile, not the card, so it opens 個人情報. */
   onEditBirthday: () => void;
+  onOpenMap: () => void;
+  /** Past マイ名刺, newest first. */
+  history: Meishi[];
+  onDeleteHistoryEntry: (id: string) => void;
 }
 
-export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle, onEditMeishi, onEditBirthday }) => (
+export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile, onOpenCamera, onDeleteMyMeishi, onOpenPublicCard, publicHandle, onEditMeishi, onEditBirthday, onOpenMap, history, onDeleteHistoryEntry }) => {
+  const [isHistoryEditing, setIsHistoryEditing] = useState(false);
+
+  return (
   <div className="space-y-6">
     {/* Business Card Registration Box */}
     {!myMeishi ? (
@@ -115,51 +122,76 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
           </div>
         </div>
 
-        {/* Map Placeholder */}
-        <div className="mt-8 rounded-xl overflow-hidden h-48 bg-primary-soft relative">
-          <img
-            src="https://picsum.photos/seed/map/600/400"
-            alt="Map"
-            className="w-full h-full object-cover opacity-60"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-surface/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-line flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-ink">地図を見る</span>
-            </div>
-          </div>
-        </div>
+        {/* Opens the real card map. This used to be a random stock photo from
+            picsum.photos dressed up as a map, which showed a different picture
+            on every load and had nothing to do with the address above it. */}
+        <button
+          onClick={onOpenMap}
+          className="mt-8 w-full rounded-xl border border-line bg-canvas px-4 py-4 flex items-center gap-3 hover:bg-primary-soft transition-colors text-left"
+        >
+          <span className="w-10 h-10 rounded-full bg-surface border border-line flex items-center justify-center shrink-0">
+            <MapPin className="w-5 h-5 text-ink" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-bold text-ink">地図を見る</span>
+            <span className="block text-xs text-ink-muted truncate">
+              {myMeishi.address ? `${myMeishi.address} ${myMeishi.detailedAddress || ''}`.trim() : '住所が未登録です'}
+            </span>
+          </span>
+          <ChevronRight className="w-5 h-5 text-ink-faint shrink-0" />
+        </button>
 
-        {/* Business Card History */}
+        {/* 名刺ヒストリー — previous マイ名刺, archived when a new one is
+            registered. Entries are real cards (isPastMyCard), not embedded
+            copies, so their images stay out of the current card's document. */}
         <div className="mt-10 pt-8 border-t border-line">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-[18px] font-bold text-ink">名刺ヒストリー</h3>
-            <button className="text-sm text-ink-muted">編集</button>
+            {history.length > 0 && (
+              <button
+                onClick={() => setIsHistoryEditing((editing) => !editing)}
+                className="text-sm text-ink-muted"
+              >
+                {isHistoryEditing ? '完了' : '編集'}
+              </button>
+            )}
           </div>
-          {myMeishi.history && myMeishi.history.length > 0 ? (
+          {history.length > 0 ? (
             <div className="relative space-y-12 pl-4">
               {/* Timeline Line */}
               <div className="absolute left-[6px] top-2 bottom-2 w-[1px] bg-line"></div>
 
-              {myMeishi.history.map((h, idx) => (
-                <div key={idx} className="relative flex items-start justify-between gap-4">
+              {history.map((entry) => (
+                <div key={entry.id} className="relative flex items-start justify-between gap-4">
                   {/* Timeline Dot */}
-                  <div className="absolute -left-[14px] top-1.5 w-3.5 h-3.5 rounded-full bg-line border-2 border-white z-10"></div>
+                  <div className="absolute -left-[14px] top-1.5 w-3.5 h-3.5 rounded-full bg-line border-2 border-surface z-10"></div>
 
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-ink mb-1">{h.company}</p>
-                    <p className="text-sm text-ink mb-1">{h.position}</p>
-                    <p className="text-sm text-ink-faint">{h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '年 ').replace(/\//g, '月 ') + '日' : '2025年 09月 02日'}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-ink mb-1">{entry.company}</p>
+                    <p className="text-sm text-ink mb-1">{entry.position}</p>
+                    <p className="text-sm text-ink-faint">
+                      {entry.archivedAt
+                        ? `${new Date(entry.archivedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')} まで`
+                        : ''}
+                    </p>
+                    {isHistoryEditing && (
+                      <button
+                        onClick={() => onDeleteHistoryEntry(entry.id)}
+                        className="mt-2 text-xs font-bold text-danger"
+                      >
+                        この履歴を削除
+                      </button>
+                    )}
                   </div>
 
-                  <div className="w-24 h-16 rounded border border-line overflow-hidden flex-shrink-0">
-                    <img
-                      src={h.imageUrl || "https://picsum.photos/seed/card/200/120"}
-                      alt="Card Preview"
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
+                  <div className="w-24 h-16 rounded border border-line overflow-hidden flex-shrink-0 bg-canvas">
+                    {entry.imageUrl ? (
+                      <img src={entry.imageUrl} alt={`${entry.company}の名刺`} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="w-full h-full flex items-center justify-center">
+                        <IdCard className="w-5 h-5 text-ink-faint" />
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -168,8 +200,10 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
             <div className="relative pl-4">
               <div className="absolute left-[6px] top-2 bottom-2 w-[1px] bg-line"></div>
               <div className="relative flex items-start gap-4">
-                <div className="absolute -left-[14px] top-1.5 w-3.5 h-3.5 rounded-full bg-line border-2 border-white z-10"></div>
-                <p className="text-sm text-ink-faint">履歴がありません</p>
+                <div className="absolute -left-[14px] top-1.5 w-3.5 h-3.5 rounded-full bg-line border-2 border-surface z-10"></div>
+                <p className="text-sm text-ink-faint">
+                  履歴がありません。新しい名刺を登録すると、今の名刺がここに残ります。
+                </p>
               </div>
             </div>
           )}
@@ -203,3 +237,4 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
     )}
   </div>
 );
+};
