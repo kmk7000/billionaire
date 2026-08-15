@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, ChevronRight, ChevronDown, Edit3, Check, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { WheelPickerColumn, WheelPickerBand } from './WheelPickerColumn';
 import { JAPANESE_COMPANIES, PREFECTURES, COUNTRIES } from '../../constants/profileData';
 import { calculateCareerDuration, type CareerEditor } from '../../hooks/useCareerEditor';
 
@@ -257,7 +258,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                         ))}
                         <option value="海外">海外</option>
                       </select>
-                      <ChevronRight className="w-5 h-5 text-ink absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
+                      <ChevronDown className="w-5 h-5 text-ink-faint absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
 
                     {c.locationRegion === '海外' && (
@@ -272,7 +273,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
                             <option key={country} value={country}>{country}</option>
                           ))}
                         </select>
-                        <ChevronRight className="w-5 h-5 text-ink absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 pointer-events-none" />
+                        <ChevronDown className="w-5 h-5 text-ink-faint absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                     )}
                   </div>
@@ -407,35 +408,22 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
               </button>
             </div>
 
-            <div className="flex justify-center items-center h-48 gap-8 px-8">
-              <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="year-scroll">
-                <div className="h-20"></div>
-                {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                  <div
-                    key={year}
-                    onClick={() => c.setTempDate(prev => ({ ...prev, year }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.year === year ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
-                  >
-                    {year}年
-                  </div>
-                ))}
-                <div className="h-20"></div>
-              </div>
-              <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="month-scroll">
-                <div className="h-20"></div>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                  <div
-                    key={month}
-                    onClick={() => c.setTempDate(prev => ({ ...prev, month }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${c.tempDate.month === month ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
-                  >
-                    {month}月
-                  </div>
-                ))}
-                <div className="h-20"></div>
-              </div>
-              {/* Selection Highlight */}
-              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-primary-soft rounded-lg -z-10 pointer-events-none"></div>
+            <div className="flex justify-center items-center h-48 gap-8 px-8 relative">
+              <WheelPickerColumn
+                items={Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i)}
+                value={c.tempDate.year}
+                onChange={(year) => c.setTempDate(prev => ({ ...prev, year }))}
+                formatLabel={(year) => `${year}年`}
+                ariaLabel="年"
+              />
+              <WheelPickerColumn
+                items={Array.from({ length: 12 }, (_, i) => i + 1)}
+                value={c.tempDate.month}
+                onChange={(month) => c.setTempDate(prev => ({ ...prev, month }))}
+                formatLabel={(month) => `${month}月`}
+                ariaLabel="月"
+              />
+              <WheelPickerBand />
             </div>
           </motion.div>
         </>

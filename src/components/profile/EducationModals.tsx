@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, ChevronRight, ChevronDown, Check, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { WheelPickerColumn, WheelPickerBand } from './WheelPickerColumn';
 import { JAPANESE_UNIVERSITIES, JAPANESE_MAJORS, DEGREES } from '../../constants/profileData';
 import type { EducationEditor } from '../../hooks/useEducationEditor';
 
@@ -383,21 +384,14 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
             </div>
 
             <div className="flex justify-center items-center h-48 px-8 relative">
-              <div className="w-full h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="edu-year-scroll">
-                <div className="h-20"></div>
-                {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() + 5 - i).map(year => (
-                  <div
-                    key={year}
-                    onClick={() => e.setTempYear(year)}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${e.tempYear === year ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
-                  >
-                    {year}年
-                  </div>
-                ))}
-                <div className="h-20"></div>
-              </div>
-              {/* Selection Highlight */}
-              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-primary-soft rounded-lg -z-10 pointer-events-none"></div>
+              <WheelPickerColumn
+                items={Array.from({ length: 50 }, (_, i) => new Date().getFullYear() + 5 - i)}
+                value={e.tempYear}
+                onChange={e.setTempYear}
+                formatLabel={(year) => `${year}年`}
+                ariaLabel="年"
+              />
+              <WheelPickerBand />
             </div>
           </motion.div>
         </>

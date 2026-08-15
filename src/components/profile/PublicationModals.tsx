@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { WheelPickerColumn, WheelPickerBand } from './WheelPickerColumn';
 import type { PublicationEditor } from '../../hooks/usePublicationEditor';
 
 export const PublicationModals: React.FC<{ publication: PublicationEditor }> = ({ publication: p }) => (
@@ -102,34 +103,21 @@ export const PublicationModals: React.FC<{ publication: PublicationEditor }> = (
               </button>
             </div>
             <div className="flex justify-center items-center h-48 gap-8 px-8 relative">
-              <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="publication-year-scroll">
-                <div className="h-20"></div>
-                {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() + 10 - i).map(year => (
-                  <div
-                    key={year}
-                    onClick={() => p.setTempDate(prev => ({ ...prev, year }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${p.tempDate.year === year ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
-                  >
-                    {year}年
-                  </div>
-                ))}
-                <div className="h-20"></div>
-              </div>
-              <div className="flex-1 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative" id="publication-month-scroll">
-                <div className="h-20"></div>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                  <div
-                    key={month}
-                    onClick={() => p.setTempDate(prev => ({ ...prev, month }))}
-                    className={`h-8 flex items-center justify-center snap-center cursor-pointer ${p.tempDate.month === month ? 'text-xl font-bold text-ink' : 'text-ink-faint'}`}
-                  >
-                    {month}月
-                  </div>
-                ))}
-                <div className="h-20"></div>
-              </div>
-              {/* Selection Highlight */}
-              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-8 bg-primary-soft rounded-lg -z-10 pointer-events-none"></div>
+              <WheelPickerColumn
+                items={Array.from({ length: 50 }, (_, i) => new Date().getFullYear() + 10 - i)}
+                value={p.tempDate.year}
+                onChange={(year) => p.setTempDate(prev => ({ ...prev, year }))}
+                formatLabel={(year) => `${year}年`}
+                ariaLabel="年"
+              />
+              <WheelPickerColumn
+                items={Array.from({ length: 12 }, (_, i) => i + 1)}
+                value={p.tempDate.month}
+                onChange={(month) => p.setTempDate(prev => ({ ...prev, month }))}
+                formatLabel={(month) => `${month}月`}
+                ariaLabel="月"
+              />
+              <WheelPickerBand />
             </div>
           </motion.div>
         </>

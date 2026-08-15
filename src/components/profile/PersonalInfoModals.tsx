@@ -49,14 +49,14 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
               <select
                 value={p.birthYear || ''}
                 onChange={(e) => p.setBirthYear(e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full border border-line rounded-md h-[52px] px-4 text-[15px] focus:outline-none focus:border-primary focus:ring-0 appearance-none bg-surface"
+                className="w-full border border-line rounded-md h-[45px] px-4 text-[15px] focus:outline-none focus:border-primary focus:ring-0 appearance-none bg-surface"
               >
                 <option value="" disabled>選択してください</option>
                 {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map((year) => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
-              <ChevronDown className="w-5 h-5 text-ink-muted absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="w-5 h-5 text-ink-faint absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 
