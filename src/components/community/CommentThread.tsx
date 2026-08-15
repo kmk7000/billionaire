@@ -50,10 +50,10 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ threaded, postId, 
   return (
     <div className="pt-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-gray-900 text-sm">コメント {threaded.reduce((sum, c) => sum + 1 + c.replies.length, 0)}件</h3>
-        <div className="flex items-center gap-3 text-xs text-gray-400">
-          <button onClick={() => setSortMode('likes')} className={sortMode === 'likes' ? 'font-bold text-gray-900' : ''}>共感順</button>
-          <button onClick={() => setSortMode('new')} className={sortMode === 'new' ? 'font-bold text-gray-900' : ''}>新着順</button>
+        <h3 className="font-bold text-ink text-sm">コメント {threaded.reduce((sum, c) => sum + 1 + c.replies.length, 0)}件</h3>
+        <div className="flex items-center gap-3 text-xs text-ink-faint">
+          <button onClick={() => setSortMode('likes')} className={sortMode === 'likes' ? 'font-bold text-ink' : ''}>共感順</button>
+          <button onClick={() => setSortMode('new')} className={sortMode === 'new' ? 'font-bold text-ink' : ''}>新着順</button>
         </div>
       </div>
 
@@ -63,19 +63,19 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ threaded, postId, 
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={`${sessionHandle}として書き込む`}
-          className="flex-1 h-[40px] px-3 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-black"
+          className="flex-1 h-[40px] px-3 border border-line rounded-full text-sm focus:outline-none focus:border-black"
         />
         <button aria-label="送信"
           onClick={handleSubmit}
           disabled={!draft.trim() || isSubmitting}
-          className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center disabled:bg-gray-300 transition-colors"
+          className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center disabled:bg-primary-soft transition-colors"
         >
           <Send className="w-4 h-4" />
         </button>
       </div>
 
       {sorted.length === 0 ? (
-        <div className="text-center py-10 text-gray-400 text-sm">
+        <div className="text-center py-10 text-ink-faint text-sm">
           <p>登録されたコメントがありません</p>
           <p className="mt-1">最初のコメントを書いてみましょう</p>
         </div>
@@ -84,21 +84,21 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ threaded, postId, 
           {sorted.map((comment) => (
             <div key={comment.id}>
               <div className="flex items-baseline gap-2 mb-1">
-                <span className="font-bold text-sm text-gray-900">{comment.anonHandle}</span>
-                <span className="text-[10px] text-gray-400">{comment.authorLabel}</span>
-                <span className="text-[10px] text-gray-300 ml-auto">{formatRelativeTime(comment.createdAt)}</span>
+                <span className="font-bold text-sm text-ink">{comment.anonHandle}</span>
+                <span className="text-[10px] text-ink-faint">{comment.authorLabel}</span>
+                <span className="text-[10px] text-ink-faint ml-auto">{formatRelativeTime(comment.createdAt)}</span>
               </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.body}</p>
+              <p className="text-sm text-ink-muted whitespace-pre-wrap">{comment.body}</p>
               {comment.replies.length > 0 && (
-                <div className="ml-4 mt-3 space-y-3 border-l-2 border-gray-100 pl-3">
+                <div className="ml-4 mt-3 space-y-3 border-l-2 border-line pl-3">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="font-bold text-sm text-gray-900">{reply.anonHandle}</span>
-                        <span className="text-[10px] text-gray-400">{reply.authorLabel}</span>
-                        <span className="text-[10px] text-gray-300 ml-auto">{formatRelativeTime(reply.createdAt)}</span>
+                        <span className="font-bold text-sm text-ink">{reply.anonHandle}</span>
+                        <span className="text-[10px] text-ink-faint">{reply.authorLabel}</span>
+                        <span className="text-[10px] text-ink-faint ml-auto">{formatRelativeTime(reply.createdAt)}</span>
                       </div>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{reply.body}</p>
+                      <p className="text-sm text-ink-muted whitespace-pre-wrap">{reply.body}</p>
                     </div>
                   ))}
                 </div>

@@ -762,8 +762,8 @@ export default function App() {
 
   if (!isAuthReady || loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#0A0A0A] animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -825,8 +825,8 @@ export default function App() {
               onClick={() => setIsSearchOpen(true)}
               className="relative w-72 xl:w-80 text-left cursor-text"
             >
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <span className="block w-full bg-white/10 border border-transparent hover:bg-white/15 text-gray-400 text-xs pl-9 pr-4 py-2 rounded-full transition-all">
+              <Search className="w-4 h-4 text-ink-faint absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <span className="block w-full bg-surface/10 border border-transparent hover:bg-surface/15 text-ink-faint text-xs pl-9 pr-4 py-2 rounded-full transition-all">
                 会社名、お名前、職種、キーワードで検索...
               </span>
             </button>
@@ -848,7 +848,7 @@ export default function App() {
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors duration-200 ${
                     isActive
                       ? 'bg-surface text-primary'
-                      : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                      : 'text-white/60 hover:bg-surface/10 hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -882,14 +882,14 @@ export default function App() {
             <button
               aria-label="お知らせ"
               onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer"
+              className="relative p-2 text-white/60 hover:bg-surface/10 hover:text-white rounded-lg cursor-pointer"
             >
               <Bell className="w-5 h-5" />
             </button>
 
             <button
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 p-1 rounded-lg hover:bg-surface/10 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center font-bold text-xs">
                 {userProfile?.displayName?.[0] || 'B'}
@@ -1124,31 +1124,31 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-[300]"
+              className="fixed inset-0 bg-ink/50 z-[300]"
               onClick={() => setIsMyMeishiDeleteDialogOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
               exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
-              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-white rounded-2xl z-[310] p-6 text-center shadow-xl"
+              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-surface rounded-2xl z-[310] p-6 text-center shadow-xl"
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-ink mb-2">
                 自分の名刺を削除しますか？
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-ink-muted mb-6">
                 削除した名刺は復元できません。
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsMyMeishiDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50"
+                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas"
                 >
                   キャンセル
                 </button>
                 <button
                   onClick={confirmDeleteMyMeishi}
-                  className="flex-1 py-3 px-4 bg-[#FF4B4B] text-white rounded-xl font-bold hover:bg-red-600"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90"
                 >
                   削除
                 </button>
@@ -1166,27 +1166,27 @@ export default function App() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-gray-50 z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+            className="fixed inset-0 bg-canvas z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+            <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 <button onClick={() => setIsIntroEditOpen(false)}>
-                  <ArrowLeft className="w-6 h-6 text-gray-900" />
+                  <ArrowLeft className="w-6 h-6 text-ink" />
                 </button>
-                <h2 className="text-lg font-bold text-gray-900">紹介</h2>
+                <h2 className="text-lg font-bold text-ink">紹介</h2>
               </div>
               <button 
                 onClick={handleSaveIntro}
-                className="text-[#0A0A0A] font-bold text-sm"
+                className="text-primary font-bold text-sm"
               >
                 保存
               </button>
             </div>
 
-            <div className="p-4 bg-white mb-2">
-              <h3 className="font-bold text-[12px] text-gray-900 mb-2">プロフィール紹介</h3>
-              <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">
+            <div className="p-4 bg-surface mb-2">
+              <h3 className="font-bold text-[12px] text-ink mb-2">プロフィール紹介</h3>
+              <p className="text-[12px] text-ink-muted mb-4 leading-relaxed">
                 自分の専門性を十分に表現できるように100文字以上の作成を推奨します。
               </p>
               
@@ -1195,27 +1195,27 @@ export default function App() {
                   value={introText}
                   onChange={(e) => setIntroText(e.target.value)}
                   placeholder="例）ファッション分野で勤務し、デザインおよびブランドディレクティングの豊富な経歴を持っており、現在はヨーロッパおよびアメリカのファッションブランドを対象にデザイン企画コンサルティングを提供するクリエイティブスタジオを運営しています。&#13;&#10;&#13;&#10;*すべてのユーザーに公開されます。機密情報は記入しないでください。"
-                  className="w-full h-64 p-4 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-black focus:ring-0 resize-none"
+                  className="w-full h-64 p-4 bg-canvas border border-line rounded-md text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-black focus:ring-0 resize-none"
                   maxLength={5000}
                 />
-                <div className="text-right text-xs text-gray-400 mt-2">
+                <div className="text-right text-xs text-ink-faint mt-2">
                   {introText.length}/5000文字
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-white flex items-center justify-between">
+            <div className="p-4 bg-surface flex items-center justify-between">
               <div className="flex-1 pr-4">
-                <h3 className="font-bold text-gray-900 mb-1">求職用紹介作成</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <h3 className="font-bold text-ink mb-1">求職用紹介作成</h3>
+                <p className="text-xs text-ink-muted leading-relaxed">
                   採用担当者にのみ表示する具体的な数値が含まれた内容を作成するにはオプションをオンにしてください。
                 </p>
               </div>
               <button 
                 onClick={() => setIsJobSeekingIntro(!isJobSeekingIntro)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isJobSeekingIntro ? 'bg-[#0A0A0A]' : 'bg-gray-200'}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${isJobSeekingIntro ? 'bg-primary' : 'bg-primary-soft'}`}
               >
-                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${isJobSeekingIntro ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                <div className={`w-5 h-5 bg-surface rounded-full absolute top-0.5 transition-transform ${isJobSeekingIntro ? 'translate-x-6' : 'translate-x-0.5'}`} />
               </button>
             </div>
           </motion.div>
@@ -1264,7 +1264,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[100] flex items-end"
+            className="fixed inset-0 bg-ink/50 z-[100] flex items-end"
             onClick={() => setIsMeishiOtherMethodsOpen(false)}
           >
             <motion.div
@@ -1272,36 +1272,36 @@ export default function App() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-white w-full rounded-t-3xl p-6 pb-12 max-w-md mx-auto"
+              className="bg-surface w-full rounded-t-3xl p-6 pb-12 max-w-md mx-auto"
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-8" />
-              <h3 className="text-xl font-bold text-gray-900 mb-8">名刺登録</h3>
+              <div className="w-12 h-1.5 bg-primary-soft rounded-full mx-auto mb-8" />
+              <h3 className="text-xl font-bold text-ink mb-8">名刺登録</h3>
               
               <div className="space-y-4">
                 <button 
                   onClick={handleOpenMeishiCamera}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-canvas hover:bg-primary-soft transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <Camera className="w-6 h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-900">カメラで撮影</p>
-                    <p className="text-sm text-gray-500">名刺を撮影して自動で情報を入力します</p>
+                    <p className="font-bold text-ink">カメラで撮影</p>
+                    <p className="text-sm text-ink-muted">名刺を撮影して自動で情報を入力します</p>
                   </div>
                 </button>
 
                 <button 
                   onClick={handleOpenMeishiAlbum}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-canvas hover:bg-primary-soft transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <ImageIcon className="w-6 h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-900">アルバムから選択</p>
-                    <p className="text-sm text-gray-500">保存されている名刺画像を選択します</p>
+                    <p className="font-bold text-ink">アルバムから選択</p>
+                    <p className="text-sm text-ink-muted">保存されている名刺画像を選択します</p>
                   </div>
                 </button>
 
@@ -1310,14 +1310,14 @@ export default function App() {
                     setIsMeishiOtherMethodsOpen(false);
                     setIsMeishiDirectInputOpen(true);
                   }}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-canvas hover:bg-primary-soft transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                  <div className="w-12 h-12 rounded-full bg-primary-soft flex items-center justify-center text-ink-muted">
                     <Edit2 className="w-6 h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-900">直接入力</p>
-                    <p className="text-sm text-gray-500">情報を手動で入力して登録します</p>
+                    <p className="font-bold text-ink">直接入力</p>
+                    <p className="text-sm text-ink-muted">情報を手動で入力して登録します</p>
                   </div>
                 </button>
               </div>
@@ -1349,22 +1349,22 @@ export default function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-[300] flex flex-col pt-safe"
+            className="fixed inset-0 bg-surface z-[300] flex flex-col pt-safe"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+            <div className="flex items-center justify-between p-4 border-b border-line">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setIsMeishiDirectInputOpen(false)}
-                  className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
+                  className="p-2 text-ink hover:bg-primary-soft rounded-full"
                 >
                   <ArrowLeft className="w-6 h-6" />
                 </button>
-                <h3 className="text-xl font-bold text-gray-900">直接入力</h3>
+                <h3 className="text-xl font-bold text-ink">直接入力</h3>
               </div>
               <button 
                 onClick={handleSaveMeishiDirect}
-                className="text-[#0A0A0A] font-bold text-lg px-4"
+                className="text-primary font-bold text-lg px-4"
               >
                 次へ
               </button>
@@ -1376,18 +1376,18 @@ export default function App() {
               <div className="flex justify-between items-start">
                 <div className="flex-1 space-y-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-500">名前</label>
+                    <label className="text-sm font-bold text-ink-muted">名前</label>
                     <input 
                       type="text" 
                       placeholder="名前"
                       value={meishiDirectInputData.name}
                       onChange={e => setMeishiDirectInputData({...meishiDirectInputData, name: e.target.value})}
-                      className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all"
+                      className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all"
                     />
                   </div>
                 </div>
                 <div className="ml-6 flex flex-col items-center">
-                  <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden border border-gray-200">
+                  <div className="w-24 h-24 rounded-full bg-primary-soft flex items-center justify-center text-ink-faint overflow-hidden border border-line">
                     {meishiDirectInputData.profileImage ? (
                       <img src={meishiDirectInputData.profileImage} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
@@ -1396,7 +1396,7 @@ export default function App() {
                   </div>
                   <button 
                     onClick={handleMeishiManualProfileClick}
-                    className="mt-2 text-xs font-bold text-white bg-gray-600 px-4 py-1.5 rounded-full flex items-center gap-1"
+                    className="mt-2 text-xs font-bold text-white bg-ink-muted px-4 py-1.5 rounded-full flex items-center gap-1"
                   >
                     <span>編集</span>
                   </button>
@@ -1406,101 +1406,101 @@ export default function App() {
               {/* Other Fields */}
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">役職</label>
+                  <label className="text-sm font-bold text-ink-muted">役職</label>
                   <input 
                     type="text" 
                     placeholder="例) チームリーダー"
                     value={meishiDirectInputData.position}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, position: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">部署</label>
+                  <label className="text-sm font-bold text-ink-muted">部署</label>
                   <input 
                     type="text" 
                     placeholder="例) 経営戦略室"
                     value={meishiDirectInputData.department}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, department: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">会社</label>
+                  <label className="text-sm font-bold text-ink-muted">会社</label>
                   <input 
                     type="text" 
                     placeholder="会社名検索"
                     value={meishiDirectInputData.company}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, company: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">携帯電話</label>
+                  <label className="text-sm font-bold text-ink-muted">携帯電話</label>
                   <input 
                     type="tel" 
                     placeholder="01012345678"
                     value={meishiDirectInputData.mobile}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, mobile: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">メール</label>
+                  <label className="text-sm font-bold text-ink-muted">メール</label>
                   <input 
                     type="email" 
                     placeholder="remember@rmbr.com"
                     value={meishiDirectInputData.email}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, email: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">電話</label>
+                  <label className="text-sm font-bold text-ink-muted">電話</label>
                   <input 
                     type="tel" 
                     placeholder="0212345678"
                     value={meishiDirectInputData.phone}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, phone: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">ファックス</label>
+                  <label className="text-sm font-bold text-ink-muted">ファックス</label>
                   <input 
                     type="tel" 
                     placeholder="0212345678"
                     value={meishiDirectInputData.fax}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, fax: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">住所</label>
+                  <label className="text-sm font-bold text-ink-muted">住所</label>
                   <input 
                     type="text" 
                     placeholder="東京都港区..."
                     value={meishiDirectInputData.address}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, address: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-500">建物名・部屋番号</label>
+                  <label className="text-sm font-bold text-ink-muted">建物名・部屋番号</label>
                   <input 
                     type="text" 
                     placeholder="6階"
                     value={meishiDirectInputData.detailedAddress}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, detailedAddress: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-gray-50"
+                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
                   />
                 </div>
               </div>
@@ -1550,22 +1550,22 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[300] flex flex-col items-center justify-center text-white pt-safe"
+            className="fixed inset-0 bg-ink/90 z-[300] flex flex-col items-center justify-center text-white pt-safe"
           >
-            <div className="relative w-64 h-40 border-2 border-white/20 rounded-lg overflow-hidden mb-8 bg-gray-900/50">
+            <div className="relative w-64 h-40 border-2 border-white/20 rounded-lg overflow-hidden mb-8 bg-ink/50">
               <div className="absolute inset-0 flex items-center justify-center opacity-20">
                 <IdCard className="w-20 h-20" />
               </div>
               <motion.div 
                 animate={{ top: ['0%', '100%', '0%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute left-0 right-0 h-0.5 bg-white shadow-[0_0_15px_#FFFFFF] z-10"
+                className="absolute left-0 right-0 h-0.5 bg-surface shadow-[0_0_15px_#FFFFFF] z-10"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none" />
             </div>
             <Loader2 className="w-10 h-10 animate-spin text-white mb-4" />
             <p className="font-bold text-lg">名刺をスキャン中...</p>
-            <p className="text-sm text-gray-400 mt-2">情報を読み取っています</p>
+            <p className="text-sm text-ink-faint mt-2">情報を読み取っています</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1597,19 +1597,19 @@ export default function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMoreMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 z-[60]"
+              className="fixed inset-0 bg-ink/50 z-[60]"
             />
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-2xl z-[70] overflow-hidden"
+              className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface rounded-t-2xl z-[70] overflow-hidden"
             >
-              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-bold text-gray-900">その他</h3>
+              <div className="p-4 border-b border-line flex justify-between items-center">
+                <h3 className="font-bold text-ink">その他</h3>
                 <button onClick={() => setIsMoreMenuOpen(false)} className="p-2">
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-ink-muted" />
                 </button>
               </div>
               <div className="p-2 pb-8">
@@ -1618,28 +1618,28 @@ export default function App() {
                     setIsMoreMenuOpen(false);
                     accountSettings.openSimpleLoginSettings();
                   }}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
                 >
-                  <Settings className="w-5 h-5 text-gray-700" />
-                  <span className="font-bold text-gray-900">簡単ログイン設定</span>
+                  <Settings className="w-5 h-5 text-ink-muted" />
+                  <span className="font-bold text-ink">簡単ログイン設定</span>
                 </button>
                 <button 
                   onClick={handleDeleteSelectedMeishis}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
                 >
-                  <Trash2 className="w-5 h-5 text-red-500" />
-                  <span className="font-bold text-red-500">名刺を削除</span>
+                  <Trash2 className="w-5 h-5 text-danger" />
+                  <span className="font-bold text-danger">名刺を削除</span>
                 </button>
-                <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left rounded-xl">
-                  <Download className="w-5 h-5 text-gray-700" />
-                  <span className="font-bold text-gray-900">ファイルへエクスポート</span>
+                <button className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl">
+                  <Download className="w-5 h-5 text-ink-muted" />
+                  <span className="font-bold text-ink">ファイルへエクスポート</span>
                 </button>
                 <button 
                   onClick={handleShareSelectedMeishis}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
                 >
-                  <Share2 className="w-5 h-5 text-gray-700" />
-                  <span className="font-bold text-gray-900">複数共有</span>
+                  <Share2 className="w-5 h-5 text-ink-muted" />
+                  <span className="font-bold text-ink">複数共有</span>
                 </button>
               </div>
             </motion.div>
@@ -1653,31 +1653,31 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-[100]"
+              className="fixed inset-0 bg-ink/50 z-[100]"
               onClick={() => setIsDeleteDialogOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
               exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
-              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-white rounded-2xl z-[110] p-6 text-center shadow-xl"
+              className="fixed top-1/2 left-1/2 w-[90%] max-w-sm bg-surface rounded-2xl z-[110] p-6 text-center shadow-xl"
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-ink mb-2">
                 {selectedMeishis.length}枚の名刺を削除しますか？
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-ink-muted mb-6">
                 削除した名刺は復元できません。
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50"
+                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas"
                 >
                   キャンセル
                 </button>
                 <button
                   onClick={confirmDeleteMeishis}
-                  className="flex-1 py-3 px-4 bg-[#FF4B4B] text-white rounded-xl font-bold hover:bg-red-600"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90"
                 >
                   削除
                 </button>

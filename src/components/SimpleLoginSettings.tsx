@@ -29,25 +29,25 @@ const SimpleLoginSettings: React.FC<SimpleLoginSettingsProps> = ({ onBack }) => 
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[1000] flex flex-col pt-safe"
+      className="fixed inset-0 bg-surface z-[1000] flex flex-col pt-safe"
     >
-      <div className="sticky top-0 bg-white px-4 py-3 flex items-center border-b border-gray-100">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-gray-900">
+      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center border-b border-line">
+        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h2 className="text-lg font-bold text-gray-900 ml-2">簡単ログイン設定</h2>
+        <h2 className="text-lg font-bold text-ink ml-2">簡単ログイン設定</h2>
       </div>
 
       <div className="flex-1 px-6 pt-6">
         <div className="space-y-6">
           {loginMethods.map((method) => (
             <div key={method.key} className="flex items-center justify-between">
-              <span className="text-[16px] font-medium text-gray-900">{method.label}</span>
+              <span className="text-[16px] font-medium text-ink">{method.label}</span>
               <button
                 onClick={() => toggleLogin(method.key)}
-                className={`w-12 h-7 rounded-full transition-colors relative ${logins[method.key] ? 'bg-black' : 'bg-gray-200'}`}
+                className={`w-12 h-7 rounded-full transition-colors relative ${logins[method.key] ? 'bg-primary' : 'bg-primary-soft'}`}
               >
-                <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${logins[method.key] ? 'left-6' : 'left-1'}`} />
+                <div className={`absolute top-1 w-5 h-5 rounded-full bg-surface transition-transform ${logins[method.key] ? 'left-6' : 'left-1'}`} />
               </button>
             </div>
           ))}

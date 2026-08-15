@@ -110,7 +110,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             <div className="p-4 flex justify-between items-center z-10 text-white bg-gradient-to-b from-black/60 to-transparent">
               <button aria-label="フラッシュを切り替え" 
                 onClick={toggleFlash}
-                className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-amber-400 text-black' : 'bg-white/10 text-white'}`}
+                className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-amber-400 text-black' : 'bg-surface/10 text-white'}`}
               >
                 <Flashlight className="w-6 h-6" />
               </button>
@@ -134,21 +134,21 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 
               {/* Capture Flash animation */}
               {isCapturing && (
-                <div className="absolute inset-0 bg-white animate-pulse z-20" />
+                <div className="absolute inset-0 bg-surface animate-pulse z-20" />
               )}
 
               {/* Overlay with Guide Frame */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 {/* Dark Mask around the guide frame */}
-                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute inset-0 bg-ink/40" />
 
                 {/* Guide Frame */}
                 <div className="relative w-[85%] aspect-[1.6/1] z-10 shadow-2xl">
                   {/* Guide corners */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#0A0A0A] rounded-tl-lg" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#0A0A0A] rounded-tr-lg" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#0A0A0A] rounded-bl-lg" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#0A0A0A] rounded-br-lg" />
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg" />
 
                   {/* Inner subtle border */}
                   <div className="absolute inset-0 border border-white/30 rounded-lg" />
@@ -157,7 +157,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                   <motion.div 
                     animate={{ y: ["0%", "100%", "0%"] }}
                     transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="w-full h-0.5 bg-[#0A0A0A] shadow-[0_0_8px_#0A0A0A]"
+                    className="w-full h-0.5 bg-primary shadow-[0_0_8px_#0A0A0A]"
                   />
                 </div>
 
@@ -168,10 +168,10 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             </div>
 
             {/* Controls */}
-            <div className="p-8 pb-12 flex items-center justify-around bg-white">
+            <div className="p-8 pb-12 flex items-center justify-around bg-surface">
               <button 
                 onClick={handleAlbumClick}
-                className="flex flex-col items-center gap-1 text-gray-900 active:scale-95 transition-transform"
+                className="flex flex-col items-center gap-1 text-ink active:scale-95 transition-transform"
               >
                 <ImageIcon className="w-7 h-7" />
                 <span className="text-xs font-bold">アルバム</span>
@@ -179,14 +179,14 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 
               <button aria-label="撮影する" 
                 onClick={captureImage}
-                className="w-20 h-20 rounded-full border-4 border-[#0A0A0A] p-1 flex items-center justify-center active:scale-95 transition-transform"
+                className="w-20 h-20 rounded-full border-4 border-primary p-1 flex items-center justify-center active:scale-95 transition-transform"
               >
-                <div className="w-full h-full rounded-full bg-[#0A0A0A]" />
+                <div className="w-full h-full rounded-full bg-primary" />
               </button>
 
               <button 
                 onClick={() => setIsMeishiMoreOptionsOpen(true)}
-                className="flex flex-col items-center gap-1 text-gray-900 active:scale-95 transition-transform"
+                className="flex flex-col items-center gap-1 text-ink active:scale-95 transition-transform"
               >
                 <MoreHorizontal className="w-7 h-7" />
                 <span className="text-xs font-bold">その他</span>
@@ -205,14 +205,14 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center p-4">
-              <div className="relative w-full max-w-sm min-h-[140px] rounded-lg overflow-hidden shadow-2xl border border-white/20 bg-white flex items-center justify-center">
+              <div className="relative w-full max-w-sm min-h-[140px] rounded-lg overflow-hidden shadow-2xl border border-white/20 bg-surface flex items-center justify-center">
                 <img
                   src={meishiSide === 'front' ? capturedMeishiImage! : capturedMeishiBack!}
                   alt="Captured Meishi"
                   className="w-full h-auto max-h-[46vh] object-contain"
                 />
                 {isScanning && (
-                  <div className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center gap-2 text-white">
+                  <div className="absolute inset-0 bg-ink/55 flex flex-col items-center justify-center gap-2 text-white">
                     <Loader2 className="w-6 h-6 animate-spin" />
                     <span className="text-xs font-medium">名刺を読み取っています...</span>
                   </div>
@@ -225,7 +225,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 <div className="mt-4 w-full max-w-sm">
                   <button
                     onClick={toggleUseScanned}
-                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-white active:scale-95 transition-transform"
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-full bg-surface/10 border border-white/20 text-white active:scale-95 transition-transform"
                   >
                     <span className="flex items-center gap-2 text-sm font-bold">
                       <ScanLine className="w-4 h-4" />
@@ -246,7 +246,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               {meishiSide === 'front' && !capturedMeishiBack && (
                 <button 
                   onClick={addBackSide}
-                  className="mt-8 flex items-center gap-1 text-white font-bold bg-white/10 px-4 py-2 rounded-full border border-white/20 active:scale-95 transition-transform"
+                  className="mt-8 flex items-center gap-1 text-white font-bold bg-surface/10 px-4 py-2 rounded-full border border-white/20 active:scale-95 transition-transform"
                 >
                   裏面追加 <ChevronRight className="w-4 h-4" />
                 </button>
@@ -268,7 +268,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               </button>
               <button 
                 onClick={handleConfirmMeishi}
-                className="flex-1 py-4 rounded-lg font-bold bg-white text-black active:scale-95 transition-transform"
+                className="flex-1 py-4 rounded-lg font-bold bg-surface text-black active:scale-95 transition-transform"
               >
                 確認
               </button>
@@ -277,12 +277,12 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
         )}
 
         {meishiStep === 'settings' && (
-          <div className="flex-1 flex flex-col bg-gray-50">
-            <div className="p-4 flex items-center justify-between bg-white border-b sticky top-0 z-10">
+          <div className="flex-1 flex flex-col bg-canvas">
+            <div className="p-4 flex items-center justify-between bg-surface border-b sticky top-0 z-10">
               <button onClick={() => setMeishiStep('preview')}>
-                <ChevronLeft className="w-6 h-6 text-gray-900" />
+                <ChevronLeft className="w-6 h-6 text-ink" />
               </button>
-              <span className="font-bold text-gray-900">名刺登録設定</span>
+              <span className="font-bold text-ink">名刺登録設定</span>
               <div className="w-6" />
             </div>
 
@@ -290,8 +290,8 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               {/* Previews */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-500 text-center">表面</p>
-                  <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+                  <p className="text-xs font-bold text-ink-muted text-center">表面</p>
+                  <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line shadow-sm bg-surface">
                     <img 
                       src={capturedMeishiImage!} 
                       alt="Front" 
@@ -301,8 +301,8 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 </div>
                 {capturedMeishiBack && (
                   <div className="space-y-2">
-                    <p className="text-xs font-bold text-gray-500 text-center">裏面</p>
-                    <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+                    <p className="text-xs font-bold text-ink-muted text-center">裏面</p>
+                    <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line shadow-sm bg-surface">
                       <img 
                         src={capturedMeishiBack} 
                         alt="Back" 
@@ -314,55 +314,55 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               </div>
 
               <div className="space-y-4">
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-surface rounded-xl p-5 shadow-sm border border-line flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <Send className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">名刺を送る</p>
-                      <p className="text-xs text-gray-500">登録と同時に相手に送信します</p>
+                      <p className="font-bold text-ink">名刺を送る</p>
+                      <p className="text-xs text-ink-muted">登録と同時に相手に送信します</p>
                     </div>
                   </div>
                   <div 
                     onClick={() => setMeishiSettings(meishiSettings === 'send' ? 'save' : 'send')}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'send' ? 'bg-[#0A0A0A]' : 'bg-gray-200'}`}
+                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'send' ? 'bg-primary' : 'bg-primary-soft'}`}
                   >
                     <motion.div 
                       animate={{ x: meishiSettings === 'send' ? 24 : 4 }}
-                      className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" 
+                      className="absolute top-1 w-4 h-4 bg-surface rounded-full shadow-sm" 
                     />
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-surface rounded-xl p-5 shadow-sm border border-line flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#0A0A0A]/10 flex items-center justify-center text-[#0A0A0A]">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <Briefcase className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">名刺帳に保存</p>
-                      <p className="text-xs text-gray-500">名刺帳に新しい名刺を登録します</p>
+                      <p className="font-bold text-ink">名刺帳に保存</p>
+                      <p className="text-xs text-ink-muted">名刺帳に新しい名刺を登録します</p>
                     </div>
                   </div>
                   <div 
                     onClick={() => setMeishiSettings(meishiSettings === 'save' ? 'send' : 'save')}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'save' ? 'bg-[#0A0A0A]' : 'bg-gray-200'}`}
+                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'save' ? 'bg-primary' : 'bg-primary-soft'}`}
                   >
                     <motion.div 
                       animate={{ x: meishiSettings === 'save' ? 24 : 4 }}
-                      className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" 
+                      className="absolute top-1 w-4 h-4 bg-surface rounded-full shadow-sm" 
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 bg-white border-t">
+            <div className="p-6 bg-surface border-t">
               <button 
                 onClick={handleFinalSave}
                 disabled={isProcessing}
-                className="w-full py-4 rounded-xl font-bold bg-[#0A0A0A] hover:bg-black text-white shadow-lg shadow-[#0A0A0A]/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98 transition-transform"
+                className="w-full py-4 rounded-xl font-bold bg-primary hover:bg-black text-white shadow-lg shadow-[#0A0A0A]/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98 transition-transform"
               >
                 {isProcessing ? (
                   <>
@@ -378,37 +378,37 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
         )}
 
         {meishiStep === 'success' && (
-          <div className="flex-1 flex flex-col bg-white relative">
+          <div className="flex-1 flex flex-col bg-surface relative">
             <button aria-label="閉じる" 
               onClick={handleClose}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 z-10"
+              className="absolute top-4 right-4 p-2 text-ink-faint hover:text-ink-muted z-10"
             >
               <X className="w-6 h-6" />
             </button>
 
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="mb-8">
-                <div className="w-20 h-20 bg-[#0A0A0A]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-[#0A0A0A]" />
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 leading-tight">
-                  <span className="text-[#0A0A0A]">1枚</span>の名刺を<br />
+                <h3 className="text-2xl font-bold text-ink leading-tight">
+                  <span className="text-primary">1枚</span>の名刺を<br />
                   登録しました！
                 </h3>
-                <p className="mt-4 text-gray-400 text-sm leading-relaxed max-w-[240px] mx-auto">
+                <p className="mt-4 text-ink-faint text-sm leading-relaxed max-w-[240px] mx-auto">
                   AI解析により名刺情報を正確に入力中.<br />
                   名刺帳からご確認いただけます。
                 </p>
               </div>
             </div>
 
-            <div className="p-6 bg-white border-t">
+            <div className="p-6 bg-surface border-t">
               <button 
                 onClick={() => {
                   handleClose();
                   onViewSavedMeishis?.();
                 }}
-                className="w-full py-4 rounded-xl font-bold bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A]/5 transition-colors"
+                className="w-full py-4 rounded-xl font-bold bg-surface border-2 border-primary text-primary hover:bg-primary/5 transition-colors"
               >
                 見に行く
               </button>
@@ -423,40 +423,40 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[250] flex items-end justify-center"
+              className="fixed inset-0 bg-ink/60 z-[250] flex items-end justify-center"
               onClick={() => setIsMeishiMoreOptionsOpen(false)}
             >
               <motion.div
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
-                className="w-full bg-white rounded-t-2xl p-6 space-y-4 max-w-md"
+                className="w-full bg-surface rounded-t-2xl p-6 space-y-4 max-w-md"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="font-bold text-gray-900 mb-2 text-center">その他の登録方法</h3>
+                <h3 className="font-bold text-ink mb-2 text-center">その他の登録方法</h3>
                 <button 
                   onClick={() => {
                     setIsMeishiMoreOptionsOpen(false);
                     onOpenDirectInput?.();
                   }}
-                  className="w-full p-4 bg-gray-50 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors"
+                  className="w-full p-4 bg-canvas rounded-xl flex items-center gap-3 hover:bg-primary-soft transition-colors"
                 >
-                  <Edit2 className="w-5 h-5 text-[#0A0A0A]" />
-                  <span className="font-bold text-gray-900">直接入力して登録</span>
+                  <Edit2 className="w-5 h-5 text-primary" />
+                  <span className="font-bold text-ink">直接入力して登録</span>
                 </button>
                 <button 
                   onClick={() => {
                     setIsMeishiMoreOptionsOpen(false);
                     handleAlbumClick();
                   }}
-                  className="w-full p-4 bg-gray-50 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors"
+                  className="w-full p-4 bg-canvas rounded-xl flex items-center gap-3 hover:bg-primary-soft transition-colors"
                 >
-                  <ImageIcon className="w-5 h-5 text-[#0A0A0A]" />
-                  <span className="font-bold text-gray-900">アルバムから選択</span>
+                  <ImageIcon className="w-5 h-5 text-primary" />
+                  <span className="font-bold text-ink">アルバムから選択</span>
                 </button>
                 <button 
                   onClick={() => setIsMeishiMoreOptionsOpen(false)}
-                  className="w-full py-3 text-gray-500 font-bold text-center mt-2"
+                  className="w-full py-3 text-ink-muted font-bold text-center mt-2"
                 >
                   キャンセル
                 </button>

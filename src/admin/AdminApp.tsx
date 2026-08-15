@@ -184,7 +184,7 @@ export const AdminApp: React.FC = () => {
                   onClick={() => setPanel(key)}
                   aria-current={isActive ? 'page' : undefined}
                   className={`w-full flex items-center gap-2.5 h-9 px-2.5 rounded-md text-[13px] font-bold transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
-                    isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white hover:bg-white/8'
+                    isActive ? 'bg-surface/15 text-white' : 'text-white/60 hover:text-white hover:bg-surface/8'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
@@ -206,7 +206,7 @@ export const AdminApp: React.FC = () => {
           </p>
           <button
             onClick={() => signOut(auth)}
-            className="w-full flex items-center gap-2 h-8 px-2 rounded-md text-[12px] font-bold text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 h-8 px-2 rounded-md text-[12px] font-bold text-white/60 hover:text-white hover:bg-surface/10 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             ログアウト

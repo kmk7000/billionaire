@@ -33,7 +33,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
   const canProceed = agreements.age && agreements.tos && agreements.privacyRequired;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto shadow-2xl relative pt-safe">
+    <div className="min-h-screen bg-surface flex flex-col max-w-md mx-auto shadow-2xl relative pt-safe">
       <div className="p-4">
         <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2">
           <ChevronRight className="w-6 h-6 rotate-180" />
@@ -41,18 +41,18 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
       </div>
 
       <div className="flex-1 px-6 pt-4">
-        <h2 className="font-bold text-gray-900 mb-8 terms-heading">
+        <h2 className="font-bold text-ink mb-8 terms-heading">
           利用規約に同意してください
         </h2>
 
         <div 
           onClick={handleToggleAll}
-          className={`p-5 border rounded-xl mb-8 flex items-center gap-3 cursor-pointer transition-colors ${agreements.all ? 'border-gray-900 bg-gray-50' : 'border-gray-200'}`}
+          className={`p-5 border rounded-xl mb-8 flex items-center gap-3 cursor-pointer transition-colors ${agreements.all ? 'border-primary bg-canvas' : 'border-line'}`}
         >
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center border ${agreements.all ? 'bg-gray-900 border-gray-900' : 'border-gray-300'}`}>
-            <Check className={`w-4 h-4 transition-colors ${agreements.all ? 'text-white' : 'text-gray-300'}`} />
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center border ${agreements.all ? 'bg-primary border-primary' : 'border-line'}`}>
+            <Check className={`w-4 h-4 transition-colors ${agreements.all ? 'text-white' : 'text-ink-faint'}`} />
           </div>
-          <span className="font-bold text-gray-900">すべてに同意します</span>
+          <span className="font-bold text-ink">すべてに同意します</span>
         </div>
 
         <div className="space-y-6">
@@ -65,12 +65,12 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
           ].map((item) => (
             <div key={item.key} className="flex items-center justify-between group cursor-pointer" onClick={() => handleToggle(item.key as any)}>
               <div className="flex items-center gap-3">
-                <Check className={`w-4 h-4 transition-colors ${agreements[item.key as keyof typeof agreements] ? 'text-gray-900' : 'text-gray-300'}`} />
-                <span className={`text-sm ${agreements[item.key as keyof typeof agreements] ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+                <Check className={`w-4 h-4 transition-colors ${agreements[item.key as keyof typeof agreements] ? 'text-ink' : 'text-ink-faint'}`} />
+                <span className={`text-sm ${agreements[item.key as keyof typeof agreements] ? 'text-ink font-medium' : 'text-ink-faint'}`}>
                   {item.label}
                 </span>
               </div>
-              {item.hasDetail && <ChevronRight className="w-4 h-4 text-gray-300" />}
+              {item.hasDetail && <ChevronRight className="w-4 h-4 text-ink-faint" />}
             </div>
           ))}
         </div>
@@ -80,7 +80,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
         <button
           disabled={!canProceed}
           onClick={onNext}
-          className={`w-full py-4 rounded-xl font-bold transition-colors ${canProceed ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'}`}
+          className={`w-full py-4 rounded-xl font-bold transition-colors ${canProceed ? 'bg-primary text-white' : 'bg-primary-soft text-ink-faint'}`}
         >
           次へ
         </button>

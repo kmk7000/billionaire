@@ -88,7 +88,15 @@ src/
    - **푸시 발송 서버**: 지금은 클라이언트가 기기 토큰을 저장하는 부분까지만 되어 있고, 실제로 알림을 "보내는" 쪽(Firebase Cloud Messaging 연동, 커뮤니티 좋아요/댓글 시 서버에서 발송)은 아직 없음 — 별도 작업 필요.
    - **LINE 로그인**: `server.ts`의 `/api/auth/line/url` 콜백은 배포된 HTTPS 서버가 있어야 네이티브 앱에서도 동작한다(로컬호스트로는 불가) — 서버 배포가 선행되어야 함.
    - 명함 스캔은 기존 `getUserMedia` 기반 커스텀 카메라 UI를 그대로 재사용 중이며(Capacitor 네이티브 셸 안에서는 카메라 권한이 PWA와 달리 앱 단위로 영구 저장되므로 이것만으로도 안정성 문제가 크게 개선됨), `@capacitor/camera` 플러그인으로 교체하는 건 필요해지면 나중에 고려.
-9. **디자인 토큰 시스템** — 색상/그림자/radius 토큰이 `src/index.css`의 Tailwind 4 `@theme` 블록에 정의되어 있다(`ink`/`ink-muted`/`ink-faint`/`line`/`surface`/`canvas`/`primary`/`primary-soft`/`accent`(朱色)/`success`/`warning`/`danger`). 새 UI는 반드시 이 토큰 클래스(`text-ink`, `bg-canvas` 등)를 쓰고 `gray-*`/`bg-white`/`bg-black`/hex 하드코딩을 금지. 구 `src/constants/theme.ts`는 삭제됨.
+9. **디자인 토큰 시스템 — 전면 마이그레이션 완료 (2026-08)** — 색상/그림자/radius 토큰이 `src/index.css`의 Tailwind 4 `@theme` 블록에 정의되어 있다(`ink`/`ink-muted`/`ink-faint`/`line`/`surface`/`canvas`/`primary`/`primary-soft`/`accent`(朱色)/`success`/`warning`/`danger`). 구 `src/constants/theme.ts`는 삭제됨.
+    - **레거시 클래스 673건을 17개 파일에서 일괄 치환**해 이제 `gray-*`/`bg-white`/토큰값 hex는 0건이다. 새 UI도 반드시 토큰 클래스만 쓸 것.
+    - **표준 매핑**: `bg-white`→`bg-surface`, `bg-gray-50`→`bg-canvas`, `bg-gray-100/200/300`→`bg-primary-soft`, `text-gray-900/800`→`text-ink`, `text-gray-700/600/500`→`text-ink-muted`, `text-gray-400/200`→`text-ink-faint`, `border-gray-*`→`border-line`, `text-red-500`→`text-danger`, `bg-black/NN`(스크림)→`bg-ink/NN`, `bg-black`(버튼)→`bg-primary`.
+    - **일괄 치환하면 안 되는 것들** (실제로 이번에 걸린 함정):
+      - **`text-white`(123건)와 `border-white`는 그대로 둔다.** 어두운 배경 위에서 정상이다.
+      - **`text-gray-300`은 배경에 따라 갈린다.** 데스크톱 헤더(`App.tsx`, 배경 `rgb(10,10,10)`)와 다크 하단바(`BottomNav`)에서는 `text-white/60`으로, 밝은 배경(약관·댓글·게시글)에서는 `text-ink-faint`로 보냈다. 전부 `text-ink-faint`로 밀었으면 어두운 헤더에서 대비가 무너졌다.
+      - **`MeishiScannerModal`의 `bg-black` 4건은 의도적으로 유지.** 카메라 뷰파인더 표면이지 테마 색이 아니다.
+      - **`#06C755`(LINE 브랜드 그린) 유지.** 브랜드 색은 토큰화 대상이 아니다.
+    - 토큰값과 동일한 raw hex(`#0A0A0A`→primary, `#141A21`→ink, `#5B6672`→ink-muted, `#8B95A1`→ink-faint, `#E5E8EB`→line, `#F7F8FA`→canvas, `#C9483B`→accent)도 전부 토큰 클래스로 바꿨다.
 10. **스텁/빈 기능 정리 완료 (2026-08)** — 검색(`SearchOverlay`: 명함+커뮤니티 통합, 모바일 3개 헤더+데스크톱 헤더 연결), 알림 패널(`NotificationsPanel`: 정직한 빈 상태, 가짜 배지 제거), 명함 상세 메모(Firestore `meishi.memo`)와 tel/sms/mailto 액션, 이메일 실제 가입(createUserWithEmailAndPassword), 프로필 완성도(로컬 토글 → 실데이터 파생), 프로필 사진 업로드(리사이즈 후 users.photoURL에 dataURL 저장), 마이프로필 投稿 탭(내 게시글 목록). 가짜 데이터(팔로워 128/129, 가짜 제안 배너, 목 트렌딩, 가짜 커뮤니티 카테고리 탭) 제거됨. **아직 스텁인 것**: チーム名刺帳/グループ連絡先(準備中), 프로필 履歴書管理/お知らせ 탭(準備中です), 알림 백엔드, 알림 백엔드.
 11. **공개 디지털 명함 / 유저별 핸들 구현 완료 (2026-08)** — `my_cards/{uid}`(유저당 1장, 문서 ID가 uid라 list 쿼리 불필요) + `handles/{handle}`(문서 ID가 핸들 자체, `create`만 허용해 트랜잭션 없이 원자적 유일성 보장). 규칙 배포 완료. 카드 내용은 마이 명함(`meishi.isMyCard`)+프로필에서 파생되며, 원본이 바뀌면 `isStale`로 감지해 「最新の内容に更新する」로 재동기화한다(자동 저장 안 함). 비공개 전환 시 URL을 알아도 404. 진입점: 데스크톱 좌측 사이드바 버튼 + 마이프로필 マイ名刺タブ의 「マイ名刺を共有する」. 관련 파일: `hooks/usePublicCard.ts`, `components/profile/PublicCardModal.tsx`, `services/firestoreService.ts`의 `handleService`.
     - **주의**: `tsconfig.json`에 `strict`가 꺼져 있어 판별 유니온(`{ok:true}|{ok:false,reason}`) 내로잉이 동작하지 않는다. `HandleCheck`는 옵셔널 필드 인터페이스로 정의했다. (CLAUDE.md 코딩 규칙의 "TypeScript strict"와 실제 tsconfig가 불일치 — 정리 필요)

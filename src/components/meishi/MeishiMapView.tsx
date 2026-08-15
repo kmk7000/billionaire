@@ -538,15 +538,15 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                 onCloseClick={() => setSelectedGroup(null)}
               >
                 <div className="p-1 min-w-[160px] max-w-[220px]">
-                  <p className="font-bold text-sm text-gray-900 mb-1">{selectedGroup.company}</p>
+                  <p className="font-bold text-sm text-ink mb-1">{selectedGroup.company}</p>
                   {selectedGroup.members.map((m) => (
                     <button
                       key={m.id}
                       onClick={() => onSelectMeishi?.(m)}
-                      className="w-full text-left py-1.5 border-t border-gray-100 first:border-t-0 hover:bg-gray-50"
+                      className="w-full text-left py-1.5 border-t border-line first:border-t-0 hover:bg-canvas"
                     >
-                      <p className="text-xs font-medium text-gray-900">{m.name}</p>
-                      {m.position && <p className="text-[10px] text-gray-500">{m.position}</p>}
+                      <p className="text-xs font-medium text-ink">{m.name}</p>
+                      {m.position && <p className="text-[10px] text-ink-muted">{m.position}</p>}
                     </button>
                   ))}
                 </div>

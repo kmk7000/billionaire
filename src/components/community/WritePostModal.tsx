@@ -24,7 +24,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-[150] flex items-end sm:items-center sm:justify-center"
+          className="fixed inset-0 bg-ink/50 z-[150] flex items-end sm:items-center sm:justify-center"
           onClick={close}
         >
           <motion.div
@@ -32,26 +32,26 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl max-h-[90vh] flex flex-col"
+            className="bg-surface w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">投稿を作成</h2>
-              <button aria-label="閉じる" onClick={close} className="p-1 text-gray-400">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+              <h2 className="font-bold text-ink">投稿を作成</h2>
+              <button aria-label="閉じる" onClick={close} className="p-1 text-ink-faint">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-2">掲示板を選択</label>
+                <label className="block text-xs font-bold text-ink-muted mb-2">掲示板を選択</label>
                 <div className="flex flex-wrap gap-2">
                   {COMMUNITY_BOARDS.map((board) => (
                     <button
                       key={board.id}
                       onClick={() => setBoardId(board.id)}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                        boardId === board.id ? 'bg-[#0A0A0A] text-white' : 'bg-gray-100 text-gray-600'
+                        boardId === board.id ? 'bg-primary text-white' : 'bg-primary-soft text-ink-muted'
                       }`}
                     >
                       {getCommunityBoardLabel(board.id)}
@@ -66,7 +66,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="タイトルを入力してください"
                 maxLength={100}
-                className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-black"
+                className="w-full px-3 py-3 border border-line rounded-xl text-sm font-bold focus:outline-none focus:border-black"
               />
 
               <textarea
@@ -75,15 +75,15 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
                 placeholder="内容を入力してください"
                 rows={8}
                 maxLength={3000}
-                className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:border-black"
+                className="w-full px-3 py-3 border border-line rounded-xl text-sm resize-none focus:outline-none focus:border-black"
               />
             </div>
 
-            <div className="px-5 py-4 border-t border-gray-100">
+            <div className="px-5 py-4 border-t border-line">
               <button
                 onClick={handleSubmitClick}
                 disabled={!canSubmit || isSubmitting}
-                className="w-full py-3 rounded-xl bg-black text-white font-bold text-sm disabled:bg-gray-300 transition-colors"
+                className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm disabled:bg-primary-soft transition-colors"
               >
                 {isSubmitting ? '投稿中...' : '投稿する'}
               </button>
