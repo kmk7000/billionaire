@@ -159,7 +159,7 @@ export default function App() {
   const myMeishi = meishis.find(m => m.isMyCard);
   const [selectedCommunityBoard, setSelectedCommunityBoard] = useState<string>('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard);
+  const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard, undefined, !!user);
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
   useCallerIdSync(meishis);

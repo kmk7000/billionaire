@@ -2,12 +2,27 @@ import { useState, useEffect } from 'react';
 import { communityService } from '../services/firestoreService';
 import { CommunityPost } from '../types/db';
 
-export function useCommunityPosts(boardId: string = 'all', fallbackPosts: CommunityPost[] = []) {
+/**
+ * `isEnabled` should be false until the user is signed in. The `posts` rules
+ * require authentication, so subscribing on the login screen guarantees a
+ * PERMISSION_DENIED for every visitor before they log in — noise that hides
+ * real failures.
+ */
+export function useCommunityPosts(
+  boardId: string = 'all',
+  fallbackPosts: CommunityPost[] = [],
+  isEnabled: boolean = true
+) {
   const [posts, setPosts] = useState<CommunityPost[]>(fallbackPosts);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    if (!isEnabled) {
+      setPosts(fallbackPosts);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const unsubscribe = communityService.subscribePosts(
       boardId,
@@ -28,7 +43,7 @@ export function useCommunityPosts(boardId: string = 'all', fallbackPosts: Commun
     );
 
     return () => unsubscribe();
-  }, [boardId]);
+  }, [boardId, isEnabled]);
 
   const createPost = async (
     postData: Omit<CommunityPost, 'id' | 'likeCount' | 'commentCount' | 'viewCount' | 'status' | 'createdAt' | 'updatedAt'>

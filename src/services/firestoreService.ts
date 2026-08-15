@@ -19,7 +19,7 @@ import {
   increment,
   Unsubscribe,
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, handleFirestoreError, logFirestoreError, OperationType } from '../firebase';
 import {
   UserProfile,
   Employment,
@@ -55,7 +55,7 @@ export const contactService = {
         onData(cards);
       },
       (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'contacts');
+        logFirestoreError(error, OperationType.LIST, 'contacts');
         if (onError) onError(error);
       }
     );
@@ -282,7 +282,7 @@ export const communityService = {
         onData(posts);
       },
       (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'posts');
+        logFirestoreError(error, OperationType.LIST, 'posts');
         if (onError) onError(error);
       }
     );

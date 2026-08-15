@@ -5,10 +5,16 @@ const config: CapacitorConfig = {
   appName: 'Billionaire',
   webDir: 'dist',
   server: {
-    // Firebase Auth's init warm-up request fails under WKWebView's default
-    // capacitor:// custom scheme (CORS/redirect check error) — https://localhost
-    // gives it a normal secure-context origin instead.
-    iosScheme: 'https',
+    // Do NOT add `iosScheme: 'https'` here. It looks like it works but is
+    // silently discarded: Capacitor's InstanceDescriptor.normalize() keeps a
+    // scheme only when `WKWebView.handlesURLScheme(scheme) == false`, and
+    // WKWebView handles https natively, so the value is thrown away and reset
+    // to the default "capacitor". Verified on-device 2026-08 — the bundled
+    // capacitor.config.json said "https" while the app logged
+    // `Loading app at capacitor://localhost`. iOS therefore always serves
+    // from capacitor://localhost, and any code that needs a normal web origin
+    // (Firebase's gapi auth iframe, for one) has to be skipped on native
+    // instead — see src/firebase.ts.
     androidScheme: 'https',
   },
   plugins: {

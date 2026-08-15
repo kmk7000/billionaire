@@ -17,26 +17,39 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-// IndexedDB persistence can hang inside a Capacitor WKWebView on a real
-// device — not by rejecting (which the fallback array below would recover
-// from), but by never settling at all, so onAuthStateChanged never fires and
-// the app is stuck on its loading spinner forever. Confirmed on-device
-// 2026-08: this only surfaces on a real iOS device, never in the browser
-// preview or the iOS Simulator's WebKit, which is why it went unnoticed
-// until the first physical-device install. The fix is ordering, not just
-// having a fallback: on native platforms put the synchronous, reliable
-// localStorage-backed persistence first so the hang-prone IndexedDB path is
-// never on the critical path to the first auth state resolution.
-const authPersistence = Capacitor.isNativePlatform()
-  ? [browserLocalPersistence, inMemoryPersistence]
-  : [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence];
+// The popup/redirect resolver must NOT be supplied on native. Diagnosed
+// on-device 2026-08, after the app hung on its loading spinner forever on a
+// physical iPhone while working fine in the browser:
+//
+//   - On iOS, Firebase's BrowserPopupRedirectResolver reports
+//     `_shouldInitProactively === true` (it checks `_isIOS()`), so
+//     `initializeAuth` eagerly loads the gapi auth iframe from
+//     apis.google.com before resolving.
+//   - Capacitor serves the app from `capacitor://localhost` (see
+//     capacitor.config.ts for why that cannot be changed), and Google's
+//     endpoints reject that origin via CORS. The `gapi.iframes` module
+//     therefore never arrives.
+//   - Firebase's `loadGapi()` calls `gapi.load('gapi.iframes', { callback,
+//     ontimeout })`. The callback *does* fire, so `ontimeout` never will —
+//     but inside it, `resolve(gapi.iframes.getContext())` throws a
+//     TypeError because `gapi.iframes` is undefined. That throw happens
+//     outside the Promise executor, so the promise neither resolves nor
+//     rejects: it stays pending forever.
+//   - `initializeAuth` awaits it (its try/catch only helps for a rejection,
+//     not a hang), so `onAuthStateChanged` never fires and the app's
+//     `isAuthReady` gate never opens.
+//
+// Native sign-in does not need the resolver at all: App.tsx uses
+// `FirebaseAuthentication.signInWithGoogle()` (native SDK) followed by
+// `signInWithCredential`. Only the web branch calls `signInWithPopup`.
+const isNative = Capacitor.isNativePlatform();
 
 export const auth = initializeAuth(app, {
-  persistence: authPersistence,
-  // signInWithPopup/signInWithRedirect throw auth/argument-error unless a
-  // resolver is explicitly supplied — getAuth() includes this by default,
-  // but initializeAuth() does not.
-  popupRedirectResolver: browserPopupRedirectResolver,
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
+  // Web only: signInWithPopup/signInWithRedirect throw auth/argument-error
+  // unless a resolver is explicitly supplied — getAuth() includes this by
+  // default, but initializeAuth() does not.
+  ...(isNative ? {} : { popupRedirectResolver: browserPopupRedirectResolver }),
 });
 export const googleProvider = new GoogleAuthProvider();
 export { EmailAuthProvider };
@@ -68,6 +81,38 @@ export interface FirestoreErrorInfo {
       photoUrl: string | null;
     }[];
   }
+}
+
+/**
+ * Logs a Firestore failure without rethrowing.
+ *
+ * Use this inside onSnapshot error callbacks and anywhere else that runs
+ * outside a try/catch: `handleFirestoreError` throws, and a throw from a
+ * listener callback escapes as an uncaught error (Capacitor surfaces it as a
+ * "STARTUP JS ERROR") while also skipping whatever fallback the caller meant
+ * to run after it.
+ */
+export function logFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  return errInfo;
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
