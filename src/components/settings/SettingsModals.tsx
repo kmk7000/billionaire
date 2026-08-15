@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import {
   ArrowLeft, Megaphone, HelpCircle, Headset, Settings, UserCircle, ChevronRight,
   Image as ImageIcon, CreditCard, Phone, BookOpen, ThumbsUp, Check,
@@ -7,7 +8,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import SimpleLoginSettings from '../SimpleLoginSettings';
 import { InquiryPage } from './InquiryPage';
+import { CallerIdInfoSheet } from './CallerIdInfoSheet';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
+
+// Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
+// full explanation. Hidden on Android/web rather than shown disabled: there
+// is no Android implementation yet, and a visible-but-inert row is exactly
+// the false-advertising problem this replaces.
+const isCallerIdAvailable = Capacitor.getPlatform() === 'ios';
 
 interface SettingsModalsProps {
   settings: AccountSettings;
@@ -42,7 +50,10 @@ async function shareApp() {
 export const SettingsModals: React.FC<SettingsModalsProps> = ({
   settings: s, user, onOpenProfileManagement,
   onOpenAlbumImport, onOpenDirectInput, onOpenNotifications,
-}) => (
+}) => {
+  const [isCallerIdSheetOpen, setIsCallerIdSheetOpen] = useState(false);
+
+  return (
   <>
     {/* More Page Overlay */}
     <AnimatePresence>
@@ -145,13 +156,18 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Phone className="w-6 h-6 text-gray-700" />
-                  <span className="text-[15px] font-bold text-gray-900">着信時に相手の名刺情報を表示</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
+              {isCallerIdAvailable && (
+                <button
+                  onClick={() => { s.closeMorePage(); setIsCallerIdSheetOpen(true); }}
+                  className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-6 h-6 text-gray-700" />
+                    <span className="text-[15px] font-bold text-gray-900">着信時に相手の名刺情報を表示</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                </button>
+              )}
             </div>
 
             {/* Other Section */}
@@ -238,13 +254,15 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
               <div className="px-4 py-3">
                 <h3 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">名刺</h3>
               </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <span className="text-[15px] font-bold text-gray-900">着信時に相手の名刺情報を表示</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[14px] text-gray-500">オフ</span>
+              {isCallerIdAvailable && (
+                <button
+                  onClick={() => setIsCallerIdSheetOpen(true)}
+                  className="w-full flex items-center justify-between px-4 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[15px] font-bold text-gray-900">着信時に相手の名刺情報を表示</span>
                   <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </button>
+                </button>
+              )}
               <button className="w-full flex items-center justify-between px-4 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <span className="text-[15px] font-bold text-gray-900">携帯電話の連絡先に保存</span>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -660,5 +678,8 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
       user={user}
       onOpenAccountManagement={() => { s.closeInquiry(); s.openAccountManagement(); }}
     />
+
+    <CallerIdInfoSheet isOpen={isCallerIdSheetOpen} onClose={() => setIsCallerIdSheetOpen(false)} />
   </>
-);
+  );
+};

@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { initializeApp } from 'firebase/app';
 import {
   initializeAuth,
@@ -16,11 +17,22 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-// IndexedDB persistence can silently hang inside a Capacitor WKWebView, which
-// leaves onAuthStateChanged never firing — fall back through localStorage to
-// in-memory so auth state always resolves.
+// IndexedDB persistence can hang inside a Capacitor WKWebView on a real
+// device — not by rejecting (which the fallback array below would recover
+// from), but by never settling at all, so onAuthStateChanged never fires and
+// the app is stuck on its loading spinner forever. Confirmed on-device
+// 2026-08: this only surfaces on a real iOS device, never in the browser
+// preview or the iOS Simulator's WebKit, which is why it went unnoticed
+// until the first physical-device install. The fix is ordering, not just
+// having a fallback: on native platforms put the synchronous, reliable
+// localStorage-backed persistence first so the hang-prone IndexedDB path is
+// never on the critical path to the first auth state resolution.
+const authPersistence = Capacitor.isNativePlatform()
+  ? [browserLocalPersistence, inMemoryPersistence]
+  : [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence];
+
 export const auth = initializeAuth(app, {
-  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
+  persistence: authPersistence,
   // signInWithPopup/signInWithRedirect throw auth/argument-error unless a
   // resolver is explicitly supplied — getAuth() includes this by default,
   // but initializeAuth() does not.

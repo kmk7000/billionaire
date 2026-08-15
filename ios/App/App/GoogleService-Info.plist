@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>738622111654-uo3jdcqel099eb82kkegi5qcqqvdij79.apps.googleusercontent.com</string>
+	<string>738622111654-jb3gvtl0idi1cn2ulpatvdfnjnpja8db.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.738622111654-uo3jdcqel099eb82kkegi5qcqqvdij79</string>
+	<string>com.googleusercontent.apps.738622111654-jb3gvtl0idi1cn2ulpatvdfnjnpja8db</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>738622111654-k332ubh479b7mdnmdmlcn2m2gmnspusm.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAhhh6Kj_CXkVyGVJa2W1OpihQ3dt1Icm0</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.billionaire.app</string>
+	<string>com.mingyukim.billionaire</string>
 	<key>PROJECT_ID</key>
 	<string>ai-studio-applet-webapp-c0fee</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:738622111654:ios:306faf4c362d5354659967</string>
+	<string>1:738622111654:ios:99868ea35a20d4bd659967</string>
 </dict>
 </plist>

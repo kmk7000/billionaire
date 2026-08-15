@@ -3,6 +3,10 @@
 
 @theme {
   --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  /* Data columns (IDs, timestamps, counters) in the admin console. A system
+     stack rather than a webfont — it costs no request and the only thing asked
+     of it is fixed advance width. */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
   /* Design tokens — 静かな信頼 (quiet trust) */
   --color-ink: #141A21;

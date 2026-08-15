@@ -63,10 +63,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Operator role. Granted only by editing `users/{uid}.role` in the Firebase
+    // Console — the users rules below reject any client-side write to another
+    // account's document, so nobody can promote themselves or anyone else from
+    // inside the app. There is deliberately no hardcoded-email fallback: an
+    // address baked into the rules is a standing backdoor that survives losing
+    // control of the mailbox.
     function isAdmin() {
       return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "milk454537@gmail.com" && request.auth.token.email_verified == true));
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function hasRequiredFields(fields) {
@@ -126,8 +131,10 @@ service cloud.firestore {
              data.body is string && data.body.size() > 0 && data.body.size() < 3000;
     }
 
-    // Allows engagement-counter-only updates (likes/comments/views) by any
-    // authenticated user, distinct from the author editing their own content.
+    // Restricts an update to a specific set of fields. Used both for
+    // engagement-counter bumps by any authenticated user (distinct from the
+    // author editing their own content) and for moderation, which may only
+    // touch `status`.
     function onlyCountersChanged(allowedFields) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
     }
@@ -178,7 +185,11 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidPost(request.resource.data);
       allow update: if isAuthenticated() &&
         ((resource.data.authorId == request.auth.uid && isValidPost(request.resource.data)) ||
-          onlyCountersChanged(['likeCount', 'commentCount', 'viewCount', 'updatedAt']));
+          onlyCountersChanged(['likeCount', 'commentCount', 'viewCount', 'updatedAt']) ||
+          // Moderation: an admin may hide or restore a post, and nothing else.
+          // Confining the write to `status` means an operator can never rewrite
+          // a member's words while leaving their name on them.
+          (isAdmin() && onlyCountersChanged(['status', 'updatedAt'])));
       allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
     }
 
@@ -187,7 +198,9 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidComment(request.resource.data);
       allow update: if isAuthenticated() &&
         ((resource.data.authorId == request.auth.uid && isValidComment(request.resource.data)) ||
-          onlyCountersChanged(['likeCount']));
+          onlyCountersChanged(['likeCount']) ||
+          // Moderation: hide/restore only, same reasoning as posts.
+          (isAdmin() && onlyCountersChanged(['status'])));
       allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
     }
 
@@ -203,7 +216,10 @@ service cloud.firestore {
         request.resource.data.body is string &&
         request.resource.data.body.size() > 0 &&
         request.resource.data.body.size() <= 5000;
-      allow update: if isAdmin();
+      // Triage only. The admin console records a status, an internal note and
+      // who handled it; the reporter's own words stay immutable.
+      allow update: if isAdmin() &&
+        onlyCountersChanged(['status', 'adminNote', 'handledBy', 'handledAt']);
 
       match /attachments/{attachmentId} {
         allow read: if isAuthenticated() &&
@@ -217,7 +233,21 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (resource.data.reporterId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() && hasRequiredFields(['reporterId', 'targetType', 'targetId', 'reason']) &&
         request.resource.data.reporterId == request.auth.uid;
-      allow update: if isAdmin();
+      // Triage only, same as inquiries — the report itself is evidence.
+      allow update: if isAdmin() &&
+        onlyCountersChanged(['status', 'adminNote', 'handledBy', 'handledAt']);
+    }
+
+    // Append-only trail of admin console activity: who viewed or changed
+    // what, when. There is deliberately no `update` or `delete` rule here —
+    // an operator can create a new entry but never edit or remove one, not
+    // even their own. If a logged action turns out to be wrong, the record
+    // of the mistake stays; the fix is a new, separately-logged action.
+    match /admin_audit/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() &&
+        hasRequiredFields(['adminUid', 'adminEmail', 'action', 'targetType', 'targetId']) &&
+        request.resource.data.adminUid == request.auth.uid;
     }
 
     match /blocks/{blockId} {

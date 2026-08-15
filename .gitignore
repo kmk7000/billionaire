@@ -10,3 +10,6 @@ service-account.json
 
 # Local-only third-party design skill (npm install -g ui-ux-pro-max-cli && uipro init --ai claude)
 .claude/skills/ui-ux-pro-max/
+
+# Operator console build output (deployed separately from the app)
+dist-admin

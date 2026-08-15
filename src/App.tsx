@@ -27,6 +27,7 @@ import { WritePostModal } from './components/community/WritePostModal';
 import { useCommunityPosts } from './hooks/useCommunityPosts';
 import { useCommunityWrite } from './hooks/useCommunityWrite';
 import { useNativePush } from './hooks/useNativePush';
+import { useCallerIdSync } from './hooks/useCallerIdSync';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
 import { EducationModals } from './components/profile/EducationModals';
@@ -161,6 +162,7 @@ export default function App() {
   const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard);
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
+  useCallerIdSync(meishis);
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
   const [loginView, setLoginView] = useState<'main' | 'terms' | 'signup'>('main');

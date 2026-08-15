@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
+    "build:admin": "vite build --config vite.admin.config.ts",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist-admin",
     "lint": "tsc --noEmit",
     "cap:sync": "vite build && npx cap sync",
     "cap:ios": "npm run cap:sync && npx cap open ios",

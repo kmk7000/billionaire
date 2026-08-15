@@ -186,7 +186,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           <div className="bg-canvas rounded-xl p-4">
             <span className="inline-block px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold rounded mb-2">発信者表示</span>
             <p className="font-bold text-ink text-xs leading-relaxed">
-              名刺を連絡先に保存する必要はありません。電話がかかってくるとRememberがお知らせします。
+              名刺を連絡先に保存する必要はありません。着信時に会社名・お名前を表示できます（iOS、[設定]から有効化）。
             </p>
           </div>
 

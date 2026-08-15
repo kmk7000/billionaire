@@ -8,7 +8,8 @@
 ```bash
 npm install        # 의존성 설치
 npm run dev        # 개발 서버 (Express + Vite middleware, http://localhost:3000)
-npm run build      # 프로덕션 빌드 (vite build → dist/)
+npm run build      # 앱 프로덕션 빌드 (vite build → dist/)
+npm run build:admin # 관리 콘솔 빌드 (→ dist-admin/, 앱과 별도 배포)
 npm run lint       # 타입 체크 (tsc --noEmit)
 
 # 네이티브 앱 (Capacitor)
@@ -91,6 +92,28 @@ src/
 10. **스텁/빈 기능 정리 완료 (2026-08)** — 검색(`SearchOverlay`: 명함+커뮤니티 통합, 모바일 3개 헤더+데스크톱 헤더 연결), 알림 패널(`NotificationsPanel`: 정직한 빈 상태, 가짜 배지 제거), 명함 상세 메모(Firestore `meishi.memo`)와 tel/sms/mailto 액션, 이메일 실제 가입(createUserWithEmailAndPassword), 프로필 완성도(로컬 토글 → 실데이터 파생), 프로필 사진 업로드(리사이즈 후 users.photoURL에 dataURL 저장), 마이프로필 投稿 탭(내 게시글 목록). 가짜 데이터(팔로워 128/129, 가짜 제안 배너, 목 트렌딩, 가짜 커뮤니티 카테고리 탭) 제거됨. **아직 스텁인 것**: チーム名刺帳/グループ連絡先(準備中), 프로필 履歴書管理/お知らせ 탭(準備中です), 알림 백엔드, 알림 백엔드.
 11. **공개 디지털 명함 / 유저별 핸들 구현 완료 (2026-08)** — `my_cards/{uid}`(유저당 1장, 문서 ID가 uid라 list 쿼리 불필요) + `handles/{handle}`(문서 ID가 핸들 자체, `create`만 허용해 트랜잭션 없이 원자적 유일성 보장). 규칙 배포 완료. 카드 내용은 마이 명함(`meishi.isMyCard`)+프로필에서 파생되며, 원본이 바뀌면 `isStale`로 감지해 「最新の内容に更新する」로 재동기화한다(자동 저장 안 함). 비공개 전환 시 URL을 알아도 404. 진입점: 데스크톱 좌측 사이드바 버튼 + 마이프로필 マイ名刺タブ의 「マイ名刺を共有する」. 관련 파일: `hooks/usePublicCard.ts`, `components/profile/PublicCardModal.tsx`, `services/firestoreService.ts`의 `handleService`.
     - **주의**: `tsconfig.json`에 `strict`가 꺼져 있어 판별 유니온(`{ok:true}|{ok:false,reason}`) 내로잉이 동작하지 않는다. `HandleCheck`는 옵셔널 필드 인터페이스로 정의했다. (CLAUDE.md 코딩 규칙의 "TypeScript strict"와 실제 tsconfig가 불일치 — 정리 필요)
+12. **관리 콘솔(管理コンソール) — 앱과 분리된 별도 데스크톱 페이지 (2026-08)** — 운영자가 문의/신고/커뮤니티/계정을 처리하는 화면. **앱(`dist/`)에는 일절 포함되지 않는다.**
+    - **빌드 분리**: `admin.html` + `src/admin/` + `vite.admin.config.ts` → `npm run build:admin` → `dist-admin/`. 소비자용 `vite build`는 `index.html`만 입력으로 잡으므로 관리자 코드가 `dist/`에 들어가지 않는다(검증: `dist/`에서 `管理コンソール`/`adminInquiryService` 문자열 0건). **Capacitor가 `dist/`를 네이티브 앱에 복사하므로, 이 분리가 곧 "관리자 화면이 App Store/Play 심사와 회원 단말에 실리지 않는다"는 뜻이다.**
+    - **개발 중에는** 기존 dev 서버 그대로 `http://localhost:3000/admin.html`에서 열린다(Vite가 루트 HTML 엔트리를 서빙). 프로덕션에서만 산출물이 갈린다.
+    - **배포**: `dist-admin/`는 앱과 다른 호스트(예: `admin.example.com`)에 올리고 Cloudflare Access / IP 허용목록 / VPN 뒤에 두는 것을 전제로 설계했다. 네트워크 게이트는 코드와 정찰을 막고, 실제 데이터 보호는 여전히 `firestore.rules`의 `isAdmin()`이 한다 — 둘은 대체재가 아니라 계층이다.
+    - **구조**: `src/admin/AdminApp.tsx`(인증+역할 게이트+사이드바 레이아웃), `AdminLogin.tsx`(별도 오리진이라 자체 로그인 필요), `ui.tsx`(공용 조각), `panels/`(Overview/Inquiries/Reports/Content/Users 5종). 쿼리는 `src/services/adminService.ts`에 모여 있고 앱과 공유한다.
+    - **디자인**: ui-ux-pro-max(density 9 / variance 2 / motion 2). 다크 사이드바 + 고밀도 테이블 + 우측 드로어 상세. 생성기가 제안한 블루/앰버 팔레트는 **쓰지 않았다** — 제품과 그 제품을 관리하는 콘솔의 팔레트가 갈리면 같은 가이드의 `consistency`(우선순위 4)와 `color-semantic`을 스스로 어기게 된다. 대신 구조·밀도·`number-tabular` 권고만 따르고 색은 앱 토큰을 유지했다. 데이터 컬럼(ID/일시/카운터)은 `--font-mono`(시스템 스택, 웹폰트 요청 0).
+    - **관리자 권한 부여는 Firebase 콘솔에서만 가능**하다. `isAdmin()`은 `users/{uid}.role == 'admin'`만 본다(하드코딩 이메일 백도어 제거함). `users` 규칙이 모든 쓰기에 `data.uid == request.auth.uid`를 요구하므로 앱에서 자신이나 타인을 승격시킬 수 없다 — 의도된 마찰이다.
+    - **관리자 쓰기는 필드 단위로 제한**했다. `posts`/`comments`는 `status`(+`updatedAt`)만, `inquiries`/`reports`는 `status`/`adminNote`/`handledBy`/`handledAt`만. 운영자가 회원 글 본문을 고쳐 쓰는 일이 규칙 차원에서 불가능하다. 모더레이션은 삭제가 아니라 `status: 'hidden'` 소프트 숨김.
+    - **의도적으로 넣지 않은 것**: `meishi` 컬렉션 열람. 규칙상 admin은 읽을 수 있지만, 명함에 담긴 제3자 개인정보는 운영자가 훑어볼 대상이 아니다(리멤버는 한 발 더 나아가 타이피스트가 명함 한 장의 전체를 구조적으로 볼 수 없게 필드를 쪼개 배분한다). 사용자 목록도 최근 50건 + 이메일 완전일치 조회로 제한.
+    - **아직 없는 것**: 문의 답장 메일 발송(서버 필요 — 현재는 `mailto:`), **관리자 행위 감사 로그**(운영자가 2명 이상이 되는 시점의 최우선 과제), 문의/신고 페이지네이션(각 200건 상한).
+    - 쿼리는 `where` + `orderBy` 조합을 피해 복합 인덱스 없이 동작하도록 짰다(필터는 클라이언트). 건수가 커지면 인덱스 + 서버 필터로 옮길 것.
+    - **주의**: `src/firebase.ts`의 `handleFirestoreError`는 원본 `FirebaseError`를 삼키고 JSON 문자열을 담은 새 `Error`를 던진다. `err.code === 'permission-denied'` 판별이 동작하지 않으므로 메시지 문자열로 판단해야 한다(`AdminApp.load()` 참고).
+
+13. **着信時に相手の名刺情報を表示 — iOS만 구현 완료, Android는 미착수 (2026-08)** — 리멤버가 내세우는 발신자 표시 기능. **WebView(React) 코드로는 절대 구현 불가능** — 수신 전화 화면은 OS가 그리므로 두 플랫폼 모두 완전히 별도의 네이티브 코드가 필요하다.
+    - **iOS 구현 방식**: Apple `CXCallDirectoryExtension` — 회사명+이름 **텍스트 한 줄만** 가능(사진·직함 불가), **사용자가 설정 → 電話 → 通話のブロックと識別에서 직접 켜야** 동작(앱이 자동으로 켤 수 없음), 갱신 시점은 iOS가 배터리/CPU 상황을 보고 알아서 스케줄링(실시간 아님, 명함 저장 후 반영까지 지연될 수 있음). 이게 애플이 허용하는 전부다 — Today TIP이나 설정 문구에 "실시간"이나 "사진 표시" 같은 과장 카피를 넣지 말 것.
+    - **아키텍처**: 확장(extension)은 별도 샌드박스 프로세스라 WebView·Firestore를 못 본다. 데이터는 App Group(`group.com.billionaire.app.callerid`)을 통해서만 전달된다: JS(`src/hooks/useCallerIdSync.ts`, meishis 변경 시 자동 동기화) → Capacitor 플러그인(`ios/App/App/Plugins/CallerIdIndexPlugin.swift`, App Group UserDefaults에 기록 + `CXCallDirectoryManager.reloadExtension` 호출) → 확장(`ios/App/CallDirectoryExtension/CallDirectoryHandler.swift`, 같은 UserDefaults를 읽어 `CXCallDirectoryProvider`에 등록). 전화번호는 `src/utils/phoneNumber.ts`가 국가코드 없는 일본 국내번호(0으로 시작)를 81…로 정규화하며, 애매한 형식은 등록하지 않고 버린다(iOS는 오름차순이 아니거나 중복된 항목이 하나라도 있으면 전체 로드를 취소함).
+    - **Xcode 프로젝트 변경은 GUI 없이 `xcodeproj` Ruby gem으로 처리**했다(`ios/add_call_directory_extension.rb`, 멱등적 — 재실행해도 안전). `CallDirectoryExtension` 타겟 추가, Info.plist(`NSExtensionPointIdentifier = com.apple.callkit.call-directory`), 양쪽 타겟에 App Groups 엔타이틀먼트, App 타겟에 Embed App Extensions 빌드 페이즈까지 스크립트로 반영했고, `xcodebuild -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO`로 두 타겟 모두 컴파일 성공까지 확인했다.
+    - **남은 수동 작업 (Xcode에서 한 번)**: `CODE_SIGN_STYLE = Automatic`으로 해뒀으므로, Apple Developer 계정이 연결된 Xcode에서 처음 빌드하면 App Groups가 자동으로 프로비저닝된다. 자동으로 안 잡히면 두 타겟(App, CallDirectoryExtension) 각각 Signing & Capabilities → + Capability → App Groups → `group.com.billionaire.app.callerid` 추가.
+    - **Android는 아직 없음** — 사용자가 명시적으로 "iOS 먼저, Android는 iOS 완성 후"로 순서를 정했다. Android 쪽은 `CallScreeningService` + `RoleManager.ROLE_CALL_SCREENING` + 커스텀 오버레이 Activity로 사진·직함까지 포함한 리멤버 수준의 풀스크린 화면이 가능(iOS보다 표현력이 훨씬 높음)하지만, 이 개발 환경엔 Android Studio가 없어(`ANDROID_HOME` 미설정, 8번 항목 참고) 실제 빌드·기기 테스트는 사용자 환경에서 해야 한다.
+    - **프라이버시 설계**: 트루콜러류(전 세계 사용자 연락처를 크라우드소싱해 타인 번호까지 역조회)와 달리, **로그인한 사용자 본인이 저장한 명함의 번호만** 로컬로 동기화한다. 서버로 타인의 전화번호를 보내 조회하는 경로는 없다. `useCallerIdSync`는 `isMyCard`(본인 명함)를 제외한다 — 식별 대상은 "나에게 걸려오는 남"이지 내 번호가 아니기 때문.
+    - **UI 진입점**: `もっと見る`>`便利な機能`와 `設定`>`名刺` 두 곳 모두 `src/components/settings/CallerIdInfoSheet.tsx`를 여는 것으로 통일했다. 이 시트가 실제 상태(有効/無効/未確認)를 `CXCallDirectoryManager.getEnabledStatusForExtension`으로 조회해 보여주고, iOS 설정 앱을 여는 버튼과 함께 "사진 없음/실시간 아님/자동으로 켤 수 없음" 3가지 한계를 명시한다. **`Capacitor.getPlatform() !== 'ios'`면 두 진입점 모두 완전히 숨김** — Android/web에서 눌러도 안 되는 버튼을 보여주는 대신, 아예 없는 것으로 취급(10번 항목의 "스텁 정리" 원칙과 동일).
+    - **버그 발견 겸 수정**: `TodayScreen.tsx`의 発信者表示 TIP 카피가 "電話がかかってくるとRememberがお知らせします"로 **경쟁사 이름이 그대로 박혀 있었다**(리멤버 마케팅 문구를 참고하며 브랜드명을 안 바꾼 흔적으로 추정). "Billionaire"가 아니라 아예 잘못된 회사명을 사용자에게 노출하고 있었던 것 — 이번에 발견해서 고쳤다.
 
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 

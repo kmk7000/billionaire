@@ -15,13 +15,45 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		6A5BF738BB7526AF8E11A416 /* CallDirectoryExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49DE3389BA5B069A2AE03912 /* CallDirectoryExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6EF06BD8EFC2A269D51A7B17 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4C92B4CCE003193CB600C8B /* Foundation.framework */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A261861653A7FD414C31F520 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3CA4BEA6F9170C773847F46F /* GoogleService-Info.plist */; };
+		E6F0C4913A0232CBC5F58734 /* CallerIdIndexPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB181710781927B40AC5C3E /* CallerIdIndexPlugin.swift */; };
+		F0EB602C4177D6ACB7FAC53F /* CallDirectoryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041E1E1FF30D9E540A728015 /* CallDirectoryHandler.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		105608547707A031786F2ED4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 03EBB6AF3E0566BC1728AEC3;
+			remoteInfo = CallDirectoryExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4D9B17BA37F7F0DC173499DF /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6A5BF738BB7526AF8E11A416 /* CallDirectoryExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		041E1E1FF30D9E540A728015 /* CallDirectoryHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallDirectoryHandler.swift; sourceTree = "<group>"; };
+		1CAF3487923507AD393F2D09 /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		3CA4BEA6F9170C773847F46F /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		49DE3389BA5B069A2AE03912 /* CallDirectoryExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CallDirectoryExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4CB181710781927B40AC5C3E /* CallerIdIndexPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallerIdIndexPlugin.swift; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -32,6 +64,9 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		A16EC009594ADAE202113DD7 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4C92B4CCE003193CB600C8B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		BB580C03FF3B65F73C20841F /* CallDirectoryExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = CallDirectoryExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +75,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C26119682866FEF06182B578 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EF06BD8EFC2A269D51A7B17 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +95,8 @@
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
+				C3A5DF4305B388E6A63ACB84 /* CallDirectoryExtension */,
+				7C4C45C9DDF098720BC0BC65 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -59,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				49DE3389BA5B069A2AE03912 /* CallDirectoryExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,10 +126,46 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		7C4C45C9DDF098720BC0BC65 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				925218976045ACE1CC7B441B /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		925218976045ACE1CC7B441B /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				B4C92B4CCE003193CB600C8B /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		AECBE9304D4C3677017106F8 /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				4CB181710781927B40AC5C3E /* CallerIdIndexPlugin.swift */,
+			);
+			path = Plugins;
+			sourceTree = "<group>";
+		};
+		C3A5DF4305B388E6A63ACB84 /* CallDirectoryExtension */ = {
+			isa = PBXGroup;
+			children = (
+				041E1E1FF30D9E540A728015 /* CallDirectoryHandler.swift */,
+				A16EC009594ADAE202113DD7 /* Info.plist */,
+				BB580C03FF3B65F73C20841F /* CallDirectoryExtension.entitlements */,
+			);
+			path = CallDirectoryExtension;
+			sourceTree = "<group>";
+		};
 		D9C1E65168724752426FAE24 /* App */ = {
 			isa = PBXGroup;
 			children = (
 				3CA4BEA6F9170C773847F46F /* GoogleService-Info.plist */,
+				AECBE9304D4C3677017106F8 /* Plugins */,
+				1CAF3487923507AD393F2D09 /* App.entitlements */,
 			);
 			name = App;
 			sourceTree = "<group>";
@@ -91,6 +173,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		03EBB6AF3E0566BC1728AEC3 /* CallDirectoryExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 203E6B20EF6F9DAAD965A4CC /* Build configuration list for PBXNativeTarget "CallDirectoryExtension" */;
+			buildPhases = (
+				5E9F65ED925B3F2FB6A85B3F /* Sources */,
+				C26119682866FEF06182B578 /* Frameworks */,
+				613D00AF93D340E380D4B674 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CallDirectoryExtension;
+			productName = CallDirectoryExtension;
+			productReference = 49DE3389BA5B069A2AE03912 /* CallDirectoryExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		504EC3031FED79650016851F /* App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
@@ -98,10 +197,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				4D9B17BA37F7F0DC173499DF /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AAC253D66C28FC5135C248C7 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -144,6 +245,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				03EBB6AF3E0566BC1728AEC3 /* CallDirectoryExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -163,6 +265,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		613D00AF93D340E380D4B674 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -172,10 +281,28 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
+				E6F0C4913A0232CBC5F58734 /* CallerIdIndexPlugin.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5E9F65ED925B3F2FB6A85B3F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0EB602C4177D6ACB7FAC53F /* CallDirectoryHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AAC253D66C28FC5135C248C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CallDirectoryExtension;
+			target = 03EBB6AF3E0566BC1728AEC3 /* CallDirectoryExtension */;
+			targetProxy = 105608547707A031786F2ED4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -197,6 +324,27 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		060CA85D91D891E888DFF7FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = CallDirectoryExtension/CallDirectoryExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64GF4299AJ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CallDirectoryExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mingyukim.billionaire.CallDirectoryExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
@@ -311,8 +459,10 @@
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64GF4299AJ;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -321,7 +471,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.billionaire.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mingyukim.billionaire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -333,8 +483,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64GF4299AJ;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -342,7 +494,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.billionaire.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mingyukim.billionaire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
@@ -350,9 +502,40 @@
 			};
 			name = Release;
 		};
+		FD5BCA03784785816DBE6BBB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = CallDirectoryExtension/CallDirectoryExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64GF4299AJ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CallDirectoryExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mingyukim.billionaire.CallDirectoryExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		203E6B20EF6F9DAAD965A4CC /* Build configuration list for PBXNativeTarget "CallDirectoryExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD5BCA03784785816DBE6BBB /* Release */,
+				060CA85D91D891E888DFF7FE /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		504EC2FF1FED79650016851F /* Build configuration list for PBXProject "App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
