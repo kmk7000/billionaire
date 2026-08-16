@@ -24,6 +24,10 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
   const [isPasswordResetErrorOpen, setIsPasswordResetErrorOpen] = useState(false);
   const [isSimpleLoginSettingsOpen, setIsSimpleLoginSettingsOpen] = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isPrologueOpen, setIsPrologueOpen] = useState(false);
+  const [isLegalOpen, setIsLegalOpen] = useState(false);
+  const [isNotificationPrefsOpen, setIsNotificationPrefsOpen] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
@@ -151,6 +155,15 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
   const openInquiry = () => setIsInquiryOpen(true);
   const closeInquiry = () => setIsInquiryOpen(false);
 
+  const openHelp = () => setIsHelpOpen(true);
+  const closeHelp = () => setIsHelpOpen(false);
+  const openPrologue = () => setIsPrologueOpen(true);
+  const closePrologue = () => setIsPrologueOpen(false);
+  const openLegal = () => setIsLegalOpen(true);
+  const closeLegal = () => setIsLegalOpen(false);
+  const openNotificationPrefs = () => setIsNotificationPrefsOpen(true);
+  const closeNotificationPrefs = () => setIsNotificationPrefsOpen(false);
+
   const openSimpleLoginSettings = () => setIsSimpleLoginSettingsOpen(true);
   const closeSimpleLoginSettings = () => setIsSimpleLoginSettingsOpen(false);
 
@@ -167,6 +180,10 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
     isPasswordResetErrorOpen, closePasswordResetError,
     isSimpleLoginSettingsOpen, openSimpleLoginSettings, closeSimpleLoginSettings,
     isInquiryOpen, openInquiry, closeInquiry,
+    isHelpOpen, openHelp, closeHelp,
+    isPrologueOpen, openPrologue, closePrologue,
+    isLegalOpen, openLegal, closeLegal,
+    isNotificationPrefsOpen, openNotificationPrefs, closeNotificationPrefs,
     currentPassword, setCurrentPassword,
     password, setPassword,
     confirmPassword, setConfirmPassword,

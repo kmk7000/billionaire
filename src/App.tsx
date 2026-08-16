@@ -156,6 +156,10 @@ export default function App() {
   // so the editor can also be opened straight from マイ名刺 in the profile,
   // without dragging the card-detail overlay open underneath it.
   const [editingMeishi, setEditingMeishi] = useState<Meishi | null>(null);
+  // Bumped by 設定 > サーバーと情報を再同期 to tear down and re-establish the
+  // Firestore listeners, for when a device has been offline long enough to
+  // doubt what it is showing.
+  const [resyncKey, setResyncKey] = useState(0);
   const [selectedMeishis, setSelectedMeishis] = useState<string[]>([]);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -385,7 +389,7 @@ export default function App() {
       unsubscribeProfile();
       unsubscribeMeishi();
     };
-  }, [user]);
+  }, [user, resyncKey]);
 
   const handleLineLogin = async () => {
     try {
@@ -1235,6 +1239,8 @@ export default function App() {
       <SettingsModals
         settings={accountSettings}
         user={user}
+        userProfile={userProfile}
+        onResync={() => setResyncKey(k => k + 1)}
         onOpenProfileManagement={() => { setProfileTab(1); setIsProfileOpen(true); }}
         onOpenAlbumImport={handleOpenMeishiAlbum}
         onOpenDirectInput={() => setIsMeishiDirectInputOpen(true)}

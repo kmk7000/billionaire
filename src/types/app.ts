@@ -73,6 +73,13 @@ export interface UserProfile {
   birthday?: string;
   awards?: string[];
   certificates?: string[];
+  /** 通知管理. Absent means the defaults in NotificationPrefsPage apply. */
+  notificationPrefs?: {
+    communityReplies?: boolean;
+    communityLikes?: boolean;
+    cardUpdates?: boolean;
+    marketing?: boolean;
+  };
 }
 
 export interface Meishi {

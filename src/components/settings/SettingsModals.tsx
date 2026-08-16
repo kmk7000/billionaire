@@ -9,7 +9,12 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import SimpleLoginSettings from '../SimpleLoginSettings';
 import { InquiryPage } from './InquiryPage';
 import { CallerIdInfoSheet } from './CallerIdInfoSheet';
+import { HelpPage } from './HelpPage';
+import { ProloguePage } from './ProloguePage';
+import { LegalPage } from './LegalPage';
+import { NotificationPrefsPage } from './NotificationPrefsPage';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
+import type { UserProfile } from '../../types/app';
 import { useToast } from '../Toast';
 
 // Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
@@ -21,6 +26,9 @@ const isCallerIdAvailable = Capacitor.getPlatform() === 'ios';
 interface SettingsModalsProps {
   settings: AccountSettings;
   user: FirebaseUser | null;
+  userProfile: UserProfile | null;
+  /** Tears down and re-establishes the Firestore listeners. */
+  onResync: () => void;
   onOpenProfileManagement: () => void;
   onOpenAlbumImport: () => void;
   onOpenDirectInput: () => void;
@@ -51,7 +59,7 @@ async function shareApp(onCopied: (message: string) => void) {
 }
 
 export const SettingsModals: React.FC<SettingsModalsProps> = ({
-  settings: s, user, onOpenProfileManagement,
+  settings: s, user, userProfile, onResync, onOpenProfileManagement,
   onOpenAlbumImport, onOpenDirectInput, onOpenNotifications,
 }) => {
   const toast = useToast();
@@ -89,7 +97,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 </div>
                 <span className="text-[11px] font-bold text-ink-muted">お知らせ</span>
               </button>
-              <button className="flex flex-col items-center gap-2">
+              <button
+                onClick={() => { s.closeMorePage(); s.openHelp(); }}
+                className="flex flex-col items-center gap-2"
+              >
                 <div className="w-12 h-12 rounded-full bg-canvas flex items-center justify-center">
                   <HelpCircle className="w-6 h-6 text-ink-muted" />
                 </div>
@@ -179,7 +190,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
               <div className="px-4 py-2">
                 <h3 className="text-[13px] font-bold text-ink-faint uppercase tracking-wider">その他</h3>
               </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-canvas transition-colors">
+              <button
+                onClick={() => { s.closeMorePage(); s.openPrologue(); }}
+                className="w-full flex items-center justify-between px-4 py-4 hover:bg-canvas transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <BookOpen className="w-6 h-6 text-ink-muted" />
                   <span className="text-[15px] font-bold text-ink">プロローグ</span>
@@ -289,7 +303,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
               <div className="px-4 py-3">
                 <h3 className="text-[13px] font-bold text-ink-faint uppercase tracking-wider">一般</h3>
               </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors">
+              <button
+                onClick={s.openNotificationPrefs}
+                className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors"
+              >
                 <span className="text-[15px] font-bold text-ink">通知管理</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
@@ -307,7 +324,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
               <div className="px-4 py-3">
                 <h3 className="text-[13px] font-bold text-ink-faint uppercase tracking-wider">その他</h3>
               </div>
-              <button className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors">
+              <button
+                onClick={s.openLegal}
+                className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors"
+              >
                 <span className="text-[15px] font-bold text-ink">法的通知</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
@@ -318,7 +338,10 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                   <ChevronRight className="w-5 h-5 text-ink-faint" />
                 </div>
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors">
+              <button
+                onClick={() => { onResync(); toast.success('サーバーと同期しました。'); }}
+                className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors"
+              >
                 <span className="text-[15px] font-bold text-ink">サーバーと情報を再同期</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
@@ -687,6 +710,20 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
     />
 
     <CallerIdInfoSheet isOpen={isCallerIdSheetOpen} onClose={() => setIsCallerIdSheetOpen(false)} />
+
+    <HelpPage
+      isOpen={s.isHelpOpen}
+      onClose={s.closeHelp}
+      onOpenInquiry={() => { s.closeHelp(); s.openInquiry(); }}
+    />
+    <ProloguePage isOpen={s.isPrologueOpen} onClose={s.closePrologue} />
+    <LegalPage isOpen={s.isLegalOpen} onClose={s.closeLegal} />
+    <NotificationPrefsPage
+      isOpen={s.isNotificationPrefsOpen}
+      onClose={s.closeNotificationPrefs}
+      user={user}
+      userProfile={userProfile}
+    />
   </>
   );
 };
