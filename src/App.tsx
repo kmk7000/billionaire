@@ -649,43 +649,55 @@ export default function App() {
 
 
 
+  // 36px boxes around 24px icons. The icons keep their old spacing because the
+  // gap shrank by exactly what the boxes grew (gap-1 + 6px + 6px = the previous
+  // gap-4), so this is a bigger tap area at identical visual weight.
+  const headerIconButton = 'w-9 h-9 flex items-center justify-center cursor-pointer';
+
   const headerActions = (
     <>
-      <button aria-label="検索" onClick={() => setIsSearchOpen(true)} className="p-0 leading-none">
+      <button aria-label="検索" onClick={() => setIsSearchOpen(true)} className={headerIconButton}>
         <Search className="w-6 h-6 text-ink-muted" />
       </button>
-      <button aria-label="お知らせ" onClick={() => setIsNotificationsOpen(true)} className="p-0 leading-none">
+      <button aria-label="お知らせ" onClick={() => setIsNotificationsOpen(true)} className={headerIconButton}>
         <Bell className="w-6 h-6 text-ink-muted" />
       </button>
     </>
+  );
+
+  /** The title row shared by all three tab headers.
+   *
+   *  Kept as one definition rather than three copies because the tabs are seen
+   *  one after another — any drift in height or padding reads as the bar
+   *  jumping when you switch tabs. The negative right margin cancels the new
+   *  icon boxes' inner padding, so the last icon's edge lands 16px from the
+   *  screen, mirroring the title's 16px on the left. */
+  const tabHeaderRow = (title: React.ReactNode) => (
+    <div className="px-4 h-12 flex items-center justify-between">
+      {title}
+      <div className="flex items-center gap-1 -mr-1.5">
+        {headerActions}
+        <button aria-label="メニュー" onClick={accountSettings.openMorePage} className={headerIconButton}>
+          <Menu className="w-6 h-6 text-ink-muted" />
+        </button>
+      </div>
+    </div>
   );
 
   const renderHeader = () => {
     switch (activeTab) {
       case 'today':
         return (
-          <header className="bg-surface px-4 h-[52px] flex items-center justify-between sticky top-0 z-10 border-b border-line">
-            <h1 className="text-2xl font-bold font-serif tracking-tighter text-primary">Billionaire</h1>
-            <div className="flex items-center gap-4">
-              {headerActions}
-              <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
-                <Menu className="w-6 h-6 text-ink-muted cursor-pointer" />
-              </button>
-            </div>
+          <header className="bg-surface sticky top-0 z-10">
+            {tabHeaderRow(
+              <h1 className="text-2xl font-bold font-serif tracking-tighter text-primary">Billionaire</h1>
+            )}
           </header>
         );
       case 'meishi':
         return (
-          <header className="sticky top-0 z-10 bg-surface border-b border-line">
-            <div className="px-4 h-[52px] flex justify-between items-center">
-              <h1 className="text-xl font-black tracking-tight text-ink">名刺帳</h1>
-              <div className="flex gap-4">
-                {headerActions}
-                <button aria-label="メニュー" onClick={accountSettings.openMorePage} className="p-0 leading-none">
-                  <Menu className="w-6 h-6 text-ink-muted cursor-pointer" />
-                </button>
-              </div>
-            </div>
+          <header className="sticky top-0 z-10 bg-surface">
+            {tabHeaderRow(<h1 className="text-xl font-black tracking-tight text-ink">名刺帳</h1>)}
 
             <div className="flex gap-6 overflow-x-auto no-scrollbar px-4 py-2 relative">
               {[
@@ -713,13 +725,8 @@ export default function App() {
         );
       case 'community':
         return (
-          <header className="sticky top-0 z-10 bg-surface border-b border-line">
-            <div className="px-4 h-[52px] flex justify-between items-center">
-              <h1 className="text-xl font-black tracking-tight text-ink">コミュニティ</h1>
-              <div className="flex gap-4">
-                {headerActions}
-              </div>
-            </div>
+          <header className="sticky top-0 z-10 bg-surface">
+            {tabHeaderRow(<h1 className="text-xl font-black tracking-tight text-ink">コミュニティ</h1>)}
           </header>
         );
     }
