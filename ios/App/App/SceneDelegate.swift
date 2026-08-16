@@ -5,17 +5,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = scene as? UIWindowScene else { return }
-
-        window = UIWindow(windowScene: windowScene)
-        // MainViewController, not CAPBridgeViewController: this scene builds
-        // the root view controller in code and never consults Main.storyboard,
-        // so the storyboard's custom class is irrelevant — the subclass has to
-        // be named here or its capacitorDidLoad() (which registers this app's
-        // own CallerIdIndexPlugin) never runs.
-        window?.rootViewController = MainViewController()
-        window?.makeKeyAndVisible()
-
+        // No window is built here on purpose.
+        //
+        // The scene manifest sets UISceneStoryboardFile = Main, so UIKit has
+        // already instantiated Main.storyboard's initial view controller and
+        // installed it in a window before this method is called — verified on
+        // device by logging `window` on entry. Creating a second window here
+        // left the app with *two* CAPBridgeViewControllers, each with its own
+        // webview running the JS, and only one of them carrying the app-target
+        // plugin registration. Whichever window ended up key decided whether
+        // CallerIdIndex existed, which is why the simulator worked and the
+        // phone answered {"code":"UNIMPLEMENTED"}.
+        //
+        // The storyboard now names MainViewController directly, so the single
+        // root controller UIKit creates is the one that registers the plugin.
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 

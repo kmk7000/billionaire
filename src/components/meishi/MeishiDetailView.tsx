@@ -11,6 +11,8 @@ export const MeishiDetailView: React.FC<{
   onSaveMemo: (memo: string) => void;
 }> = ({ meishi, onBack, onEdit, onDelete, onSaveMemo }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'memo'>('info');
+  // Whichever number can actually place a call, preferring the mobile.
+  const callNumber = meishi.mobile || meishi.phone;
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
   const [memoDraft, setMemoDraft] = useState(meishi.memo ?? '');
@@ -76,21 +78,24 @@ export const MeishiDetailView: React.FC<{
         </div>
       </div>
 
-      {/* Action Buttons — real tel:/sms:/mailto: links when the data exists */}
+      {/* Action Buttons — real tel:/sms:/mailto: links when the data exists.
+          A card carries two number fields and either may be the only one
+          filled in, so both are considered; 携帯電話 wins when both exist,
+          since it is the one that reaches the person rather than a desk. */}
       <div className="px-6 flex justify-around items-center mb-10">
         <a
           aria-label="電話をかける"
-          href={meishi.phone ? `tel:${meishi.phone}` : undefined}
-          aria-disabled={!meishi.phone}
-          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
+          href={callNumber ? `tel:${callNumber}` : undefined}
+          aria-disabled={!callNumber}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${callNumber ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
         >
           <Phone className="w-6 h-6" />
         </a>
         <a
           aria-label="メッセージを送る"
-          href={meishi.phone ? `sms:${meishi.phone}` : undefined}
-          aria-disabled={!meishi.phone}
-          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${meishi.phone ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
+          href={callNumber ? `sms:${callNumber}` : undefined}
+          aria-disabled={!callNumber}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 ${callNumber ? 'bg-primary text-white hover:opacity-90' : 'bg-primary-soft text-ink-faint pointer-events-none'}`}
         >
           <MessageSquare className="w-6 h-6" />
         </a>
@@ -155,10 +160,25 @@ export const MeishiDetailView: React.FC<{
                     <span className="flex-1 text-[15px] text-ink font-medium">{meishi.department}</span>
                   </div>
                 )}
+                {/* 携帯電話 and FAX are on the edit form but were never shown
+                    here, so a card whose only number sat in 携帯電話 looked as
+                    though it had no phone number at all. */}
+                {meishi.mobile && (
+                  <div className="flex items-start">
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">携帯電話</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{meishi.mobile}</span>
+                  </div>
+                )}
                 {meishi.phone && (
                   <div className="flex items-start">
                     <span className="w-24 text-[15px] text-ink-faint font-medium">電話番号</span>
                     <span className="flex-1 text-[15px] text-ink font-medium">{meishi.phone}</span>
+                  </div>
+                )}
+                {meishi.fax && (
+                  <div className="flex items-start">
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">FAX</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{meishi.fax}</span>
                   </div>
                 )}
                 {meishi.email && (

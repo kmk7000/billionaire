@@ -11,10 +11,17 @@ import UIKit
 /// the JS side gets `{"code":"UNIMPLEMENTED"}` on every call even though the
 /// Swift file compiles fine.
 ///
-/// `capacitorDidLoad()` is Capacitor's supported hook for exactly this. Note
-/// that this class is wired up in SceneDelegate, not in Main.storyboard: this
-/// app's scene builds its root view controller in code, so the storyboard's
-/// custom class is never consulted and editing it has no effect.
+/// `capacitorDidLoad()` is Capacitor's supported hook for exactly this. It
+/// runs from `loadView()`, so only a controller that actually loads registers
+/// anything.
+///
+/// This class is named in Main.storyboard, and nowhere else. The scene
+/// manifest sets UISceneStoryboardFile, so UIKit instantiates the storyboard's
+/// initial view controller and installs it in a window before
+/// `scene(_:willConnectTo:)` ever runs. SceneDelegate used to build a second
+/// window around its own MainViewController, which left two bridges — two
+/// webviews, both running the JS, only one of them holding this registration —
+/// and whichever window became key decided whether the plugin existed at all.
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginType(CallerIdIndexPlugin.self)
