@@ -144,6 +144,10 @@ src/
       - 이 문제를 오버레이 CSS로 고치려는 시도는 헛수고다(sticky 헤더로 안 고쳐진다 — 실제로 한 번 헛짚었음). 원인이 오버레이 내부 스크롤이 아니기 때문이다.
     - **전체화면 오버레이는 헤더를 `sticky top-0 z-10 bg-surface`로 고정할 것.** 위 키보드 문제와는 별개의 결함이지만, 고정하지 않으면 스크롤 시 검색 입력·저장 버튼이 화면 밖으로 사라진다. `src/`의 `fixed inset-0 … overflow-y-auto` 오버레이 16개를 전수 점검했고 현재 미고정은 0개다. 새 오버레이를 만들 때도 이 패턴을 지킬 것.
 
+16. **Firestore 문서 값은 렌더 직전까지 신뢰하면 안 된다 (2026-08)** — `setUserProfile(docSnap.data() as UserProfile)`(`App.tsx`)는 **캐스트지 검증이 아니다.** 타입은 컴파일 타임에만 존재하므로 문서에 뭐가 들어있든 그대로 컴포넌트로 흘러간다.
+    - **규칙(rules)이 막아준다고 안심할 수 없다.** Firestore는 latency compensation 때문에 **서버가 거부하기 전에 로컬 캐시에 먼저 적용**하고 스냅샷 리스너를 깨운다. 즉 규칙이 금지하는 값도 왕복하는 동안 한 번은 렌더된다. 실제로 `users.phone`에 숫자를 쓰는 거부될 write 하나가 `formatMobileNumber`의 `digits.slice`를 터뜨려 **앱 전체가 백지**가 됐다(에러 바운더리 없음). 규칙 배포 직후 검증 중에 자체적으로 재현했다.
+    - 따라서 **Firestore 값을 받는 표시 함수는 타입 시그니처와 무관하게 런타임 가드를 둘 것.** 현재 `formatMobileNumber(value: unknown)`은 비문자열을 문자열화한 뒤 숫자만 남겨서, 이상한 값은 예외 대신 빈 문자열로 렌더된다. 경계에서 좁히는 것도 같이 한다(`PhoneNumberPage`의 `typeof userProfile?.phone === 'string' ? … : ''`).
+
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 
 - TypeScript strict, `any` 금지

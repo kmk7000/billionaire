@@ -34,8 +34,21 @@ export function toDomesticDigits(raw: string): string {
   return digits.slice(0, MOBILE_DIGITS);
 }
 
-/** `09012345678` → `090-1234-5678`. Formats partial input as it is typed. */
-export function formatMobileNumber(digits: string): string {
+/**
+ * `09012345678` → `090-1234-5678`. Formats partial input as it is typed.
+ *
+ * Tolerates a non-string because its input comes off a Firestore document,
+ * where `docSnap.data() as UserProfile` is a cast rather than validation. A
+ * number there used to throw and take the whole app down to a white screen —
+ * and it did not need a corrupt document to happen: Firestore applies a write
+ * to the local cache before the server rules reject it, so one bad write
+ * rendered through this function during the round trip.
+ */
+export function formatMobileNumber(value: unknown): string {
+  // Keeping only digits means unexpected values render as nothing rather than
+  // as "[ob-ject- Object]". Callers pass an already-digits-only string, so
+  // this is a no-op on the normal path.
+  const digits = (value == null ? '' : String(value)).replace(/[^0-9]/g, '');
   if (digits.length <= 3) return digits;
   if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;

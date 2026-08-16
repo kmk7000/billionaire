@@ -26,7 +26,9 @@ export const PhoneNumberPage: React.FC<{
   userProfile: UserProfile | null;
 }> = ({ isOpen, onClose, user, userProfile }) => {
   const toast = useToast();
-  const saved = userProfile?.phone || '';
+  // Narrowed rather than trusted: the profile is a cast of Firestore data, so
+  // anything could be sitting on this field. Everything below assumes a string.
+  const saved = typeof userProfile?.phone === 'string' ? userProfile.phone : '';
   const [digits, setDigits] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
