@@ -80,21 +80,28 @@ public class CallerIdIndexPlugin: CAPPlugin, CAPBridgedPlugin {
         let entryCount = defaults?.stringArray(forKey: Self.storageKey)?.count ?? 0
 
         CXCallDirectoryManager.sharedInstance.getEnabledStatusForExtension(withIdentifier: Self.extensionId) { status, error in
-            if let error = error {
-                call.reject(error.localizedDescription)
-                return
-            }
             let label: String
             switch status {
             case .enabled: label = "enabled"
             case .disabled: label = "disabled"
             default: label = "unknown"
             }
-            call.resolve([
+
+            // Resolving even when the query failed, rather than rejecting.
+            // A rejection here is indistinguishable on the JS side from the
+            // plugin being absent entirely, and the two need opposite advice:
+            // one means the extension is not installed, the other means this
+            // build cannot talk to it at all. The App Group answer is also
+            // still true and useful regardless of what CallKit said.
+            var result: [String: Any] = [
                 "status": label,
                 "appGroupAvailable": defaults != nil,
                 "entryCount": entryCount
-            ])
+            ]
+            if let error = error {
+                result["error"] = error.localizedDescription
+            }
+            call.resolve(result)
         }
     }
 

@@ -76,6 +76,10 @@ export interface UserProfile {
   birthday?: string;
   awards?: string[];
   certificates?: string[];
+  /** 着信時に相手の名刺情報を表示 (iOS). Absent means on — the feature shipped
+      before this switch existed, so treating "unset" as off would silently
+      disable it for everyone who never opted out. */
+  callerIdEnabled?: boolean;
   /** 通知管理. Absent means the defaults in NotificationPrefsPage apply. */
   notificationPrefs?: {
     communityReplies?: boolean;

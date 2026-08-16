@@ -46,7 +46,16 @@ export function buildCallerIdEntries(meishis: Meishi[]): CallerIdEntry[] {
   return entries;
 }
 
-export function useCallerIdSync(meishis: Meishi[]) {
+/**
+ * Keeps the device's caller-ID index in step with the saved cards.
+ *
+ * `enabled` is the in-app switch. iOS gives no API to turn the extension
+ * itself on or off — only the user can, in Settings — but what the extension
+ * has to work with is entirely ours: switching off writes an empty index, so
+ * calls stop being identified even while the iOS toggle stays on. That is a
+ * real off, not a cosmetic one, and it is the only honest one available.
+ */
+export function useCallerIdSync(meishis: Meishi[], enabled: boolean = true) {
   // Guards against re-syncing identical data on every unrelated re-render —
   // each sync asks iOS to reload the extension, which is not free.
   const lastSyncedKey = useRef<string | null>(null);
@@ -54,7 +63,7 @@ export function useCallerIdSync(meishis: Meishi[]) {
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'ios') return;
 
-    const entries = buildCallerIdEntries(meishis);
+    const entries = enabled ? buildCallerIdEntries(meishis) : [];
     const key = entries
       .map((entry) => `${entry.number}:${entry.label}`)
       .sort()
@@ -69,5 +78,5 @@ export function useCallerIdSync(meishis: Meishi[]) {
       // actually looking for it.
       console.warn('Caller ID sync failed:', error);
     });
-  }, [meishis]);
+  }, [meishis, enabled]);
 }

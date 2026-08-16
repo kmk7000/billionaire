@@ -170,7 +170,7 @@ export default function App() {
   const { posts, loading: communityLoading } = useCommunityPosts(selectedCommunityBoard, undefined, !!user);
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
-  useCallerIdSync(meishis);
+  useCallerIdSync(meishis, userProfile?.callerIdEnabled !== false);
   const toast = useToast();
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);

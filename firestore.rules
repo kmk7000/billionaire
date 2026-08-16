@@ -101,6 +101,7 @@ service cloud.firestore {
              // written by src/utils/mobileNumber.ts. Bounded here so a client
              // cannot park arbitrary text on the field.
              (!('phone' in data) || (data.phone is string && data.phone.matches('^0[0-9]{9,10}$'))) &&
+             (!('callerIdEnabled' in data) || data.callerIdEnabled is bool) &&
              (!('introduction' in data) || (data.introduction is string && data.introduction.size() <= 5000)) &&
              (!('isJobSeekingIntro' in data) || data.isJobSeekingIntro is bool);
     }

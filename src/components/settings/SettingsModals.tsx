@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Capacitor } from '@capacitor/core';
 import {
   ArrowLeft, Megaphone, HelpCircle, Headset, Settings, UserCircle, ChevronRight,
   Image as ImageIcon, CreditCard, Phone, BookOpen, ThumbsUp, Check,
@@ -19,11 +18,10 @@ import type { Meishi, UserProfile } from '../../types/app';
 import { formatMobileNumber } from '../../utils/mobileNumber';
 import { useToast } from '../Toast';
 
-// Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
-// full explanation. Hidden on Android/web rather than shown disabled: there
-// is no Android implementation yet, and a visible-but-inert row is exactly
-// the false-advertising problem this replaces.
-const isCallerIdAvailable = Capacitor.getPlatform() === 'ios';
+// Shown on every platform. It used to be hidden off iOS to avoid an inert
+// row, but hiding it also meant a web user never learned the feature exists
+// — and the entry point is not inert: it opens a sheet that explains the
+// feature is iOS-only and withholds the controls that would do nothing here.
 
 interface SettingsModalsProps {
   settings: AccountSettings;
@@ -175,8 +173,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 </div>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
-              {isCallerIdAvailable && (
-                <button
+              <button
                   onClick={() => { s.closeMorePage(); setIsCallerIdSheetOpen(true); }}
                   className="w-full flex items-center justify-between px-4 py-4 hover:bg-canvas transition-colors"
                 >
@@ -186,7 +183,6 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                   </div>
                   <ChevronRight className="w-5 h-5 text-ink-faint" />
                 </button>
-              )}
             </div>
 
             {/* Other Section */}
@@ -284,15 +280,13 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
               <div className="px-4 py-3">
                 <h3 className="text-[13px] font-bold text-ink-faint uppercase tracking-wider">名刺</h3>
               </div>
-              {isCallerIdAvailable && (
-                <button
+              <button
                   onClick={() => setIsCallerIdSheetOpen(true)}
                   className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors"
                 >
                   <span className="text-[15px] font-bold text-ink">着信時に相手の名刺情報を表示</span>
                   <ChevronRight className="w-5 h-5 text-ink-faint" />
                 </button>
-              )}
               <button className="w-full flex items-center justify-between px-4 py-4 border-b border-line hover:bg-canvas transition-colors">
                 <span className="text-[15px] font-bold text-ink">携帯電話の連絡先に保存</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
@@ -722,6 +716,8 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
       isOpen={isCallerIdSheetOpen}
       onClose={() => setIsCallerIdSheetOpen(false)}
       meishis={meishis}
+      user={user}
+      userProfile={userProfile}
     />
 
     <HelpPage
