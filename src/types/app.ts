@@ -100,6 +100,10 @@ export interface Meishi {
   phone: string;
   mobile?: string;
   fax?: string;
+  /** ISO 3166-1 alpha-2 for the numbers above. Absent means JP — every card
+      saved before the picker existed is Japanese. See
+      src/constants/phoneCountries.ts. */
+  phoneCountry?: string;
   address?: string;
   detailedAddress?: string;
   imageUrl?: string;

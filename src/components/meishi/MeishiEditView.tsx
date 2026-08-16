@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { User, ChevronRight, ArrowLeft, X } from 'lucide-react';
+import { User, ChevronRight, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Meishi } from '../../types/app';
 import { resizeImage } from '../../utils/imageUtils';
+import { DEFAULT_PHONE_COUNTRY, PHONE_COUNTRIES, getPhoneCountry } from '../../constants/phoneCountries';
 
 export const MeishiEditView: React.FC<{ 
   meishi: Meishi; 
@@ -11,6 +12,8 @@ export const MeishiEditView: React.FC<{
 }> = ({ meishi, onBack, onSave }) => {
   const [formData, setFormData] = useState<Meishi>(meishi);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  // Drives the placeholders, so the example matches the country being entered.
+  const phoneCountry = getPhoneCountry(formData.phoneCountry);
   const galleryInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -187,10 +190,30 @@ export const MeishiEditView: React.FC<{
           </div>
 
           <div className="space-y-1.5">
+            <label htmlFor="phone-country" className="text-sm font-bold text-ink-muted">電話番号の国</label>
+            <div className="relative">
+              <select
+                id="phone-country"
+                value={formData.phoneCountry || DEFAULT_PHONE_COUNTRY}
+                onChange={e => setFormData({...formData, phoneCountry: e.target.value})}
+                className="w-full py-2.5 px-3 pr-10 rounded-md border border-line focus:border-black outline-none transition-all appearance-none bg-surface text-ink"
+              >
+                {PHONE_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-5 h-5 text-ink-faint absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <p className="text-[12px] text-ink-faint leading-relaxed">
+              着信時の名刺表示に使用します。海外の番号は国を選択してください。
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
             <label className="text-sm font-bold text-ink-muted">携帯電話</label>
             <input 
               type="tel" 
-              placeholder="01012345678"
+              placeholder={phoneCountry.example}
               value={formData.mobile || ''}
               onChange={e => setFormData({...formData, mobile: e.target.value})}
               className="w-full py-2.5 px-3 rounded-md border border-line focus:border-black outline-none transition-all"
@@ -212,7 +235,7 @@ export const MeishiEditView: React.FC<{
             <label className="text-sm font-bold text-ink-muted">電話</label>
             <input 
               type="tel" 
-              placeholder="0212345678"
+              placeholder={phoneCountry.example}
               value={formData.phone}
               onChange={e => setFormData({...formData, phone: e.target.value})}
               className="w-full py-2.5 px-3 rounded-md border border-line focus:border-black outline-none transition-all"
@@ -223,7 +246,7 @@ export const MeishiEditView: React.FC<{
             <label className="text-sm font-bold text-ink-muted">ファックス</label>
             <input 
               type="tel" 
-              placeholder="0212345678"
+              placeholder={phoneCountry.example}
               value={formData.fax || ''}
               onChange={e => setFormData({...formData, fax: e.target.value})}
               className="w-full py-2.5 px-3 rounded-md border border-line focus:border-black outline-none transition-all"

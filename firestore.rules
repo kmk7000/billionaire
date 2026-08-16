@@ -110,7 +110,11 @@ service cloud.firestore {
       return hasRequiredFields(['ownerUid', 'name', 'company']) &&
              data.ownerUid == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
-             data.company is string && data.company.size() > 0 && data.company.size() < 100;
+             data.company is string && data.company.size() > 0 && data.company.size() < 100 &&
+             // ISO 3166-1 alpha-2 for the card's phone numbers. Absent is
+             // valid and means JP — every card predates the picker.
+             (!('phoneCountry' in data) ||
+              (data.phoneCountry is string && data.phoneCountry.matches('^[A-Z]{2}$')));
     }
 
     function isValidDigitalCard(data) {

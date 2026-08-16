@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MessageSquare, ChevronRight, Mail, ArrowLeft, Edit2, Trash2, MoreHorizontal, Download, Phone, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Tab, Meishi } from '../../types/app';
+import { DEFAULT_PHONE_COUNTRY, getPhoneCountry } from '../../constants/phoneCountries';
 
 export const MeishiDetailView: React.FC<{
   meishi: Meishi;
@@ -13,6 +14,8 @@ export const MeishiDetailView: React.FC<{
   const [activeTab, setActiveTab] = useState<'info' | 'memo'>('info');
   // Whichever number can actually place a call, preferring the mobile.
   const callNumber = meishi.mobile || meishi.phone;
+  const phoneCountry = getPhoneCountry(meishi.phoneCountry);
+  const isDefaultPhoneCountry = phoneCountry.code === DEFAULT_PHONE_COUNTRY;
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
   const [memoDraft, setMemoDraft] = useState(meishi.memo ?? '');
@@ -25,7 +28,9 @@ export const MeishiDetailView: React.FC<{
       `FN:${meishi.name}`,
       `ORG:${meishi.company}`,
       `TITLE:${meishi.position}`,
-      meishi.phone ? `TEL;TYPE=CELL:${meishi.phone}` : '',
+      meishi.mobile ? `TEL;TYPE=CELL:${meishi.mobile}` : '',
+      meishi.phone ? `TEL;TYPE=WORK:${meishi.phone}` : '',
+      meishi.fax ? `TEL;TYPE=FAX:${meishi.fax}` : '',
       meishi.email ? `EMAIL:${meishi.email}` : '',
       meishi.address ? `ADR;TYPE=WORK:;;${meishi.address};;;;` : '',
       'END:VCARD'
@@ -158,6 +163,16 @@ export const MeishiDetailView: React.FC<{
                   <div className="flex items-start">
                     <span className="w-24 text-[15px] text-ink-faint font-medium">部署</span>
                     <span className="flex-1 text-[15px] text-ink font-medium">{meishi.department}</span>
+                  </div>
+                )}
+                {/* Only shown when it is not the JP default: on a Japanese
+                    card the row is noise, but on a foreign one it is the
+                    difference between a number that dials and one that does
+                    not. */}
+                {!isDefaultPhoneCountry && (
+                  <div className="flex items-start">
+                    <span className="w-24 text-[15px] text-ink-faint font-medium">国</span>
+                    <span className="flex-1 text-[15px] text-ink font-medium">{phoneCountry.label}</span>
                   </div>
                 )}
                 {/* 携帯電話 and FAX are on the edit form but were never shown

@@ -34,7 +34,9 @@ export function buildCallerIdEntries(meishis: Meishi[]): CallerIdEntry[] {
       if (!label) return;
 
       [meishi.mobile, meishi.phone].forEach((raw) => {
-        const number = normalizePhoneNumber(raw);
+        // Per-card country: a Korean card's 010-… is +82, not +81. Reading
+        // every card as Japanese registered numbers that dial nowhere.
+        const number = normalizePhoneNumber(raw, meishi.phoneCountry);
         if (!number || seen.has(number)) return;
         seen.add(number);
         // iOS gives no documented hard cap but keeps a short practical budget
