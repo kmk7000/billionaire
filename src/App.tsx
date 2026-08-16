@@ -699,7 +699,14 @@ export default function App() {
           <header className="sticky top-0 z-10 bg-surface">
             {tabHeaderRow(<h1 className="text-xl font-black tracking-tight text-ink">名刺帳</h1>)}
 
-            <div className="flex gap-6 overflow-x-auto no-scrollbar px-4 py-2 relative">
+            {/* The underline marks the whole tab, not the word. Each button
+                carries its own 16px side padding instead of the row carrying
+                it, so the labels still start on the app's 16px margin while
+                the indicator runs the full width of the tab it belongs to —
+                and the first one reaches the screen edge. A rule the width of
+                the text alone reads as an underlined word rather than a
+                selected tab. */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar py-2 relative">
               {[
                 { id: 'my', label: 'マイ名刺帳' },
                 { id: 'team', label: 'チーム名刺帳' },
@@ -708,13 +715,13 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveMeishiTab(tab.id as 'my' | 'team' | 'group')}
-                  className={`relative text-sm font-bold whitespace-nowrap pb-2 transition-colors ${activeMeishiTab === tab.id ? 'text-ink' : 'text-ink-faint'}`}
+                  className={`relative text-sm font-bold whitespace-nowrap px-4 pb-2 transition-colors ${activeMeishiTab === tab.id ? 'text-ink' : 'text-ink-faint'}`}
                 >
                   {tab.label}
                   {activeMeishiTab === tab.id && (
                     <motion.div
                       layoutId="meishiTabIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
