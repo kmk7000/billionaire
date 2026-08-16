@@ -13,8 +13,10 @@ import { HelpPage } from './HelpPage';
 import { ProloguePage } from './ProloguePage';
 import { LegalPage } from './LegalPage';
 import { NotificationPrefsPage } from './NotificationPrefsPage';
+import { PhoneNumberPage } from './PhoneNumberPage';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
 import type { Meishi, UserProfile } from '../../types/app';
+import { formatMobileNumber } from '../../utils/mobileNumber';
 import { useToast } from '../Toast';
 
 // Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
@@ -263,10 +265,15 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 <span className="text-[15px] font-bold text-ink">簡易ログイン設定</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
-              <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-canvas transition-colors">
+              <button
+                onClick={s.openPhoneNumber}
+                className="w-full flex items-center justify-between px-4 py-4 hover:bg-canvas transition-colors"
+              >
                 <span className="text-[15px] font-bold text-ink">携帯電話番号変更</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[14px] text-ink-muted">010-8526-8170</span>
+                  <span className="text-[14px] text-ink-muted tabular-nums">
+                    {userProfile?.phone ? formatMobileNumber(userProfile.phone) : '未登録'}
+                  </span>
                   <ChevronRight className="w-5 h-5 text-ink-faint" />
                 </div>
               </button>
@@ -727,6 +734,12 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
     <NotificationPrefsPage
       isOpen={s.isNotificationPrefsOpen}
       onClose={s.closeNotificationPrefs}
+      user={user}
+      userProfile={userProfile}
+    />
+    <PhoneNumberPage
+      isOpen={s.isPhoneNumberOpen}
+      onClose={s.closePhoneNumber}
       user={user}
       userProfile={userProfile}
     />

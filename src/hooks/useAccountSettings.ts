@@ -28,6 +28,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
   const [isPrologueOpen, setIsPrologueOpen] = useState(false);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
   const [isNotificationPrefsOpen, setIsNotificationPrefsOpen] = useState(false);
+  const [isPhoneNumberOpen, setIsPhoneNumberOpen] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
@@ -35,6 +36,9 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
 
   const openMorePage = () => setIsMorePageOpen(true);
   const closeMorePage = () => setIsMorePageOpen(false);
+
+  const openPhoneNumber = () => setIsPhoneNumberOpen(true);
+  const closePhoneNumber = () => setIsPhoneNumberOpen(false);
 
   const openSettingsPage = () => setIsSettingsPageOpen(true);
   const closeSettingsPage = () => setIsSettingsPageOpen(false);
@@ -184,6 +188,7 @@ export function useAccountSettings(user: FirebaseUser | null, setActiveTab: (tab
     isPrologueOpen, openPrologue, closePrologue,
     isLegalOpen, openLegal, closeLegal,
     isNotificationPrefsOpen, openNotificationPrefs, closeNotificationPrefs,
+    isPhoneNumberOpen, openPhoneNumber, closePhoneNumber,
     currentPassword, setCurrentPassword,
     password, setPassword,
     confirmPassword, setConfirmPassword,

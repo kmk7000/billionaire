@@ -53,6 +53,9 @@ export interface UserProfile {
   email: string;
   displayName?: string;
   photoURL?: string;
+  /** Own mobile number, domestic digits with no separators (`09012345678`).
+      See src/utils/mobileNumber.ts. */
+  phone?: string;
   company?: string;
   position?: string;
   role: string;

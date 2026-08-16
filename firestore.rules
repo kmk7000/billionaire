@@ -97,6 +97,10 @@ service cloud.firestore {
              (!('role' in data) || data.role in ['user', 'admin']) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
              (!('company' in data) || (data.company is string && data.company.size() < 100)) &&
+             // Own mobile number: domestic digits only, no separators, as
+             // written by src/utils/mobileNumber.ts. Bounded here so a client
+             // cannot park arbitrary text on the field.
+             (!('phone' in data) || (data.phone is string && data.phone.matches('^0[0-9]{9,10}$'))) &&
              (!('introduction' in data) || (data.introduction is string && data.introduction.size() <= 5000)) &&
              (!('isJobSeekingIntro' in data) || data.isJobSeekingIntro is bool);
     }
