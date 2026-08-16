@@ -57,4 +57,12 @@
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  /* Floating action buttons sit a fixed gap above the bottom nav.
+     The nav is 60px of chrome plus env(safe-area-inset-bottom), which is 0 in
+     a browser but ~34px on a device with a home indicator — so a plain
+     `bottom-20` that looked fine in the preview overlapped the nav on a real
+     iPhone. Measured on-device 2026-08. */
+  .bottom-above-nav {
+    bottom: calc(env(safe-area-inset-bottom) + 76px);
+  }
 }

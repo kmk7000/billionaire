@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronDown, MapPin, ArrowUpDown, X, Edit3, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Fab } from '../components/layout/Fab';
 import type { Meishi } from '../types/app';
 import { MeishiCard } from '../components/meishi/MeishiCard';
 
@@ -117,13 +118,10 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
 
         {/* Floating Action Button */}
         {!isEditMode && (
-          <button
-            onClick={onOpenCamera}
-            className="fixed bottom-24 right-4 bg-primary hover:opacity-90 text-white px-5 py-3.5 rounded-full shadow-lg flex items-center gap-2 font-bold active:scale-95 transition-transform duration-200 z-20"
-          >
+          <Fab onClick={onOpenCamera}>
             <Plus className="w-5 h-5" />
             <span>名刺登録</span>
-          </button>
+          </Fab>
         )}
       </>
     )}

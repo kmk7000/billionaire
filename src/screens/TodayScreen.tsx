@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, ChevronRight, FileText, Briefcase, Clock, BarChart2, GraduationCap, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Fab } from '../components/layout/Fab';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 interface TodayScreenProps {
@@ -225,13 +226,10 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
     </div>
 
     {/* Floating Action Button */}
-    <button
-      onClick={onOpenMeishiCamera}
-      className="fixed bottom-20 right-4 bg-primary hover:opacity-90 text-white px-5 py-3 rounded-full font-bold shadow-lg flex items-center gap-1 z-30 transition-colors duration-200"
-    >
+    <Fab onClick={onOpenMeishiCamera}>
       <Plus className="w-5 h-5" />
       名刺登録
-    </button>
+    </Fab>
   </motion.div>
   );
 };

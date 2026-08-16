@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { PenSquare } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Fab } from '../components/layout/Fab';
 import type { CommunityPost } from '../types/db';
 import { BoardChipBar } from '../components/community/BoardChipBar';
 import { BestPostsSection } from '../components/community/BestPostsSection';
@@ -87,12 +88,9 @@ export const CommunityScreen: React.FC<CommunityScreenProps> = ({
         </div>
       )}
 
-      <button aria-label="投稿を作成"
-        onClick={onOpenWrite}
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg z-20 lg:hidden"
-      >
+      <Fab onClick={onOpenWrite} ariaLabel="投稿を作成" shape="circle">
         <PenSquare className="w-5 h-5" />
-      </button>
+      </Fab>
     </motion.div>
   );
 };
