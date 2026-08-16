@@ -1,13 +1,15 @@
 import React from 'react';
-import { ArrowLeft, BellOff } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
+import { AnnouncementList } from './AnnouncementList';
 
 interface NotificationsPanelProps {
   onClose: () => void;
 }
 
-// Honest empty state until a notifications backend (FCM / Firestore
-// notifications collection) exists — no fake badge counts anywhere.
+// Shows operator announcements written in the admin console. Personal push
+// notifications (community replies, likes) still need a sender — see
+// CLAUDE.md item 8 — so nothing here fakes a badge count.
 export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose }) => (
   <motion.div
     initial={{ x: '100%' }}
@@ -23,12 +25,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
       <h1 className="text-lg font-bold text-ink">お知らせ</h1>
     </div>
 
-    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-ink-faint">
-      <BellOff className="w-10 h-10" />
-      <p className="text-sm">新しいお知らせはありません</p>
-      <p className="text-xs text-ink-faint px-10 text-center leading-relaxed">
-        コミュニティのコメントやいいねの通知は、プッシュ通知の提供開始時にここに表示されます。
-      </p>
+    <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col pb-safe">
+      <AnnouncementList />
     </div>
   </motion.div>
 );

@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import {
-  LayoutDashboard, Inbox, Flag, MessagesSquare, Users, History,
+  LayoutDashboard, Inbox, Flag, MessagesSquare, Users, History, Megaphone,
   RefreshCw, LogOut, ShieldAlert, Loader2,
 } from 'lucide-react';
 import { auth, db } from '../firebase';
@@ -27,9 +27,11 @@ import { ReportsPanel } from './panels/ReportsPanel';
 import { ContentPanel } from './panels/ContentPanel';
 import { UsersPanel } from './panels/UsersPanel';
 import { AuditLogPanel } from './panels/AuditLogPanel';
+import { AnnouncementsPanel } from './panels/AnnouncementsPanel';
+import { adminAnnouncementService, type Announcement } from '../services/announcementService';
 import { Button, ErrorState, LoadingState, SLA_HOURS, hoursSince } from './ui';
 
-export type PanelKey = 'overview' | 'inquiries' | 'reports' | 'content' | 'users' | 'audit';
+export type PanelKey = 'overview' | 'inquiries' | 'reports' | 'content' | 'users' | 'announcements' | 'audit';
 
 const NAV: { key: PanelKey; label: string; Icon: any }[] = [
   { key: 'overview', label: '概要', Icon: LayoutDashboard },
@@ -37,6 +39,7 @@ const NAV: { key: PanelKey; label: string; Icon: any }[] = [
   { key: 'reports', label: '通報', Icon: Flag },
   { key: 'content', label: 'コミュニティ', Icon: MessagesSquare },
   { key: 'users', label: 'ユーザー', Icon: Users },
+  { key: 'announcements', label: 'お知らせ', Icon: Megaphone },
   { key: 'audit', label: '監査ログ', Icon: History },
 ];
 
@@ -46,6 +49,7 @@ const PANEL_TITLE: Record<PanelKey, string> = {
   reports: '通報',
   content: 'コミュニティ管理',
   users: 'ユーザー',
+  announcements: 'お知らせ',
   audit: '監査ログ',
 };
 
@@ -66,6 +70,7 @@ export const AdminApp: React.FC = () => {
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [auditLog, setAuditLog] = useState<AdminAuditEntry[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   // The role lives on the user document; there is no custom claim yet, so it
   // is read once per sign-in rather than taken from the ID token.
@@ -97,7 +102,7 @@ export const AdminApp: React.FC = () => {
     try {
       // Loaded in one shot: the overview needs queue counts from every
       // collection anyway, and support volumes are small.
-      const [nextInquiries, nextReports, nextPosts, nextComments, nextUsers, nextStats, nextAudit] =
+      const [nextInquiries, nextReports, nextPosts, nextComments, nextUsers, nextStats, nextAudit, nextAnnouncements] =
         await Promise.all([
           adminInquiryService.list(),
           adminReportService.list(),
@@ -106,6 +111,7 @@ export const AdminApp: React.FC = () => {
           adminUserService.listRecent(),
           fetchAdminStats(),
           adminAuditService.list(),
+          adminAnnouncementService.list(),
         ]);
       setInquiries(nextInquiries);
       setReports(nextReports);
@@ -114,6 +120,7 @@ export const AdminApp: React.FC = () => {
       setUsers(nextUsers);
       setStats(nextStats);
       setAuditLog(nextAudit);
+      setAnnouncements(nextAnnouncements);
       setLoadedAt(new Date());
     } catch (err: any) {
       // `handleFirestoreError` in src/firebase.ts rethrows a plain Error whose
@@ -263,6 +270,9 @@ export const AdminApp: React.FC = () => {
                 <ContentPanel posts={posts} comments={comments} onChanged={load} />
               )}
               {panel === 'users' && <UsersPanel users={users} />}
+              {panel === 'announcements' && (
+                <AnnouncementsPanel announcements={announcements} adminUid={user.uid} onChanged={load} />
+              )}
               {panel === 'audit' && <AuditLogPanel entries={auditLog} />}
             </>
           )}

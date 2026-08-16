@@ -238,6 +238,15 @@ service cloud.firestore {
         onlyCountersChanged(['status', 'adminNote', 'handledBy', 'handledAt']);
     }
 
+    // Operator announcements shown in お知らせ. Members only ever see
+    // published ones; drafts stay visible to admins alone. The client filters
+    // with `where('isPublished', '==', true)` and sorts in memory, so no
+    // composite index is needed for this to work.
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated() && (resource.data.isPublished == true || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
     // Append-only trail of admin console activity: who viewed or changed
     // what, when. There is deliberately no `update` or `delete` rule here —
     // an operator can create a new entry but never edit or remove one, not

@@ -7,6 +7,7 @@ import type { CommunityPost } from '../../types/db';
 import { getCommunityBoardLabel } from '../../constants/communityBoards';
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { MyMeishiTab } from './MyMeishiTab';
+import { AnnouncementList } from '../AnnouncementList';
 import { ProfileDetailsTab } from './ProfileDetailsTab';
 import type { CareerEditor } from '../../hooks/useCareerEditor';
 import type { EducationEditor } from '../../hooks/useEducationEditor';
@@ -221,8 +222,12 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
                 ))
               )}
             </div>
+          ) : profileTab === 3 ? (
+            /* お知らせ — the same operator feed as the notifications panel, so
+               the two places it appears can never drift apart. */
+            <AnnouncementList className="-mx-4" />
           ) : (
-            /* 履歴書管理 / お知らせ — genuinely not built yet */
+            /* 履歴書管理 — genuinely not built yet */
             <div className="flex flex-col items-center justify-center py-20 text-ink-faint">
               <p className="text-sm">準備中です</p>
             </div>
