@@ -37,8 +37,18 @@ export interface CallerIdState {
   error?: string;
 }
 
+export interface CallerIdSyncResult {
+  /** How many numbers were written to the shared container. */
+  count: number;
+  /** Whether iOS accepted the request to reload the extension now. False is
+      normal while the user has the extension switched off in Settings — the
+      numbers are stored either way and load when iOS next runs it. */
+  reloaded: boolean;
+  reloadError?: string;
+}
+
 interface CallerIdIndexPlugin {
-  sync(options: { payload: string }): Promise<{ count: number }>;
+  sync(options: { payload: string }): Promise<CallerIdSyncResult>;
   getStatus(): Promise<Omit<CallerIdState, 'available'>>;
   openSettings(): Promise<void>;
 }
@@ -48,9 +58,8 @@ const CallerIdIndex = registerPlugin<CallerIdIndexPlugin>('CallerIdIndex');
 /** True only where a native Call Directory extension can exist at all. */
 export const isCallerIdPlatform = Capacitor.getPlatform() === 'ios';
 
-export async function syncCallerIdEntries(entries: CallerIdEntry[]): Promise<number> {
-  const result = await CallerIdIndex.sync({ payload: JSON.stringify(entries) });
-  return result.count;
+export async function syncCallerIdEntries(entries: CallerIdEntry[]): Promise<CallerIdSyncResult> {
+  return CallerIdIndex.sync({ payload: JSON.stringify(entries) });
 }
 
 export async function getCallerIdState(): Promise<CallerIdState> {

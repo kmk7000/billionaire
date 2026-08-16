@@ -99,8 +99,12 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({
   const handleSyncNow = async () => {
     setIsSyncing(true);
     try {
-      const count = await syncCallerIdEntries(appEnabled ? buildCallerIdEntries(meishis) : []);
-      toast.success(`${count}件の電話番号を登録しました。`);
+      const result = await syncCallerIdEntries(appEnabled ? buildCallerIdEntries(meishis) : []);
+      // Storing and loading are separate outcomes; saying "registered" when
+      // iOS refused the reload would overstate what happened.
+      toast.success(result.reloaded
+        ? `${result.count}件の電話番号を登録しました。`
+        : `${result.count}件を保存しました。iOS側の設定をオンにすると反映されます。`);
       refreshStatus();
     } catch (error: any) {
       toast.error(`同期に失敗しました。\n${error?.message || error}`);

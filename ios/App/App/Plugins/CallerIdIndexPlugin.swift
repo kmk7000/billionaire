@@ -62,11 +62,20 @@ public class CallerIdIndexPlugin: CAPPlugin, CAPBridgedPlugin {
         defaults.set(lines, forKey: Self.storageKey)
 
         CXCallDirectoryManager.sharedInstance.reloadExtension(withIdentifier: Self.extensionId) { error in
+            // The write above already succeeded, and that is the part that
+            // lasts: the extension reads this container whenever iOS next runs
+            // it. A reload request is refused outright while the user has the
+            // extension switched off in Settings, which is a completely normal
+            // state — rejecting here reported "sync failed" for numbers that
+            // were in fact stored and simply waiting, and sent the user
+            // looking for a fault that did not exist. The count is the truth
+            // about what was stored; `reloaded` is the truth about whether iOS
+            // agreed to pick it up now.
+            var result: [String: Any] = ["count": lines.count, "reloaded": error == nil]
             if let error = error {
-                call.reject("Failed to reload the call directory extension: \(error.localizedDescription)")
-            } else {
-                call.resolve(["count": lines.count])
+                result["reloadError"] = error.localizedDescription
             }
+            call.resolve(result)
         }
     }
 

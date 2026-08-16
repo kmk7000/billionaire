@@ -22,8 +22,21 @@ import UIKit
 /// window around its own MainViewController, which left two bridges — two
 /// webviews, both running the JS, only one of them holding this registration —
 /// and whichever window became key decided whether the plugin existed at all.
+/// It must be `registerPluginInstance`, NOT `registerPluginType`. In
+/// Capacitor 8 the latter opens with:
+///
+///     public func registerPluginType(_ pluginType: CAPPlugin.Type) {
+///         if autoRegisterPlugins { return }
+///
+/// `autoRegisterPlugins` defaults to true and `CAPBridgeViewController`
+/// constructs the bridge without overriding it, so that call returns having
+/// done nothing at all — no error, no log, no registration. This file looked
+/// correct, `capacitorDidLoad()` demonstrably ran, and the plugin still did
+/// not exist as far as JS was concerned. `registerPluginInstance` carries no
+/// such guard, which is why the fix is a different method rather than a
+/// different call site.
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
-        bridge?.registerPluginType(CallerIdIndexPlugin.self)
+        bridge?.registerPluginInstance(CallerIdIndexPlugin())
     }
 }
