@@ -26,6 +26,17 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
     }
 
     private func addIdentificationEntries(to context: CXCallDirectoryExtensionContext) throws {
+        // The app always writes the complete list, so every load is a full
+        // replacement. iOS decides on its own whether to invoke us with a
+        // fresh context or an incremental one that still holds the previous
+        // load's entries — and in the incremental case anything not cleared
+        // survives. Without this, a deleted card keeps identifying calls
+        // forever and re-adding an already-present number can make the whole
+        // load fail, leaving the directory on its last good state.
+        if context.isIncremental {
+            context.removeAllIdentificationEntries()
+        }
+
         guard let defaults = UserDefaults(suiteName: Self.appGroupId) else {
             // No App Group access means no data to load. An empty directory
             // is a valid (if useless) result, not a failure worth aborting on.

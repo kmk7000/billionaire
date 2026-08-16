@@ -70,7 +70,15 @@ public class CallerIdIndexPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    /// Reports both halves of "is this working": whether the user switched the
+    /// extension on in iOS Settings, and whether our numbers actually reached
+    /// the shared container. Without the second half a failed App Group setup
+    /// is invisible — the extension reads an empty list and every call comes
+    /// through unidentified with nothing to show for it.
     @objc func getStatus(_ call: CAPPluginCall) {
+        let defaults = UserDefaults(suiteName: Self.appGroupId)
+        let entryCount = defaults?.stringArray(forKey: Self.storageKey)?.count ?? 0
+
         CXCallDirectoryManager.sharedInstance.getEnabledStatusForExtension(withIdentifier: Self.extensionId) { status, error in
             if let error = error {
                 call.reject(error.localizedDescription)
@@ -82,7 +90,11 @@ public class CallerIdIndexPlugin: CAPPlugin, CAPBridgedPlugin {
             case .disabled: label = "disabled"
             default: label = "unknown"
             }
-            call.resolve(["status": label])
+            call.resolve([
+                "status": label,
+                "appGroupAvailable": defaults != nil,
+                "entryCount": entryCount
+            ])
         }
     }
 

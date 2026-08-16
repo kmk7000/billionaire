@@ -1240,6 +1240,7 @@ export default function App() {
         settings={accountSettings}
         user={user}
         userProfile={userProfile}
+        meishis={meishis}
         onResync={() => setResyncKey(k => k + 1)}
         onOpenProfileManagement={() => { setProfileTab(1); setIsProfileOpen(true); }}
         onOpenAlbumImport={handleOpenMeishiAlbum}

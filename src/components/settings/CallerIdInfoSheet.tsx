@@ -11,12 +11,17 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Loader2, RefreshCw, Settings2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  getCallerIdStatus, openCallerIdSettings, type CallerIdStatus,
+  getCallerIdState, openCallerIdSettings, syncCallerIdEntries,
+  type CallerIdState, type CallerIdStatus,
 } from '../../native/callerIdIndex';
+import { buildCallerIdEntries } from '../../hooks/useCallerIdSync';
+import type { Meishi } from '../../types/app';
+import { useToast } from '../Toast';
 
 interface CallerIdInfoSheetProps {
   isOpen: boolean;
   onClose: () => void;
+  meishis: Meishi[];
 }
 
 const STATUS_LABEL: Record<CallerIdStatus, string> = {
@@ -31,18 +36,40 @@ const STATUS_CLASS: Record<CallerIdStatus, string> = {
   unknown: 'bg-primary-soft text-ink-faint',
 };
 
-export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({ isOpen, onClose }) => {
-  const [status, setStatus] = useState<CallerIdStatus | null>(null);
+export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({ isOpen, onClose, meishis }) => {
+  const toast = useToast();
+  const [state, setState] = useState<CallerIdState | null>(null);
   const [isOpeningSettings, setIsOpeningSettings] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const status: CallerIdStatus | null = state ? state.status : null;
+  // How many numbers this device *would* register, versus how many actually
+  // made it across. A gap between the two is the tell for a broken App Group.
+  const expectedCount = buildCallerIdEntries(meishis).length;
 
   const refreshStatus = () => {
-    setStatus(null);
-    getCallerIdStatus().then(setStatus);
+    setState(null);
+    getCallerIdState().then(setState);
   };
 
   useEffect(() => {
     if (isOpen) refreshStatus();
   }, [isOpen]);
+
+  // The background sync runs on card changes and stays quiet about failures.
+  // This is where the user comes when it is not working, so here it speaks up.
+  const handleSyncNow = async () => {
+    setIsSyncing(true);
+    try {
+      const count = await syncCallerIdEntries(buildCallerIdEntries(meishis));
+      toast.success(`${count}件の電話番号を登録しました。`);
+      refreshStatus();
+    } catch (error: any) {
+      toast.error(`同期に失敗しました。\n${error?.message || error}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleOpenSettings = async () => {
     setIsOpeningSettings(true);
@@ -71,27 +98,54 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({ isOpen, on
           </header>
 
           <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="text-[13px] text-ink-muted">現在の状態</span>
-              {status === null ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-ink-faint" />
-              ) : (
-                <span className={`px-2 py-0.5 rounded text-[12px] font-bold ${STATUS_CLASS[status]}`}>
-                  {STATUS_LABEL[status]}
-                </span>
+            <div className="mb-5">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] text-ink-muted">現在の状態</span>
+                {status === null ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-ink-faint" />
+                ) : (
+                  <span className={`px-2 py-0.5 rounded text-[12px] font-bold ${STATUS_CLASS[status]}`}>
+                    {STATUS_LABEL[status]}
+                  </span>
+                )}
+                <button
+                  aria-label="状態を再確認"
+                  onClick={refreshStatus}
+                  className="ml-auto p-1.5 rounded-lg hover:bg-canvas transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4 text-ink-faint" />
+                </button>
+              </div>
+              {state && (
+                <p className="mt-1 text-[12px] text-ink-muted tabular-nums">
+                  登録済み {state.entryCount}件 / 対象 {expectedCount}件
+                  {/* The extension can only ever match what actually crossed
+                      into the shared container, so a shortfall here is the
+                      difference between "working" and "silently doing
+                      nothing" — and it is fixable from this screen. */}
+                  {state.appGroupAvailable && state.entryCount < expectedCount && (
+                    <span className="block mt-0.5 text-warning">
+                      未登録の番号があります。「名刺を今すぐ同期」をお試しください。
+                    </span>
+                  )}
+                </p>
               )}
-              <button
-                aria-label="状態を再確認"
-                onClick={refreshStatus}
-                className="ml-auto p-1.5 rounded-lg hover:bg-canvas transition-colors"
-              >
-                <RefreshCw className="w-4 h-4 text-ink-faint" />
-              </button>
             </div>
 
             <p className="text-[14px] text-ink leading-relaxed">
               保存した名刺の電話番号からの着信に、会社名とお名前を表示します。
+              名刺に携帯電話と電話番号の両方が登録されている場合は、どちらからの着信でも表示されます。
             </p>
+
+            {state && !state.appGroupAvailable && (
+              <div className="mt-4 rounded-lg border border-danger/30 bg-danger/5 p-3.5">
+                <p className="text-[13px] font-bold text-danger mb-1">端末側の設定が未完了です</p>
+                <p className="text-[13px] text-ink-muted leading-relaxed">
+                  アプリと拡張機能の間でデータを共有できていないため、電話番号を登録できません。
+                  アプリの再インストールで解消しない場合は、お問い合わせください。
+                </p>
+              </div>
+            )}
 
             <div className="mt-4 bg-canvas rounded-lg p-4 space-y-2">
               <p className="text-[13px] font-bold text-ink">ご利用にあたって</p>
@@ -123,6 +177,14 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({ isOpen, on
                 ? <Loader2 className="w-4 h-4 animate-spin" />
                 : <Settings2 className="w-4 h-4" />}
               設定アプリを開く
+            </button>
+            <button
+              onClick={handleSyncNow}
+              disabled={isSyncing}
+              className="w-full mt-2 py-3.5 rounded-lg font-bold border border-line text-ink hover:bg-canvas transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {isSyncing && <Loader2 className="w-4 h-4 animate-spin" />}
+              名刺を今すぐ同期
             </button>
           </div>
         </motion.div>

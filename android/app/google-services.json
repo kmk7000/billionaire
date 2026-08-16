@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "738622111654",
+    "project_id": "ai-studio-applet-webapp-c0fee",
+    "storage_bucket": "ai-studio-applet-webapp-c0fee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738622111654:android:e0392dab90a5ec78659967",
+        "android_client_info": {
+          "package_name": "com.billionaire.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "738622111654-k332ubh479b7mdnmdmlcn2m2gmnspusm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.billionaire.app",
+            "certificate_hash": "f0e79ae09df566741cd9ccc846a95882e1dc3abb"
+          }
+        },
+        {
+          "client_id": "738622111654-nj52b8mj7q47jrnv03jknrncegrla654.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIT2moWA6zpGMBm6YKw9JKEHunc7qA6Os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "738622111654-nj52b8mj7q47jrnv03jknrncegrla654.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "738622111654-uo3jdcqel099eb82kkegi5qcqqvdij79.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.billionaire.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

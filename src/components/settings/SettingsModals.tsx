@@ -14,7 +14,7 @@ import { ProloguePage } from './ProloguePage';
 import { LegalPage } from './LegalPage';
 import { NotificationPrefsPage } from './NotificationPrefsPage';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
-import type { UserProfile } from '../../types/app';
+import type { Meishi, UserProfile } from '../../types/app';
 import { useToast } from '../Toast';
 
 // Real (if iOS-only, text-only) as of 2026-08 — see CallerIdInfoSheet for the
@@ -27,6 +27,8 @@ interface SettingsModalsProps {
   settings: AccountSettings;
   user: FirebaseUser | null;
   userProfile: UserProfile | null;
+  /** Saved cards, for the caller-ID number index. */
+  meishis: Meishi[];
   /** Tears down and re-establishes the Firestore listeners. */
   onResync: () => void;
   onOpenProfileManagement: () => void;
@@ -59,7 +61,7 @@ async function shareApp(onCopied: (message: string) => void) {
 }
 
 export const SettingsModals: React.FC<SettingsModalsProps> = ({
-  settings: s, user, userProfile, onResync, onOpenProfileManagement,
+  settings: s, user, userProfile, meishis, onResync, onOpenProfileManagement,
   onOpenAlbumImport, onOpenDirectInput, onOpenNotifications,
 }) => {
   const toast = useToast();
@@ -709,7 +711,11 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
       onOpenAccountManagement={() => { s.closeInquiry(); s.openAccountManagement(); }}
     />
 
-    <CallerIdInfoSheet isOpen={isCallerIdSheetOpen} onClose={() => setIsCallerIdSheetOpen(false)} />
+    <CallerIdInfoSheet
+      isOpen={isCallerIdSheetOpen}
+      onClose={() => setIsCallerIdSheetOpen(false)}
+      meishis={meishis}
+    />
 
     <HelpPage
       isOpen={s.isHelpOpen}

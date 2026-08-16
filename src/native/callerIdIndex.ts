@@ -17,9 +17,18 @@ export interface CallerIdEntry {
 
 export type CallerIdStatus = 'enabled' | 'disabled' | 'unknown';
 
+export interface CallerIdState {
+  /** Whether the user switched the extension on in iOS Settings. */
+  status: CallerIdStatus;
+  /** False when the App Group entitlement is missing — nothing can be stored. */
+  appGroupAvailable: boolean;
+  /** How many numbers are currently in the shared container. */
+  entryCount: number;
+}
+
 interface CallerIdIndexPlugin {
   sync(options: { payload: string }): Promise<{ count: number }>;
-  getStatus(): Promise<{ status: CallerIdStatus }>;
+  getStatus(): Promise<CallerIdState>;
   openSettings(): Promise<void>;
 }
 
@@ -30,12 +39,11 @@ export async function syncCallerIdEntries(entries: CallerIdEntry[]): Promise<num
   return result.count;
 }
 
-export async function getCallerIdStatus(): Promise<CallerIdStatus> {
+export async function getCallerIdState(): Promise<CallerIdState> {
   try {
-    const result = await CallerIdIndex.getStatus();
-    return result.status;
+    return await CallerIdIndex.getStatus();
   } catch {
-    return 'unknown';
+    return { status: 'unknown', appGroupAvailable: false, entryCount: 0 };
   }
 }
 
