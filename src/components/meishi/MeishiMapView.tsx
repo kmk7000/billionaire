@@ -8,6 +8,7 @@ import { GoogleMap, useJsApiLoader, InfoWindowF, CircleF, OverlayViewF, OverlayV
 import type { Meishi } from '../../types/app';
 import { useToast } from '../Toast';
 import { buildGeocodeQuery, geocodeSequentially } from '../../services/geocodeService';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 
 export const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
@@ -328,6 +329,9 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
       { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
     ],
   };
+
+  // Left-edge swipe goes back, same as the arrow.
+  useSwipeBack(onBack);
 
   return (
     <motion.div

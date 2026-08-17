@@ -4,8 +4,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { WheelPickerColumn, WheelPickerBand } from './WheelPickerColumn';
 import { JAPANESE_COMPANIES, PREFECTURES, COUNTRIES } from '../../constants/profileData';
 import { calculateCareerDuration, type CareerEditor } from '../../hooks/useCareerEditor';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 
-export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) => (
+export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) => {
+  // The list is a read-only page; the editor beneath it is a form and is
+  // deliberately left out until it can prompt about unsaved input.
+  useSwipeBack(c.closeList, c.isListOpen);
+
+  return (
   <>
     {/* Career List Overlay */}
     <AnimatePresence>
@@ -430,4 +436,5 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
       )}
     </AnimatePresence>
   </>
-);
+  );
+};

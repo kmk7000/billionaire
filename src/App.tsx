@@ -64,6 +64,8 @@ import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
 import { apiUrl, ocrMeishi, OcrUnavailableError } from './services/ocrClient';
 import { isLineLoginCancelled, signInWithLineNative } from './services/lineAuth';
+import { ConfirmDialog } from './components/ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
 import { PublicCardModal } from './components/profile/PublicCardModal';
 import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
@@ -483,6 +485,15 @@ export default function App() {
   };
 
 
+
+  // 紹介 is a form, so exiting it goes through the discard prompt rather
+  // than dropping whatever was typed.
+  const introGuard = useUnsavedChangesGuard(
+    introText !== (userProfile?.introduction || '')
+      || isJobSeekingIntro !== !!userProfile?.isJobSeekingIntro,
+    () => setIsIntroEditOpen(false),
+    isIntroEditOpen,
+  );
 
   const handleSaveIntro = async () => {
     if (!user) return;
@@ -1229,7 +1240,7 @@ export default function App() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
               <div className="flex items-center gap-3">
-                <button onClick={() => setIsIntroEditOpen(false)}>
+                <button onClick={introGuard.requestClose}>
                   <ArrowLeft className="w-6 h-6 text-ink" />
                 </button>
                 <h2 className="text-lg font-bold text-ink">紹介</h2>
@@ -1289,6 +1300,14 @@ export default function App() {
       <SkillModals skill={skill} userProfile={userProfile} />
 
       <LanguageModals language={language} />
+
+      <ConfirmDialog
+        isOpen={introGuard.isPrompting}
+        {...UNSAVED_CHANGES_DIALOG}
+        destructive
+        onConfirm={introGuard.confirmDiscard}
+        onCancel={introGuard.cancelDiscard}
+      />
 
       <SettingsModals
         settings={accountSettings}

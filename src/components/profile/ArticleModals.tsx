@@ -2,8 +2,14 @@ import React from 'react';
 import { ArrowLeft, ChevronRight, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { ArticleEditor } from '../../hooks/useArticleEditor';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 
-export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a }) => (
+export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a }) => {
+  // The list is a read-only page; the editor beneath it is a form and is
+  // deliberately left out until it can prompt about unsaved input.
+  useSwipeBack(a.closeList, a.isListOpen);
+
+  return (
   <>
     {/* Article List Edit Overlay */}
     <AnimatePresence>
@@ -194,4 +200,5 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
       )}
     </AnimatePresence>
   </>
-);
+  );
+};

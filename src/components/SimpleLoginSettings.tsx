@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 interface SimpleLoginSettingsProps {
   onBack: () => void;
@@ -22,6 +23,9 @@ const SimpleLoginSettings: React.FC<SimpleLoginSettingsProps> = ({ onBack }) => 
     { key: 'apple', label: 'Appleでログイン' },
     { key: 'line', label: 'LINEでログイン' },
   ] as const;
+
+  // Left-edge swipe goes back, same as the arrow.
+  useSwipeBack(onBack);
 
   return (
     <motion.div

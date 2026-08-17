@@ -3,6 +3,8 @@ import { User, ChevronRight, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Meishi } from '../../types/app';
 import { resizeImage } from '../../utils/imageUtils';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 import { DEFAULT_PHONE_COUNTRY, PHONE_COUNTRIES, getPhoneCountry } from '../../constants/phoneCountries';
 
 export const MeishiEditView: React.FC<{ 
@@ -35,6 +37,11 @@ export const MeishiEditView: React.FC<{
     onSave(formData);
   };
 
+  // Compared against the card this opened with, so re-typing a value back to
+  // what it was counts as clean and exits without a prompt.
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(meishi);
+  const guard = useUnsavedChangesGuard(isDirty, onBack);
+
   return (
     <motion.div
       initial={{ x: '100%' }}
@@ -46,7 +53,7 @@ export const MeishiEditView: React.FC<{
       {/* Header */}
       <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between border-b border-line z-10 pt-safe">
         <div className="flex items-center gap-4">
-          <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
+          <button aria-label="戻る" onClick={guard.requestClose} className="p-2 -ml-2 text-ink">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h3 className="text-[17px] font-bold text-ink">名刺情報の編集</h3>
@@ -276,6 +283,13 @@ export const MeishiEditView: React.FC<{
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={guard.isPrompting}
+        {...UNSAVED_CHANGES_DIALOG}
+        destructive
+        onConfirm={guard.confirmDiscard}
+        onCancel={guard.cancelDiscard}
+      />
     </motion.div>
   );
 };

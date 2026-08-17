@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { resizeImage } from '../../utils/imageUtils';
 import { submitInquiry, MAX_INQUIRY_ATTACHMENTS } from '../../services/inquiryService';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
 interface InquiryPageProps {
   isOpen: boolean;
@@ -24,6 +26,13 @@ export const InquiryPage: React.FC<InquiryPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // A sent inquiry is no longer unsaved work, so isDone clears the guard.
+  const guard = useUnsavedChangesGuard(
+    !isDone && !!(body.trim() || attachments.length),
+    onClose,
+    isOpen,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const email = user?.email || '';
@@ -246,6 +255,13 @@ export const InquiryPage: React.FC<InquiryPageProps> = ({
               </div>
             </>
           )}
+          <ConfirmDialog
+            isOpen={guard.isPrompting}
+            {...UNSAVED_CHANGES_DIALOG}
+            destructive
+            onConfirm={guard.confirmDiscard}
+            onCancel={guard.cancelDiscard}
+          />
         </motion.div>
       )}
     </AnimatePresence>

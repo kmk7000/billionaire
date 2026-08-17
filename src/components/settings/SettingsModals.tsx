@@ -16,6 +16,9 @@ import { PhoneNumberPage } from './PhoneNumberPage';
 import type { AccountSettings } from '../../hooks/useAccountSettings';
 import type { Meishi, UserProfile } from '../../types/app';
 import { formatMobileNumber } from '../../utils/mobileNumber';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 import { useToast } from '../Toast';
 
 // Shown on every platform. It used to be hidden off iOS to avoid an inert
@@ -66,6 +69,26 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
 }) => {
   const toast = useToast();
   const [isCallerIdSheetOpen, setIsCallerIdSheetOpen] = useState(false);
+
+  // Registered in ascending z-order. useSwipeBack routes a swipe to the last
+  // registration, and 設定 opens *on top of* もっと見る without closing it, so
+  // this order is what makes the swipe close the page actually in front.
+  useSwipeBack(s.closeMorePage, s.isMorePageOpen);
+  useSwipeBack(s.closeSettingsPage, s.isSettingsPageOpen);
+  useSwipeBack(s.closeAccountManagement, s.isAccountManagementOpen);
+  useSwipeBack(s.closeWithdrawal, s.isWithdrawalOpen);
+  // The two password screens hold typed input, so they go through the same
+  // discard prompt the card editor uses rather than closing outright.
+  const passwordChangeGuard = useUnsavedChangesGuard(
+    !!(s.currentPassword || s.password || s.confirmPassword),
+    s.closePasswordChange,
+    s.isPasswordChangeOpen,
+  );
+  const passwordResetGuard = useUnsavedChangesGuard(
+    !!(s.password || s.confirmPassword),
+    s.closePasswordReset,
+    s.isPasswordResetOpen,
+  );
 
   return (
   <>
@@ -488,7 +511,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3 border-b border-line">
-            <button aria-label="戻る" onClick={s.closePasswordChange} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={passwordChangeGuard.requestClose} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">パスワード再設定</h1>
@@ -612,7 +635,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3 border-b border-line">
-            <button aria-label="戻る" onClick={s.closePasswordReset} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={passwordResetGuard.requestClose} className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">パスワード再設定</h1>
@@ -733,6 +756,21 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
       user={user}
       userProfile={userProfile}
     />
+    <ConfirmDialog
+      isOpen={passwordChangeGuard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={passwordChangeGuard.confirmDiscard}
+      onCancel={passwordChangeGuard.cancelDiscard}
+    />
+    <ConfirmDialog
+      isOpen={passwordResetGuard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={passwordResetGuard.confirmDiscard}
+      onCancel={passwordResetGuard.cancelDiscard}
+    />
+
     <PhoneNumberPage
       isOpen={s.isPhoneNumberOpen}
       onClose={s.closePhoneNumber}
