@@ -62,7 +62,7 @@ import { ProfileOverlay } from './components/profile/ProfileOverlay';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
-import { ocrMeishi, OcrUnavailableError } from './services/ocrClient';
+import { apiUrl, ocrMeishi, OcrUnavailableError } from './services/ocrClient';
 import { PublicCardModal } from './components/profile/PublicCardModal';
 import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
@@ -393,7 +393,9 @@ export default function App() {
 
   const handleLineLogin = async () => {
     try {
-      const response = await fetch('/api/auth/line/url');
+      // Absolute on native for the same reason OCR is — a relative path there
+      // resolves against the bundled assets. See services/ocrClient.ts.
+      const response = await fetch(apiUrl('/api/auth/line/url'));
       if (!response.ok) throw new Error('Failed to get auth URL');
       const { url } = await response.json();
 
@@ -414,8 +416,14 @@ export default function App() {
   // Listen for success message from popup
   React.useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      const origin = event.origin;
-      if (!origin.endsWith('.run.app') && !origin.includes('localhost')) {
+      // Only the API we actually call may hand us a credential. The old check
+      // accepted any *.run.app origin, and would have rejected the deployed
+      // callback outright — it is served from cloudfunctions.net.
+      const apiOrigin = (() => {
+        try { return new URL(apiUrl('/api'), window.location.origin).origin; }
+        catch { return window.location.origin; }
+      })();
+      if (event.origin !== apiOrigin && event.origin !== window.location.origin) {
         return;
       }
 

@@ -43,6 +43,12 @@ function resolveUrl(path: string): string {
   return path;
 }
 
+/** Absolute origin of the API, or '' when a relative path is correct (web).
+ *  Exported so non-OCR callers (LINE login) resolve the same way. */
+export function apiUrl(path: string): string {
+  return resolveUrl(path);
+}
+
 async function callOcrRoute<T>(path: string, body: unknown): Promise<T> {
   const idToken = await auth.currentUser?.getIdToken();
   if (!idToken) throw new Error('Not signed in');

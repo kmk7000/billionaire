@@ -3,7 +3,9 @@
   "description": "OCR API for the Billionaire app (see src/index.ts for why it must be deployed)",
   "type": "module",
   "main": "lib/index.js",
-  "engines": { "node": "22" },
+  "engines": {
+    "node": "22"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "tsc --noEmit",
@@ -11,13 +13,14 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
+    "axios": "^1.19.0",
     "express": "^4.21.2",
     "firebase-admin": "^13.7.0",
     "firebase-functions": "^6.6.0"
   },
   "devDependencies": {
-    "typescript": "~5.8.2",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "typescript": "~5.8.2"
   },
   "private": true
 }
