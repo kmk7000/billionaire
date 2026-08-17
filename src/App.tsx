@@ -1247,7 +1247,7 @@ export default function App() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
               <div className="flex items-center gap-3">
-                <button onClick={introGuard.requestClose}>
+                <button aria-label="戻る" onClick={introGuard.requestClose}>
                   <ArrowLeft className="w-6 h-6 text-ink" />
                 </button>
                 <h2 className="text-lg font-bold text-ink">紹介</h2>

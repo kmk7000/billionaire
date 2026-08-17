@@ -113,7 +113,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button onClick={editGuard.requestClose}>
+              <button aria-label="戻る" onClick={editGuard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">{c.editingCareerId ? '経歴編集' : '経歴追加'}</h2>
