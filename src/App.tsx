@@ -62,7 +62,7 @@ import { ProfileOverlay } from './components/profile/ProfileOverlay';
 import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
-import { ocrMeishi } from './services/ocrClient';
+import { ocrMeishi, OcrUnavailableError } from './services/ocrClient';
 import { PublicCardModal } from './components/profile/PublicCardModal';
 import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
@@ -587,7 +587,12 @@ export default function App() {
       return true;
     } catch (error) {
       console.error("OCR error:", error);
-      toast.error("名刺の認識に失敗しました。\n明るい場所で、名刺全体が入るように撮影してください。");
+      // Telling someone to retake the photo is only fair advice when the photo
+      // was actually looked at. If the request never reached a server, the
+      // card was never the problem.
+      toast.error(error instanceof OcrUnavailableError
+        ? "サーバーに接続できないため、名刺を読み取れませんでした。\n通信状況をご確認のうえ、時間をおいてお試しください。"
+        : "名刺の認識に失敗しました。\n明るい場所で、名刺全体が入るように撮影してください。");
       return false;
     } finally {
       setIsMeishiOcrProcessing(false);

@@ -4,7 +4,7 @@
 // key never reaches the client bundle.
 
 import { orderCorners, scanDocument, type Quad } from '../utils/documentScan';
-import { detectCardCornersRemote } from './ocrClient';
+import { detectCardCornersRemote, OcrUnavailableError } from './ocrClient';
 
 function imageSize(dataUrl: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -51,6 +51,11 @@ export async function detectCardCorners(dataUrl: string): Promise<Quad | null> {
 
     return quad;
   } catch (error) {
+    // A null here means "no usable quad, fall back to the raw photo", which is
+    // the right answer for a detection that simply did not find the card.
+    // Being unable to ask at all is a different fact and has to reach the
+    // caller, so it is re-thrown rather than flattened into null.
+    if (error instanceof OcrUnavailableError) throw error;
     console.warn('Card corner detection failed:', error);
     return null;
   }
@@ -61,13 +66,21 @@ export async function detectCardCorners(dataUrl: string): Promise<Quad | null> {
  * Falls back to the untouched photo if anything goes wrong, so capture never
  * fails just because the enhancement did.
  */
-export async function autoScanCard(dataUrl: string): Promise<{ scanned: string; detected: boolean }> {
+export async function autoScanCard(
+  dataUrl: string,
+): Promise<{ scanned: string; detected: boolean; unavailable: boolean }> {
   try {
     const quad = await detectCardCorners(dataUrl);
     const scanned = await scanDocument(dataUrl, quad);
-    return { scanned, detected: quad !== null };
+    return { scanned, detected: quad !== null, unavailable: false };
   } catch (error) {
     console.warn('Auto scan failed, keeping original image:', error);
-    return { scanned: dataUrl, detected: false };
+    // "Fill the frame and retake" is useless advice when the detector was
+    // never reachable — the caller needs to know which of the two happened.
+    return {
+      scanned: dataUrl,
+      detected: false,
+      unavailable: error instanceof OcrUnavailableError,
+    };
   }
 }

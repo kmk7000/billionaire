@@ -45,6 +45,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 }) => {
   const {
     videoRef,
+    guideRef,
     meishiFileInputRef,
     meishiStep,
     setMeishiStep,
@@ -54,6 +55,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
     isScanning,
     useScanned,
     scanDetected,
+    scanUnavailable,
     toggleUseScanned,
     meishiSettings,
     setMeishiSettings,
@@ -151,7 +153,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 <div className="absolute inset-0 bg-ink/40" />
 
                 {/* Guide Frame */}
-                <div className="relative w-[85%] aspect-[1.6/1] z-10 shadow-2xl">
+                <div ref={guideRef} className="relative w-[85%] aspect-[1.6/1] z-10 shadow-2xl">
                   {/* Guide corners */}
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg" />
                   <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg" />
@@ -246,7 +248,9 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                   <p className="mt-2 text-[11px] text-white/50 text-center leading-relaxed">
                     {scanDetected
                       ? '名刺の輪郭を検出して、傾きと影を補正しました。'
-                      : '名刺の輪郭を検出できませんでした。枠内いっぱいに収めて再撮影すると精度が上がります。'}
+                      : scanUnavailable
+                        ? 'サーバーに接続できないため、自動補正を行えませんでした。撮影した写真をそのまま使用します。'
+                        : '名刺の輪郭を検出できませんでした。枠内いっぱいに収めて再撮影すると精度が上がります。'}
                   </p>
                 </div>
               )}

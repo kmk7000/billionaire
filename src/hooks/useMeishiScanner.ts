@@ -32,6 +32,7 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
   const [isScanning, setIsScanning] = useState(false);
   const [useScanned, setUseScanned] = useState(true);
   const [scanDetected, setScanDetected] = useState(false);
+  const [scanUnavailable, setScanUnavailable] = useState(false);
   const [meishiSettings, setMeishiSettings] = useState<MeishiSettingsOption>('save');
   const [meishiCameraStream, setMeishiCameraStream] = useState<MediaStream | null>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
@@ -40,6 +41,8 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const meishiFileInputRef = useRef<HTMLInputElement>(null);
+  // The guide rectangle is measured, never recomputed. See captureImage.
+  const guideRef = useRef<HTMLDivElement>(null);
 
   const stopCamera = useCallback(() => {
     if (meishiCameraStream) {
@@ -140,8 +143,9 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
 
       setIsScanning(true);
       autoScanCard(rawImage)
-        .then(({ scanned, detected }) => {
+        .then(({ scanned, detected, unavailable }) => {
           setScanDetected(detected);
+          setScanUnavailable(unavailable);
           setUseScanned(true);
           if (isFront) setScannedMeishiImage(scanned);
           else setScannedMeishiBack(scanned);
@@ -163,8 +167,19 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
 
     if (!videoWidth || !videoHeight) return;
 
-    // Calculate exact crop based on object-cover rendering
+    // Where the guide rectangle actually is, measured against the video.
+    //
+    // This used to re-derive the guide from constants — 85% width, 1.6:1,
+    // and *centred in the container*. It is not centred: the overlay is a
+    // flex column holding the frame and the caption under it, so the pair is
+    // centred as a group and the frame itself sits about half the caption's
+    // height above centre. The crop was taken from dead centre and so came
+    // out shifted down from what the user framed. Measuring removes the
+    // assumption entirely, and keeps working if the layout changes again.
     const rect = video.getBoundingClientRect();
+    const guide = guideRef.current?.getBoundingClientRect();
+    if (!guide) return;
+
     const containerWidth = rect.width;
     const containerHeight = rect.height;
 
@@ -179,22 +194,15 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     const offsetX = (displayedWidth - containerWidth) / 2;
     const offsetY = (displayedHeight - containerHeight) / 2;
 
-    // The guide frame is 85% of the container width
-    const guideWidthFactor = 0.85;
-    const aspectRatio = 1.6;
-
-    const visualGuideWidth = containerWidth * guideWidthFactor;
-    const visualGuideHeight = visualGuideWidth / aspectRatio;
-
-    // The visual coordinates of the guide frame relative to the container
-    const visualStartX = (containerWidth - visualGuideWidth) / 2;
-    const visualStartY = (containerHeight - visualGuideHeight) / 2;
+    // Guide position relative to the video element's own box
+    const visualStartX = guide.left - rect.left;
+    const visualStartY = guide.top - rect.top;
 
     // Map visual coordinates back to the original video resolution
     const cropX = (visualStartX + offsetX) / scale;
     const cropY = (visualStartY + offsetY) / scale;
-    const cropWidth = visualGuideWidth / scale;
-    const cropHeight = visualGuideHeight / scale;
+    const cropWidth = guide.width / scale;
+    const cropHeight = guide.height / scale;
 
     const canvas = document.createElement('canvas');
     canvas.width = cropWidth;
@@ -287,6 +295,7 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
 
   return {
     videoRef,
+    guideRef,
     meishiFileInputRef,
     meishiStep,
     setMeishiStep,
@@ -298,6 +307,7 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     isScanning,
     useScanned,
     scanDetected,
+    scanUnavailable,
     toggleUseScanned,
     meishiSettings,
     setMeishiSettings,
