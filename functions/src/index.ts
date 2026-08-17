@@ -10,10 +10,11 @@
 import express from 'express';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 import { createOcrRouter } from './ocrRoutes.js';
-import { createLineRouter } from './lineRoutes.js';
+import { createLineRouter, type PendingLogin, type PendingLoginStore } from './lineRoutes.js';
 
 // Managed by Secret Manager, injected at runtime. Never in source, never in
 // the client bundle, and not readable from the deployed container's config.
@@ -46,9 +47,41 @@ app.use(
   }),
 );
 
+/** Pending native logins, in Firestore so the exchange still resolves when a
+ *  different instance serves it than the one that ran the callback — with
+ *  autoscaling that is the normal case, and an in-memory map would fail
+ *  intermittently in a way that is miserable to reproduce.
+ *
+ *  The collection has no security rule, so the default deny applies and only
+ *  the Admin SDK can touch it. take() deletes inside a transaction, which is
+ *  what makes a code genuinely single-use under concurrency. */
+/** This project's Firestore is a NAMED database, not `(default)` — see the
+ *  `firestore` entry in firebase.json. getFirestore() with no argument talks
+ *  to `(default)`, which does not exist here and fails with a bare
+ *  `5 NOT_FOUND` that says nothing about the cause. */
+const DATABASE_ID = process.env.FIRESTORE_DATABASE_ID || 'ai-studio-7f866fe1-93c6-4327-800f-08b9693fa783';
+const db = () => getFirestore(DATABASE_ID);
+
+const pendingLogins: PendingLoginStore = {
+  async save(code, pending) {
+    await db().collection('line_auth_codes').doc(code).set(pending);
+  },
+  async take(code) {
+    const ref = db().collection('line_auth_codes').doc(code);
+    return db().runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) return null;
+      tx.delete(ref);
+      return snap.data() as PendingLogin;
+    });
+  },
+};
+
 app.use(
   createLineRouter({
     auth: getAuth,
+    store: pendingLogins,
+    nativeScheme: 'com.billionaire.app',
     getClientId: () => lineClientId.value(),
     getClientSecret: () => lineClientSecret.value(),
     getPublicOrigin: () => PUBLIC_ORIGIN,

@@ -28,6 +28,14 @@
 				<string>com.googleusercontent.apps.738622111654-jb3gvtl0idi1cn2ulpatvdfnjnpja8db</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>jp.billionaire.lineauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.billionaire.app</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

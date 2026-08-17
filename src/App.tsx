@@ -63,6 +63,7 @@ import MeishiScannerModal from './components/MeishiScannerModal';
 import { PublicCardView } from './components/PublicCardView';
 import { SearchOverlay } from './components/SearchOverlay';
 import { apiUrl, ocrMeishi, OcrUnavailableError } from './services/ocrClient';
+import { isLineLoginCancelled, signInWithLineNative } from './services/lineAuth';
 import { PublicCardModal } from './components/profile/PublicCardModal';
 import { usePublicCard } from './hooks/usePublicCard';
 import { NotificationsPanel } from './components/NotificationsPanel';
@@ -392,11 +393,28 @@ export default function App() {
   }, [user, resyncKey]);
 
   const handleLineLogin = async () => {
+    // The installed app cannot use the popup path at all — no window.open in
+    // WKWebView, and no opener to postMessage back to. See services/lineAuth.ts.
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const customToken = await signInWithLineNative();
+        await signInWithCustomToken(auth, customToken);
+      } catch (error) {
+        if (isLineLoginCancelled(error)) return;   // user backed out; not a failure
+        console.error('LINE login error:', error);
+        toast.error(`LINEログインに失敗しました。\n${(error as Error).message}`);
+      }
+      return;
+    }
+
     try {
       // Absolute on native for the same reason OCR is — a relative path there
       // resolves against the bundled assets. See services/ocrClient.ts.
       const response = await fetch(apiUrl('/api/auth/line/url'));
-      if (!response.ok) throw new Error('Failed to get auth URL');
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw new Error(detail.error || 'Failed to get auth URL');
+      }
       const { url } = await response.json();
 
       const authWindow = window.open(
@@ -410,6 +428,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('LINE login error:', error);
+      toast.error(`LINEログインに失敗しました。\n${(error as Error).message}`);
     }
   };
 

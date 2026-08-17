@@ -1,33 +1,54 @@
-// LINE Login: the authorize-URL endpoint and the OAuth callback.
+// LINE Login: authorize URL, OAuth callback, and the native code exchange.
 //
 // Shared by the dev server and the deployed function, same as ocrRoutes.
 //
-// Moving these off localhost changes their risk profile, so three things that
-// were survivable on a dev machine are fixed here:
+// Two client shapes, because the web and the installed app cannot use the same
+// hand-off:
 //
-//   * `state` was the literal string 'random_state', with a comment admitting
-//     it. On a public callback that is an open door: anyone can forge a
-//     callback and have it accepted. It is now an HMAC-signed nonce with a
-//     10-minute lifetime, and the callback rejects anything that does not
-//     verify.
-//   * The custom token was posted with `postMessage(..., '*')`, meaning any
-//     window that opened this page could read a Firebase credential. The
-//     opener's origin is now carried inside the signed state — checked
-//     against an allowlist when issued — and the token is posted only there.
-//   * The token was interpolated straight into a <script> string. Values are
-//     now JSON-encoded into the document.
+//   web    — a popup posts the Firebase custom token back to the opener via
+//            postMessage, targeted at the exact origin that started the login.
+//   native — Capacitor's WKWebView has no window.open, so the app opens the
+//            authorize URL in a system browser and gets control back through a
+//            custom URL scheme. The token is NOT put in that URL: custom
+//            schemes are not exclusive, so any app that registers the same one
+//            can receive the redirect, and a Firebase custom token is a full
+//            sign-in credential. The deep link carries a single-use code, and
+//            the app trades it for the token over HTTPS while proving it is
+//            the same client that started the flow (PKCE-style: it sends a
+//            verifier whose SHA-256 was committed to up front).
+//
+// Moving these off localhost also fixed three things that were survivable on a
+// dev machine: `state` was the literal 'random_state' (anyone could forge a
+// callback), the token went out via postMessage(..., '*') (any opener could
+// read it), and it was interpolated raw into a <script> string.
 
 import express from 'express';
 import type { Request, Response } from 'express';
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import axios from 'axios';
 
 export interface LineAuthResult {
   createCustomToken(uid: string, claims?: object): Promise<string>;
 }
 
+export interface PendingLogin {
+  customToken: string;
+  /** base64url SHA-256 of the verifier the app will present. */
+  challenge: string;
+  expiresAt: number;
+}
+
+/** Short-lived store for native logins awaiting their exchange. Kept behind an
+ *  interface so the dev server can use a Map and the deployment Firestore. */
+export interface PendingLoginStore {
+  save(code: string, pending: PendingLogin): Promise<void>;
+  /** Must be single-use: return the entry and delete it in one step. */
+  take(code: string): Promise<PendingLogin | null>;
+}
+
 export interface LineRoutesOptions {
   auth: () => LineAuthResult;
+  store: PendingLoginStore;
   /** Read lazily — under Cloud Functions these come from Secret Manager and
       are only bound at runtime. See OcrRoutesOptions.getApiKey. */
   getClientId: () => string | undefined;
@@ -35,11 +56,14 @@ export interface LineRoutesOptions {
   /** Public origin this router is reachable at, used to build the redirect
       URI. Must match a callback URL registered in the LINE console. */
   getPublicOrigin: () => string | undefined;
-  /** App origins allowed to start a login and receive the token. */
+  /** App origins allowed to start a web login and receive the token. */
   allowedAppOrigins: string[];
+  /** Custom URL scheme the installed app is registered for. */
+  nativeScheme: string;
 }
 
 const STATE_TTL_MS = 10 * 60 * 1000;
+const CODE_TTL_MS = 5 * 60 * 1000;
 
 function sign(payload: string, secret: string): string {
   return createHmac('sha256', secret).update(payload).digest('base64url');
@@ -51,37 +75,57 @@ function safeEqual(a: string, b: string): boolean {
   return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
-/** `<nonce>.<base36 issued-at>.<base64url opener origin>.<hmac>` */
-function issueState(openerOrigin: string, secret: string): string {
-  const payload = [
-    randomBytes(16).toString('hex'),
-    Date.now().toString(36),
-    Buffer.from(openerOrigin).toString('base64url'),
-  ].join('.');
-  return `${payload}.${sign(payload, secret)}`;
+function sha256(value: string): string {
+  return createHash('sha256').update(value).digest('base64url');
 }
 
-function readState(state: string, secret: string): { openerOrigin: string } | null {
+interface StatePayload {
+  /** '' for native — the token never goes to a browser origin there. */
+  openerOrigin: string;
+  native: boolean;
+  /** base64url SHA-256 of the app's verifier; native only. */
+  challenge: string;
+}
+
+/** `<nonce>.<base36 issued-at>.<base64url json>.<hmac>` */
+function issueState(payload: StatePayload, secret: string): string {
+  const body = [
+    randomBytes(16).toString('hex'),
+    Date.now().toString(36),
+    Buffer.from(JSON.stringify(payload)).toString('base64url'),
+  ].join('.');
+  return `${body}.${sign(body, secret)}`;
+}
+
+function readState(state: string, secret: string): StatePayload | null {
   const parts = state.split('.');
   if (parts.length !== 4) return null;
-  const [nonce, issuedAt, originB64, sig] = parts;
-  if (!safeEqual(sig, sign([nonce, issuedAt, originB64].join('.'), secret))) return null;
+  const [nonce, issuedAt, bodyB64, sig] = parts;
+  if (!safeEqual(sig, sign([nonce, issuedAt, bodyB64].join('.'), secret))) return null;
 
   const age = Date.now() - parseInt(issuedAt, 36);
   if (!Number.isFinite(age) || age < 0 || age > STATE_TTL_MS) return null;
 
-  return { openerOrigin: Buffer.from(originB64, 'base64url').toString('utf8') };
+  try {
+    return JSON.parse(Buffer.from(bodyB64, 'base64url').toString('utf8')) as StatePayload;
+  } catch {
+    return null;
+  }
 }
 
 export function createLineRouter({
   auth,
+  store,
   getClientId,
   getClientSecret,
   getPublicOrigin,
   allowedAppOrigins,
+  nativeScheme,
 }: LineRoutesOptions) {
   const router = express.Router();
   const allowed = new Set(allowedAppOrigins);
+
+  router.use(express.json({ limit: '64kb' }));
 
   function config() {
     // Trimmed, because the deployed secrets exist as blank placeholders until
@@ -106,21 +150,35 @@ export function createLineRouter({
       return;
     }
 
-    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || '';
-    if (!allowed.has(origin)) {
-      res.status(403).json({ error: `Origin ${origin || '(none)'} may not start a LINE login.` });
-      return;
-    }
-    if (origin) {
+    const { platform, challenge } = req.query as { platform?: string; challenge?: string };
+    const native = platform === 'native';
+
+    let payload: StatePayload;
+    if (native) {
+      // No origin check here: the caller is an app, not a browser origin, so
+      // there is nothing to check against. The challenge is what binds this
+      // authorization to the client that asked for it.
+      if (!challenge || challenge.length < 32 || challenge.length > 128) {
+        res.status(400).json({ error: 'A PKCE challenge is required for native logins.' });
+        return;
+      }
+      payload = { openerOrigin: '', native: true, challenge };
+    } else {
+      const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || '';
+      if (!allowed.has(origin)) {
+        res.status(403).json({ error: `Origin ${origin || '(none)'} may not start a LINE login.` });
+        return;
+      }
       res.set('Access-Control-Allow-Origin', origin);
       res.set('Vary', 'Origin');
+      payload = { openerOrigin: origin, native: false, challenge: '' };
     }
 
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: cfg.clientId,
       redirect_uri: cfg.redirectUri,
-      state: issueState(origin, cfg.clientSecret),
+      state: issueState(payload, cfg.clientSecret),
       scope: 'profile openid email',
     });
     res.json({ url: `https://access.line.me/oauth2/v2.1/authorize?${params.toString()}` });
@@ -140,8 +198,12 @@ export function createLineRouter({
     }
 
     const verified = state ? readState(state, cfg.clientSecret) : null;
-    if (!verified || !allowed.has(verified.openerOrigin)) {
-      // Forged, tampered with, or older than the window. Never exchange it.
+    // Forged, tampered with, or older than the window. Never exchange it.
+    if (!verified) {
+      res.status(400).send('Invalid or expired login request. Please try again.');
+      return;
+    }
+    if (!verified.native && !allowed.has(verified.openerOrigin)) {
       res.status(400).send('Invalid or expired login request. Please try again.');
       return;
     }
@@ -170,6 +232,19 @@ export function createLineRouter({
         provider: 'line',
       });
 
+      if (verified.native) {
+        // Only a lookup key crosses the custom-scheme boundary. Whoever
+        // receives it still has to present the verifier to get the token.
+        const handoff = randomBytes(32).toString('base64url');
+        await store.save(handoff, {
+          customToken,
+          challenge: verified.challenge,
+          expiresAt: Date.now() + CODE_TTL_MS,
+        });
+        res.redirect(`${nativeScheme}://line-auth?code=${encodeURIComponent(handoff)}`);
+        return;
+      }
+
       // JSON-encoded into the script, and delivered only to the origin that
       // started this login.
       res.set('Content-Type', 'text/html; charset=utf-8');
@@ -195,6 +270,31 @@ export function createLineRouter({
       console.error('LINE Auth error:', detail);
       res.status(500).send('Authentication failed');
     }
+  });
+
+  /** Native only: trade the single-use code for the custom token.
+   *
+   *  An interceptor who grabbed the deep link has the code but not the
+   *  verifier, and the code dies on first use either way. */
+  router.post('/api/auth/line/exchange', async (req: Request, res: Response) => {
+    // No CORS headers on purpose — this is for the app, not a browser origin.
+    const { code, verifier } = req.body as { code?: string; verifier?: string };
+    if (!code || !verifier) {
+      res.status(400).json({ error: 'code and verifier are required' });
+      return;
+    }
+
+    const pending = await store.take(code);
+    if (!pending || pending.expiresAt < Date.now()) {
+      res.status(400).json({ error: 'This login has expired. Please try again.' });
+      return;
+    }
+    if (!safeEqual(sha256(verifier), pending.challenge)) {
+      res.status(403).json({ error: 'Verifier does not match this login.' });
+      return;
+    }
+
+    res.json({ customToken: pending.customToken });
   });
 
   return router;

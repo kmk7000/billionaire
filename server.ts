@@ -6,7 +6,7 @@ import admin from "firebase-admin";
 import dotenv from "dotenv";
 import fs from "fs";
 import { createOcrRouter } from "./functions/src/ocrRoutes";
-import { createLineRouter } from "./functions/src/lineRoutes";
+import { createLineRouter, type PendingLogin } from "./functions/src/lineRoutes";
 
 dotenv.config({ path: ['.env.local', '.env'] });
 
@@ -64,8 +64,20 @@ app.use(createOcrRouter({
 // --- LINE Login ------------------------------------------------------------
 // Same router the deployed function mounts (functions/src/lineRoutes.ts).
 
+// Dev runs a single process, so a map is enough here.
+const pendingLogins = new Map<string, PendingLogin>();
+
 app.use(createLineRouter({
   auth: () => admin.auth(),
+  store: {
+    async save(code, pending) { pendingLogins.set(code, pending); },
+    async take(code) {
+      const found = pendingLogins.get(code) ?? null;
+      pendingLogins.delete(code);
+      return found;
+    },
+  },
+  nativeScheme: 'com.billionaire.app',
   getClientId: () => process.env.LINE_CLIENT_ID,
   getClientSecret: () => process.env.LINE_CLIENT_SECRET,
   getPublicOrigin: () => process.env.APP_URL,

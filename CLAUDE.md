@@ -87,7 +87,13 @@ src/
       - `postMessage(..., '*')`로 커스텀 토큰을 뿌렸다 — 이 창을 연 어떤 오리진이든 Firebase 자격증명을 읽을 수 있었다. 지금은 **여는 쪽 오리진을 서명된 state 안에 담아** 발급 시 허용목록과 대조하고, 그 오리진에만 postMessage한다.
       - 토큰을 `<script>` 문자열에 그대로 보간했다. 지금은 `JSON.stringify`로 인코딩한다.
       - 검증: 허용 오리진 200 / 비허용 403 / 위조 state 400 / state 안의 오리진 변조 400 / state 없음 400 / 정상 state는 LINE까지 도달.
-    - **네이티브 앱에서는 여전히 동작하지 않는다.** 클라이언트가 `window.open` 팝업 + `postMessage`에 의존하는데 **Capacitor WKWebView는 `window.open`을 지원하지 않는다**(8번 항목의 Google 로그인과 같은 이유). 딥링크 기반 흐름으로 다시 설계해야 하며, 라우트를 배포한 것만으로는 해결되지 않는다.
+    - **네이티브는 딥링크 흐름으로 별도 구현 (2026-08)** — 웹의 팝업+`postMessage`는 네이티브에서 원리상 불가능하다(WKWebView에 `window.open`이 없고, 돌려줄 opener도 없다). 앱은 `@capacitor/browser`로 시스템 브라우저를 열고, 콜백이 커스텀 스킴 `com.billionaire.app://line-auth`로 앱에 돌아온다(`@capacitor/app`의 `appUrlOpen`). 구현: `src/services/lineAuth.ts`.
+      - **딥링크에 커스텀 토큰을 실으면 안 된다.** 커스텀 스킴은 **독점이 아니라서** 같은 스킴을 등록한 다른 앱이 리다이렉트를 가로챌 수 있고, Firebase 커스텀 토큰은 그 계정으로의 완전한 로그인 자격증명이다. 그래서 딥링크에는 **일회용 code만** 싣고, 앱이 HTTPS로 `POST /api/auth/line/exchange`에 `{code, verifier}`를 보내 교환한다(PKCE 방식 — 시작할 때 `SHA-256(verifier)`를 challenge로 커밋해두고 마지막에 verifier를 제시). 가로챈 쪽은 **쓸 수 없는 code만** 얻는다.
+      - **verifier가 틀려도 code는 소모된다** — 무차별 대입 여지를 없앤다. 만료/미존재/재사용 응답 메시지를 동일하게 해 code 존재 여부도 노출하지 않는다.
+      - 검증: challenge 없는 native 요청 400 / 잘못된 verifier 403(+code 소모 확인) / 올바른 verifier 200 / 재사용 400 / 만료 400 / 미존재 400.
+      - **iOS `Info.plist`에 `com.billionaire.app` 스킴 등록** 필요(구글 로그인 스킴과 별개로 추가함).
+      - **`line_auth_codes` 컬렉션에는 규칙을 두지 않는다** — 기본 거부(`match /{path=**}`)에 걸려 클라이언트는 접근 불가하고 Admin SDK만 읽고 쓴다. `take()`는 트랜잭션 안에서 삭제해 동시성에서도 일회용을 보장한다.
+      - **`getFirestore()`를 인자 없이 쓰면 안 된다.** 이 프로젝트의 Firestore는 `(default)`가 아니라 **이름 있는 데이터베이스**(`firebase.json`의 `firestore.database` 참고)다. 인자 없이 호출하면 존재하지 않는 `(default)`를 보고 **원인을 전혀 알 수 없는 `5 NOT_FOUND`**로 500이 난다. 배포 후 실제로 밟았고 로그를 보고서야 찾았다.
 5. i18n 미적용 — 사용자 노출 문자열이 App.tsx에 하드코딩되어 있음 (SPEC은 `ja.json` 분리 요구).
 6. **採用公告(구인정보)/コネクト(커넥트) 탭은 의도적으로 제거된 상태** — 둘 다 정적 스텁이었고(구인정보는 하드코딩 목데이터 렌더링만, 커넥트는 문구 한 줄) 나중에 실제 기능으로 다시 만들 예정이라 우선 삭제했다. `Tab` 타입(`src/types/app.ts`)에서 `'connect'`/`'jobs'`를 뺐고, `BottomNav`/데스크톱 헤더 내비게이션/`App.tsx`의 탭 렌더링에서도 제거했다. 관련 파일(`ConnectScreen.tsx`, `JobsScreen.tsx`, `components/jobs/JobCard.tsx`, `Job` 타입, `MOCK_JOBS`)은 완전히 삭제했으며, 필요해지면 git 히스토리에서 복원하거나 새로 설계해서 추가할 것.
 7. **커뮤니티 기능은 리멤버(Remember) 웹(`community.rememberapp.co.kr`) 구조를 벤치마킹해 전면 구축 완료** — 게시판 사이드바/칩바, 베스트 투고 랭킹, 새 투고/추천 투고 피드, 게시글 상세+댓글, 글쓰기, 신고/차단까지 동작한다. `firestore.rules`의 `authorUid`/`content` → `authorId`/`body` 필드 불일치 버그를 고치고 `comments`/`reports`/`blocks` 규칙을 추가한 뒤 프로덕션 Firebase 프로젝트에 배포 완료(`firebase deploy --only firestore:rules`) — 브라우저에서 실제 글쓰기/댓글/좋아요/신고/차단까지 전부 검증됨. 데스크톱 레이아웃은 리멤버 실제 사이트를 DOM까지 조사해 검정 헤더+플랫 패널(둥근 모서리/그림자 없이 여백으로만 구분) 스타일로 맞춰뒀다(모바일은 기존 카드 스타일 유지).
