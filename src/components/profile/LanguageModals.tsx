@@ -25,7 +25,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
           <div className="px-4 py-4 flex items-center justify-between relative">
             <button aria-label="戻る"
               onClick={guard.requestClose}
-              className="p-1 -ml-1"
+              className="p-2.5 -ml-2.5"
             >
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>

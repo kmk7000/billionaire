@@ -32,7 +32,7 @@ export const SettingsSubPage: React.FC<{
         className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
       >
         <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3 shrink-0">
-          <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1">
+          <button aria-label="戻る" onClick={onClose} className="p-2.5 -ml-2.5">
             <ArrowLeft className="w-6 h-6 text-ink" />
           </button>
           <h1 className="text-lg font-bold text-ink">{title}</h1>

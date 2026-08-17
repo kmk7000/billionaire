@@ -120,14 +120,14 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             <div className="p-4 flex justify-between items-center z-10 text-white bg-gradient-to-b from-black/60 to-transparent">
               <button aria-label="フラッシュを切り替え" 
                 onClick={toggleFlash}
-                className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-warning text-white' : 'bg-surface/10 text-white'}`}
+                className={`tap-44 p-2 rounded-full transition-colors ${isFlashOn ? 'bg-warning text-white' : 'bg-surface/10 text-white'}`}
               >
                 <Flashlight className="w-6 h-6" />
               </button>
               <span className="font-bold text-sm">
                 {isRegisteringMyMeishi ? 'マイ名刺登録' : '名刺スキャン'}
               </span>
-              <button aria-label="閉じる" onClick={handleClose} className="p-2">
+              <button aria-label="閉じる" onClick={handleClose} className="tap-44 p-2">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -209,7 +209,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
           <div className="flex-1 flex flex-col bg-black">
             {/* Header */}
             <div className="p-4 flex items-center justify-end text-white">
-              <button aria-label="閉じる" onClick={handleClose}>
+              <button className="tap-44" aria-label="閉じる" onClick={handleClose}>
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -291,7 +291,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
         {meishiStep === 'settings' && (
           <div className="flex-1 flex flex-col bg-canvas">
             <div className="px-4 h-12 flex items-center justify-between bg-surface border-b border-line sticky top-0 z-10">
-              <button onClick={() => setMeishiStep('preview')}>
+              <button className="tap-44" onClick={() => setMeishiStep('preview')}>
                 <ChevronLeft className="w-6 h-6 text-ink" />
               </button>
               <span className="font-bold text-ink">名刺登録設定</span>
@@ -381,7 +381,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
           <div className="flex-1 flex flex-col bg-surface relative">
             <button aria-label="閉じる" 
               onClick={handleClose}
-              className="absolute top-4 right-4 p-2 text-ink-faint hover:text-ink-muted z-10"
+              className="tap-44 absolute top-4 right-4 p-2 text-ink-faint hover:text-ink-muted z-10"
             >
               <X className="w-6 h-6" />
             </button>

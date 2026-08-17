@@ -37,7 +37,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-line">
               <h2 className="font-bold text-ink">投稿を作成</h2>
-              <button aria-label="閉じる" onClick={close} className="p-1 text-ink-faint">
+              <button aria-label="閉じる" onClick={close} className="tap-44 p-1 text-ink-faint">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -66,7 +66,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="タイトルを入力してください"
                 maxLength={100}
-                className="w-full px-3 py-3 border border-line rounded-xl text-sm font-bold focus:outline-none focus:border-black"
+                className="w-full px-3 py-3 border border-line rounded-md text-sm font-bold focus:outline-none focus:border-black"
               />
 
               <textarea
@@ -75,7 +75,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
                 placeholder="内容を入力してください"
                 rows={8}
                 maxLength={3000}
-                className="w-full px-3 py-3 border border-line rounded-xl text-sm resize-none focus:outline-none focus:border-black"
+                className="w-full px-3 py-3 border border-line rounded-md text-sm resize-none focus:outline-none focus:border-black"
               />
             </div>
 
@@ -83,7 +83,7 @@ export const WritePostModal: React.FC<WritePostModalProps> = ({ write, onPosted 
               <button
                 onClick={handleSubmitClick}
                 disabled={!canSubmit || isSubmitting}
-                className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm disabled:bg-primary-soft transition-colors"
+                className="w-full py-3 rounded-lg bg-primary text-white font-bold text-sm disabled:bg-primary-soft transition-colors"
               >
                 {isSubmitting ? '投稿中...' : '投稿する'}
               </button>

@@ -26,7 +26,7 @@ export const PublicationModals: React.FC<{ publication: PublicationEditor }> = (
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button aria-label="戻る" onClick={guard.requestClose}>
+              <button className="tap-44" aria-label="戻る" onClick={guard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">論文・著書追加</h2>

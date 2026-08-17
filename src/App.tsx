@@ -703,7 +703,7 @@ export default function App() {
   // 36px boxes around 24px icons. The icons keep their old spacing because the
   // gap shrank by exactly what the boxes grew (gap-1 + 6px + 6px = the previous
   // gap-4), so this is a bigger tap area at identical visual weight.
-  const headerIconButton = 'w-9 h-9 flex items-center justify-center cursor-pointer';
+  const headerIconButton = 'tap-44 w-9 h-9 flex items-center justify-center cursor-pointer';
 
   const headerActions = (
     <>
@@ -726,7 +726,7 @@ export default function App() {
   const tabHeaderRow = (title: React.ReactNode) => (
     <div className="px-4 h-12 flex items-center justify-between">
       {title}
-      <div className="flex items-center gap-1 -mr-1.5">
+      <div className="flex items-center gap-2.5 -mr-2.5.5">
         {headerActions}
         <button aria-label="メニュー" onClick={accountSettings.openMorePage} className={headerIconButton}>
           <Menu className="w-6 h-6 text-ink-muted" />
@@ -951,14 +951,14 @@ export default function App() {
             <button
               aria-label="お知らせ"
               onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-2 text-white/60 hover:bg-surface/10 hover:text-white rounded-lg cursor-pointer"
+              className="tap-44 relative p-2.5 -m-0.5 text-white/60 hover:bg-surface/10 hover:text-white rounded-lg cursor-pointer"
             >
               <Bell className="w-5 h-5" />
             </button>
 
             <button
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 p-1 rounded-lg hover:bg-surface/10 transition-colors"
+              className="tap-44 flex items-center gap-2 p-1 rounded-lg hover:bg-surface/10 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center font-bold text-xs">
                 {userProfile?.displayName?.[0] || 'B'}
@@ -1218,13 +1218,13 @@ export default function App() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsMyMeishiDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas"
+                  className="flex-1 py-3 px-4 border border-line rounded-lg font-bold text-ink-muted hover:bg-canvas"
                 >
                   キャンセル
                 </button>
                 <button
                   onClick={confirmDeleteMyMeishi}
-                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-lg font-bold hover:opacity-90"
                 >
                   削除
                 </button>
@@ -1247,7 +1247,7 @@ export default function App() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
               <div className="flex items-center gap-3">
-                <button aria-label="戻る" onClick={introGuard.requestClose}>
+                <button className="tap-44" aria-label="戻る" onClick={introGuard.requestClose}>
                   <ArrowLeft className="w-6 h-6 text-ink" />
                 </button>
                 <h2 className="text-lg font-bold text-ink">紹介</h2>
@@ -1443,7 +1443,7 @@ export default function App() {
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setIsMeishiDirectInputOpen(false)}
-                  className="p-2 text-ink hover:bg-primary-soft rounded-full"
+                  className="p-2.5 -m-0.5 text-ink hover:bg-primary-soft rounded-full"
                 >
                   <ArrowLeft className="w-6 h-6" />
                 </button>
@@ -1469,7 +1469,7 @@ export default function App() {
                       placeholder="名前"
                       value={meishiDirectInputData.name}
                       onChange={e => setMeishiDirectInputData({...meishiDirectInputData, name: e.target.value})}
-                      className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all"
+                      className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -1499,7 +1499,7 @@ export default function App() {
                     placeholder="例) チームリーダー"
                     value={meishiDirectInputData.position}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, position: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1510,7 +1510,7 @@ export default function App() {
                     placeholder="例) 経営戦略室"
                     value={meishiDirectInputData.department}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, department: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1521,7 +1521,7 @@ export default function App() {
                     placeholder="会社名検索"
                     value={meishiDirectInputData.company}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, company: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1532,7 +1532,7 @@ export default function App() {
                     placeholder="01012345678"
                     value={meishiDirectInputData.mobile}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, mobile: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1543,7 +1543,7 @@ export default function App() {
                     placeholder="remember@rmbr.com"
                     value={meishiDirectInputData.email}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, email: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1554,7 +1554,7 @@ export default function App() {
                     placeholder="0212345678"
                     value={meishiDirectInputData.phone}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, phone: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1565,7 +1565,7 @@ export default function App() {
                     placeholder="0212345678"
                     value={meishiDirectInputData.fax}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, fax: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1576,7 +1576,7 @@ export default function App() {
                     placeholder="東京都港区..."
                     value={meishiDirectInputData.address}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, address: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
 
@@ -1587,7 +1587,7 @@ export default function App() {
                     placeholder="6階"
                     value={meishiDirectInputData.detailedAddress}
                     onChange={e => setMeishiDirectInputData({...meishiDirectInputData, detailedAddress: e.target.value})}
-                    className="w-full p-4 rounded-xl border border-line focus:border-primary focus:ring-1 focus:ring-[#0A0A0A] outline-none transition-all bg-canvas"
+                    className="w-full p-4 rounded-md border border-line focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-canvas"
                   />
                 </div>
               </div>
@@ -1695,7 +1695,7 @@ export default function App() {
             >
               <div className="p-4 border-b border-line flex justify-between items-center">
                 <h3 className="font-bold text-ink">その他</h3>
-                <button onClick={() => setIsMoreMenuOpen(false)} className="p-2">
+                <button onClick={() => setIsMoreMenuOpen(false)} className="tap-44 p-2">
                   <X className="w-5 h-5 text-ink-muted" />
                 </button>
               </div>
@@ -1705,25 +1705,25 @@ export default function App() {
                     setIsMoreMenuOpen(false);
                     accountSettings.openSimpleLoginSettings();
                   }}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-lg"
                 >
                   <Settings className="w-5 h-5 text-ink-muted" />
                   <span className="font-bold text-ink">簡単ログイン設定</span>
                 </button>
                 <button 
                   onClick={handleDeleteSelectedMeishis}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-lg"
                 >
                   <Trash2 className="w-5 h-5 text-danger" />
                   <span className="font-bold text-danger">名刺を削除</span>
                 </button>
-                <button className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl">
+                <button className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-lg">
                   <Download className="w-5 h-5 text-ink-muted" />
                   <span className="font-bold text-ink">ファイルへエクスポート</span>
                 </button>
                 <button 
                   onClick={handleShareSelectedMeishis}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-xl"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-lg"
                 >
                   <Share2 className="w-5 h-5 text-ink-muted" />
                   <span className="font-bold text-ink">複数共有</span>
@@ -1758,13 +1758,13 @@ export default function App() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas"
+                  className="flex-1 py-3 px-4 border border-line rounded-lg font-bold text-ink-muted hover:bg-canvas"
                 >
                   キャンセル
                 </button>
                 <button
                   onClick={confirmDeleteMeishis}
-                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-lg font-bold hover:opacity-90"
                 >
                   削除
                 </button>

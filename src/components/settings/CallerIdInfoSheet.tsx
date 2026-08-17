@@ -137,7 +137,7 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3">
-            <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={onClose} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">着信時に相手の名刺情報を表示</h1>
@@ -202,7 +202,7 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({
                       <button
                         aria-label="状態を再確認"
                         onClick={refreshStatus}
-                        className="ml-auto p-1.5 rounded-lg hover:bg-canvas transition-colors"
+                        className="tap-44 ml-auto p-1.5 rounded-lg hover:bg-canvas transition-colors"
                       >
                         <RefreshCw className="w-4 h-4 text-ink-faint" />
                       </button>

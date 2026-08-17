@@ -46,13 +46,13 @@ export const ConfirmDialog: React.FC<{
           <div className={`flex gap-3 ${message ? '' : 'mt-6'}`}>
             <button
               onClick={onCancel}
-              className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas transition-colors duration-200"
+              className="flex-1 py-3 px-4 border border-line rounded-lg font-bold text-ink-muted hover:bg-canvas transition-colors duration-200"
             >
               {cancelLabel}
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold text-white hover:opacity-90 transition-opacity duration-200 ${
+              className={`flex-1 py-3 px-4 rounded-lg font-bold text-white hover:opacity-90 transition-opacity duration-200 ${
                 destructive ? 'bg-danger' : 'bg-primary'
               }`}
             >

@@ -165,7 +165,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
           {onBackToApp && (
             <button 
               onClick={onBackToApp}
-              className="p-2 rounded-lg bg-surface border border-line text-ink-muted hover:bg-canvas text-xs font-medium flex items-center gap-1.5"
+              className="p-2.5 -m-0.5 rounded-lg bg-surface border border-line text-ink-muted hover:bg-canvas text-xs font-medium flex items-center gap-1.5"
             >
               <ArrowLeft className="w-4 h-4" />
               アプリに戻る
@@ -188,7 +188,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
             </span>
             <button 
               onClick={() => setShowQrModal(true)}
-              className="p-2 bg-surface/10 hover:bg-surface/20 rounded-lg text-white transition-colors"
+              className="tap-44 p-2.5 -m-0.5 bg-surface/10 hover:bg-surface/20 rounded-lg text-white transition-colors"
               title="QRコードを表示"
             >
               <QrCode className="w-5 h-5" />
@@ -321,7 +321,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleDownloadVCard}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white font-medium text-xs sm:text-sm rounded-xl hover:bg-primary active:scale-[0.99] transition-all shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-primary active:scale-[0.99] transition-all shadow-sm"
             >
               <Download className="w-4 h-4" />
               vCard 保存 (.vcf)
@@ -329,7 +329,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
 
             <button
               onClick={handleCopyLink}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-line text-ink font-medium text-xs sm:text-sm rounded-xl hover:bg-canvas active:scale-[0.99] transition-all shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-line text-ink font-medium text-xs sm:text-sm rounded-lg hover:bg-canvas active:scale-[0.99] transition-all shadow-sm"
             >
               {copied ? (
                 <>
@@ -348,7 +348,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
           <button
             onClick={handleSaveToBillionaire}
             disabled={saved || saving}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 font-medium text-xs sm:text-sm rounded-xl transition-all shadow-sm ${
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 font-medium text-xs sm:text-sm rounded-lg transition-all shadow-sm ${
               saved
                 ? 'bg-success/10 text-success border border-success/30'
                 : 'bg-gradient-to-r from-[#C9483B] to-[#B03A2E] text-white hover:opacity-95'
@@ -384,7 +384,7 @@ export const PublicCardView: React.FC<PublicCardViewProps> = ({ handle, onBackTo
             <p className="text-xs text-ink-muted">
               スマホのカメラでスキャンすると、このデジタル名刺にアクセスできます。
             </p>
-            <div className="bg-canvas p-6 rounded-xl inline-block border border-line">
+            <div className="bg-canvas p-6 rounded-lg inline-block border border-line">
               {/* High-Contrast Simulated QR Code with Logo */}
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`}

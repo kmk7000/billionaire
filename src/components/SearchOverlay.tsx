@@ -58,7 +58,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
     >
       {/* Search Header */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-line">
-        <button aria-label="閉じる" onClick={onClose} className="p-2 -ml-1 text-ink">
+        <button aria-label="閉じる" onClick={onClose} className="tap-44 p-2 -ml-1 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <div className="relative flex-1">

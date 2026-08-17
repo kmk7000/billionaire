@@ -72,10 +72,10 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
       className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar"
     >
       <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10 border-b border-line pt-safe">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <button onClick={() => setIsMoreOpen(true)} className="p-1">
+        <button onClick={() => setIsMoreOpen(true)} className="p-2.5 -m-1.5">
           <MoreVertical className="w-6 h-6 text-ink" />
         </button>
       </div>
@@ -173,7 +173,7 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
                   <button
                     key={r.value}
                     onClick={() => handleReport(r.value)}
-                    className="w-full text-left px-4 py-3 rounded-xl hover:bg-canvas text-sm font-medium text-ink"
+                    className="w-full text-left px-4 py-3 rounded-lg hover:bg-canvas text-sm font-medium text-ink"
                   >
                     {r.label}
                   </button>

@@ -24,7 +24,7 @@ export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => {
         <div className="sticky top-0 bg-surface z-20">
           <div className="px-4 py-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-ink">職務選択</h2>
-            <button aria-label="閉じる" onClick={guard.requestClose} className="p-1 -mr-1">
+            <button aria-label="閉じる" onClick={guard.requestClose} className="p-2.5 -mr-2.5">
               <X className="w-6 h-6 text-ink" />
             </button>
           </div>

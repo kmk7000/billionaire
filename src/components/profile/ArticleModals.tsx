@@ -28,7 +28,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
         >
           {/* Header */}
           <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
-            <button aria-label="戻る" onClick={a.closeList} className="mr-3">
+            <button aria-label="戻る" onClick={a.closeList} className="tap-44 mr-3">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h2 className="text-lg font-bold text-ink">記事編集</h2>
@@ -78,7 +78,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button aria-label="戻る" onClick={editGuard.requestClose}>
+              <button className="tap-44" aria-label="戻る" onClick={editGuard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">{a.editingArticleId ? '記事編集' : '記事追加'}</h2>
@@ -181,7 +181,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.95 }}
-            className="bg-surface rounded-xl w-full max-w-[320px] p-6 text-center"
+            className="bg-surface rounded-lg w-full max-w-[320px] p-6 text-center"
           >
             <h3 className="text-lg font-bold text-ink mb-6">
               記事を<br/>削除しますか？

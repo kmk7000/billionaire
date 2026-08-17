@@ -198,14 +198,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         <h3 className="font-bold text-base text-ink mb-4">新規会員のためのTIP</h3>
 
         <div className="space-y-3">
-          <div className="bg-canvas rounded-xl p-4">
+          <div className="bg-canvas rounded-lg p-4">
             <span className="inline-block px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold rounded mb-2">発信者表示</span>
             <p className="font-bold text-ink text-xs leading-relaxed">
               名刺を連絡先に保存する必要はありません。着信時に会社名・お名前を表示できます（iOS、[設定]から有効化）。
             </p>
           </div>
 
-          <div className="bg-canvas rounded-xl p-4">
+          <div className="bg-canvas rounded-lg p-4">
             <span className="inline-block px-2 py-0.5 bg-primary/5 text-primary text-[10px] font-bold rounded mb-2">スカウト提案</span>
             <p className="font-bold text-ink text-xs leading-relaxed">
               良いスカウト提案をたくさん受けるには、このようにプロフィールを作成してみてください。
@@ -213,7 +213,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           </div>
 
           <div
-            className="bg-canvas rounded-xl p-4 cursor-pointer hover:bg-primary-soft transition-colors duration-200"
+            className="bg-canvas rounded-lg p-4 cursor-pointer hover:bg-primary-soft transition-colors duration-200"
             onClick={onOpenMyMeishiCamera}
           >
             <span className="inline-block px-2 py-0.5 bg-warning/10 text-warning text-[10px] font-bold rounded mb-2">自分の名刺登録</span>

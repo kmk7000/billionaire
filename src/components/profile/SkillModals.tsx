@@ -26,7 +26,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
           <div className="px-4 py-4 flex items-center justify-between relative">
             <div className="w-6" />
             <h2 className="text-lg font-bold text-ink">専門分野・スキル選択</h2>
-            <button aria-label="閉じる" onClick={guard.requestClose} className="p-1 -mr-1">
+            <button aria-label="閉じる" onClick={guard.requestClose} className="p-2.5 -mr-2.5">
               <X className="w-6 h-6 text-ink" />
             </button>
           </div>
@@ -74,7 +74,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
                       <button
                         key={idx}
                         onClick={() => s.toggleSkill(skill)}
-                        className={`w-full flex items-center justify-between p-4 rounded-xl border ${
+                        className={`w-full flex items-center justify-between p-4 rounded-lg border ${
                           isSelected ? 'border-primary bg-canvas' : 'border-line bg-surface'
                         }`}
                       >

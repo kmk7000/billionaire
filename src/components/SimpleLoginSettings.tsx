@@ -36,7 +36,7 @@ const SimpleLoginSettings: React.FC<SimpleLoginSettingsProps> = ({ onBack }) => 
       className="fixed inset-0 bg-surface z-[1000] flex flex-col pt-safe"
     >
       <div className="sticky top-0 bg-surface px-4 py-3 flex items-center border-b border-line">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <h2 className="text-lg font-bold text-ink ml-2">簡単ログイン設定</h2>

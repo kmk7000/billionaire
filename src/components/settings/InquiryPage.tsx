@@ -118,7 +118,7 @@ export const InquiryPage: React.FC<InquiryPageProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3">
-            <button aria-label="戻る" onClick={handleClose} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={handleClose} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">1:1 お問い合わせ</h1>
@@ -150,7 +150,7 @@ export const InquiryPage: React.FC<InquiryPageProps> = ({
                   value={email}
                   readOnly
                   placeholder="メールアドレスが未設定です"
-                  className="w-full bg-canvas border border-line rounded-lg px-4 py-3.5 text-[15px] text-ink-faint"
+                  className="w-full bg-canvas border border-line rounded-md px-4 py-3.5 text-[15px] text-ink-faint"
                 />
                 <p className="text-[13px] text-ink-muted mt-2 leading-relaxed">
                   メールアドレスは
@@ -171,7 +171,7 @@ export const InquiryPage: React.FC<InquiryPageProps> = ({
                   value={body}
                   onChange={(e) => setBody(e.target.value.slice(0, MAX_BODY_LENGTH))}
                   placeholder="お問い合わせ内容をご記入ください"
-                  className="w-full min-h-[220px] bg-canvas border border-line rounded-lg px-4 py-3.5 text-[15px] text-ink placeholder-ink-faint resize-none focus:outline-none focus:border-primary transition-colors"
+                  className="w-full min-h-[220px] bg-canvas border border-line rounded-md px-4 py-3.5 text-[15px] text-ink placeholder-ink-faint resize-none focus:outline-none focus:border-primary transition-colors"
                 />
                 <p className="text-right text-[11px] text-ink-faint mt-1">
                   {body.length} / {MAX_BODY_LENGTH}

@@ -122,7 +122,7 @@ export const PhoneNumberPage: React.FC<{
           disabled={isBusy}
           aria-invalid={!!error}
           aria-describedby={error ? 'mobile-number-error' : 'mobile-number-help'}
-          className={`w-full mt-2 h-12 px-4 rounded-lg border text-[16px] text-ink tabular-nums bg-surface
+          className={`w-full mt-2 h-12 px-4 rounded-md border text-[16px] text-ink tabular-nums bg-surface
             focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 ${
               error ? 'border-danger' : 'border-line focus:border-primary'
             }`}

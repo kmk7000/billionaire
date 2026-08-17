@@ -87,7 +87,7 @@ export const PublicCardModal: React.FC<PublicCardModalProps> = ({
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-line">
               <h2 className="text-base font-bold text-ink">公開デジタル名刺</h2>
-              <button aria-label="閉じる" onClick={onClose} className="p-1 -mr-1 text-ink-muted">
+              <button aria-label="閉じる" onClick={onClose} className="tap-44 p-2.5 -mr-2.5 text-ink-muted">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -152,14 +152,14 @@ export const PublicCardModal: React.FC<PublicCardModalProps> = ({
                       <button
                         onClick={handleCopy}
                         aria-label="URLをコピー"
-                        className="p-2.5 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors"
+                        className="tap-44 p-2.5 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors"
                       >
                         {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={() => onPreview(handle)}
                         aria-label="公開名刺を開く"
-                        className="p-2.5 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors"
+                        className="tap-44 p-2.5 rounded-lg bg-canvas text-ink-muted hover:bg-primary-soft transition-colors"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </button>

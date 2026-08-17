@@ -57,7 +57,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
 
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x no-scrollbar">
         {/* Card 1 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <User className="w-6 h-6 text-ink" />
           </div>
@@ -73,7 +73,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
           </button>
         </div>
         {/* Card 2 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <Edit2 className="w-6 h-6 text-ink" />
           </div>
@@ -89,7 +89,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
           </button>
         </div>
         {/* Card 3 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <Briefcase className="w-6 h-6 text-ink" />
           </div>
@@ -105,7 +105,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
           </button>
         </div>
         {/* Card 4 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <Clock className="w-6 h-6 text-ink" />
           </div>
@@ -121,7 +121,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
           </button>
         </div>
         {/* Card 5 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <BarChart2 className="w-6 h-6 text-ink" />
           </div>
@@ -137,7 +137,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
           </button>
         </div>
         {/* Card 6 */}
-        <div className="min-w-[160px] flex-1 bg-canvas rounded-xl p-4 flex flex-col items-center text-center snap-start">
+        <div className="min-w-[160px] flex-1 bg-canvas rounded-lg p-4 flex flex-col items-center text-center snap-start">
           <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center mb-3 shadow-sm">
             <GraduationCap className="w-6 h-6 text-ink" />
           </div>
@@ -265,7 +265,7 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
             ) : section.title === '外国語' && userProfile?.languages && userProfile.languages.length > 0 ? (
               <div className="space-y-3">
                 {userProfile.languages.map((lang) => (
-                  <div key={lang.id} className="flex items-center justify-between p-4 border border-line rounded-xl bg-surface">
+                  <div key={lang.id} className="flex items-center justify-between p-4 border border-line rounded-lg bg-surface">
                     <div>
                       <div className="font-bold text-ink">{lang.language}</div>
                       <div className="text-sm text-ink-muted mt-1">{lang.level}</div>
@@ -273,13 +273,13 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => language.openExisting(lang)}
-                        className="p-2 text-ink-faint hover:text-ink-muted transition-colors"
+                        className="tap-44 p-2.5 -m-0.5 text-ink-faint hover:text-ink-muted transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => language.deleteLanguage(lang.id)}
-                        className="p-2 text-ink-faint hover:text-danger transition-colors"
+                        className="tap-44 p-2.5 -m-0.5 text-ink-faint hover:text-danger transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -290,13 +290,13 @@ export const ProfileDetailsTab: React.FC<ProfileDetailsTabProps> = ({
             ) : section.title === 'ウェブサイト・ブログ' && userProfile?.websites && userProfile.websites.length > 0 ? (
               <div className="space-y-3">
                 {userProfile.websites.map((url, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border border-line rounded-xl bg-surface">
+                  <div key={i} className="flex items-center justify-between p-4 border border-line rounded-lg bg-surface">
                     <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate mr-4">
                       {url}
                     </a>
                     <button aria-label="編集"
                       onClick={website.open}
-                      className="p-2 text-ink-faint hover:text-ink-muted transition-colors shrink-0"
+                      className="tap-44 p-2.5 -m-0.5 text-ink-faint hover:text-ink-muted transition-colors shrink-0"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>

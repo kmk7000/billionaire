@@ -27,7 +27,7 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button aria-label="戻る" onClick={guard.requestClose}>
+              <button className="tap-44" aria-label="戻る" onClick={guard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">学歴追加</h2>
@@ -146,7 +146,7 @@ export const EducationModals: React.FC<{ education: EducationEditor }> = ({ educ
                   value={e.description}
                   onChange={(ev) => e.setDescription(ev.target.value.slice(0, 5000))}
                   placeholder="例）スマートフォンセールスにおいてバイラルマーケティングが与える影響の分析(2018)"
-                  className="w-full border border-line rounded-lg p-3 h-40 resize-none focus:outline-none focus:border-ink-faint text-sm"
+                  className="w-full border border-line rounded-md p-3 h-40 resize-none focus:outline-none focus:border-ink-faint text-sm"
                 />
                 <div className="absolute bottom-3 right-3 text-xs text-ink-faint">
                   {e.description.length}/5000字

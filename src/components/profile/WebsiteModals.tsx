@@ -25,7 +25,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
             <div className="flex items-center gap-3">
               <button aria-label="戻る"
                 onClick={guard.requestClose}
-                className="p-1 -ml-1"
+                className="p-2.5 -ml-2.5"
               >
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>

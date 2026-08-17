@@ -53,7 +53,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
           </button>
         </div>
 
-        <div className="aspect-[1.6/1] w-full rounded-xl overflow-hidden border border-line shadow-sm bg-surface mb-6 p-1">
+        <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line shadow-sm bg-surface mb-6 p-1">
           <div className="w-full h-full rounded-lg overflow-hidden">
             <img src={myMeishi.imageUrl} alt="Business Card" className="w-full h-full object-contain" />
           </div>
@@ -61,7 +61,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
 
         <button
           onClick={onOpenPublicCard}
-          className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform mb-2"
+          className="w-full bg-primary text-white py-4 rounded-lg font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform mb-2"
         >
           <Share2 className="w-4 h-4" />
           <span>マイ名刺を共有する</span>
@@ -129,7 +129,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
             on every load and had nothing to do with the address above it. */}
         <button
           onClick={onOpenMap}
-          className="mt-8 w-full rounded-xl border border-line bg-canvas px-4 py-4 flex items-center gap-3 hover:bg-primary-soft transition-colors text-left"
+          className="mt-8 w-full rounded-lg border border-line bg-canvas px-4 py-4 flex items-center gap-3 hover:bg-primary-soft transition-colors text-left"
         >
           <span className="w-10 h-10 rounded-full bg-surface border border-line flex items-center justify-center shrink-0">
             <MapPin className="w-5 h-5 text-ink" />
@@ -246,7 +246,7 @@ export const MyMeishiTab: React.FC<MyMeishiTabProps> = ({ myMeishi, userProfile,
         <div className="mt-10 pt-8 border-t border-line pb-10">
           <button
             onClick={onDeleteMyMeishi}
-            className="w-full py-4 rounded-xl border border-danger/20 text-danger font-bold flex items-center justify-center gap-2 hover:bg-danger/10 transition-colors"
+            className="w-full py-4 rounded-lg border border-danger/20 text-danger font-bold flex items-center justify-center gap-2 hover:bg-danger/10 transition-colors"
           >
             <Trash2 className="w-5 h-5" />
             <span>自分の名刺を削除</span>

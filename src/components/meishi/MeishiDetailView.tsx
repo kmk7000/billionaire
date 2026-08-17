@@ -61,10 +61,10 @@ export const MeishiDetailView: React.FC<{
     >
       {/* Header */}
       <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10 pt-safe">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <button onClick={() => setIsMoreOptionsOpen(true)} className="p-1">
+        <button onClick={() => setIsMoreOptionsOpen(true)} className="p-2.5 -m-1.5">
           <MoreVertical className="w-6 h-6 text-ink" />
         </button>
       </div>
@@ -273,7 +273,7 @@ export const MeishiDetailView: React.FC<{
               value={memoDraft}
               onChange={(e) => setMemoDraft(e.target.value)}
               placeholder="出会った場所、話した内容、フォローアップ事項などをメモしておきましょう"
-              className="w-full min-h-[180px] border border-line rounded-lg p-4 text-[15px] text-ink placeholder-ink-faint focus:outline-none focus:border-primary resize-none"
+              className="w-full min-h-[180px] border border-line rounded-md p-4 text-[15px] text-ink placeholder-ink-faint focus:outline-none focus:border-primary resize-none"
             />
             <button
               onClick={() => onSaveMemo(memoDraft)}
@@ -379,7 +379,7 @@ export const MeishiDetailView: React.FC<{
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsConfirmDeleteDialogOpen(false)}
-                  className="flex-1 py-3 px-4 border border-line rounded-xl font-bold text-ink-muted hover:bg-canvas transition-colors duration-200"
+                  className="flex-1 py-3 px-4 border border-line rounded-lg font-bold text-ink-muted hover:bg-canvas transition-colors duration-200"
                 >
                   キャンセル
                 </button>
@@ -388,7 +388,7 @@ export const MeishiDetailView: React.FC<{
                     onDelete(meishi.id);
                     setIsConfirmDeleteDialogOpen(false);
                   }}
-                  className="flex-1 py-3 px-4 bg-danger text-white rounded-xl font-bold hover:opacity-90 transition-colors duration-200"
+                  className="flex-1 py-3 px-4 bg-danger text-white rounded-lg font-bold hover:opacity-90 transition-colors duration-200"
                 >
                   削除
                 </button>

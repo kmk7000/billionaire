@@ -53,7 +53,7 @@ export const MeishiEditView: React.FC<{
       {/* Header */}
       <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between border-b border-line z-10 pt-safe">
         <div className="flex items-center gap-4">
-          <button aria-label="戻る" onClick={guard.requestClose} className="p-2 -ml-2 text-ink">
+          <button aria-label="戻る" onClick={guard.requestClose} className="p-2.5 -ml-2.5 text-ink">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h3 className="text-[17px] font-bold text-ink">名刺情報の編集</h3>
@@ -134,7 +134,7 @@ export const MeishiEditView: React.FC<{
               >
                 <div className="flex justify-between items-center mb-6">
                   <h4 className="text-xl font-bold text-ink">プロフィール写真</h4>
-                  <button onClick={() => setShowPhotoOptions(false)} className="p-2 -mr-2 text-ink-faint">
+                  <button onClick={() => setShowPhotoOptions(false)} className="p-2.5 -mr-2.5 text-ink-faint">
                     <X className="w-6 h-6" />
                   </button>
                 </div>

@@ -85,12 +85,12 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
         {/* Profile Page Content */}
         <div className="flex items-center justify-between p-4 sticky top-0 bg-surface z-10 border-b border-line pt-safe">
           <div className="flex items-center gap-4">
-            <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1 hover:bg-primary-soft rounded-full transition-colors">
+            <button aria-label="戻る" onClick={onClose} className="p-2.5 -ml-2.5 hover:bg-primary-soft rounded-full transition-colors">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">{user?.displayName || 'ユーザー'}</h1>
           </div>
-          <button aria-label="設定" onClick={onOpenSettings} className="p-1 hover:bg-primary-soft rounded-full transition-colors">
+          <button aria-label="設定" onClick={onOpenSettings} className="p-2.5 -m-1.5 hover:bg-primary-soft rounded-full transition-colors">
             <UserCog className="w-6 h-6 text-ink" />
           </button>
         </div>

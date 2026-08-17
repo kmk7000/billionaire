@@ -1,6 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 @import "tailwindcss";
 
+/* Tailwind v4 auto-detects sources: every file in the project that git does
+   not ignore is scanned for class names. Three things here are not source and
+   were inflating the stylesheet with classes nothing renders:
+
+     .claude/    skill documentation, which is full of Tailwind examples
+     ios/,
+     android/    where `cap sync` copies the built dist/, so the previous
+                 build's CSS gets rescanned and every class the app has ever
+                 used is rediscovered and re-emitted — a class deleted from a
+                 component could never actually leave the stylesheet
+
+   Found while checking that removing one radius utility had taken effect: it
+   was still in the output with zero occurrences left in src/. Note that a
+   class name written in a comment counts too, so this one avoids spelling
+   any out. */
+@source not "../.claude";
+@source not "../ios";
+@source not "../android";
+
 @theme {
   --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
   /* Data columns (IDs, timestamps, counters) in the admin console. A system
@@ -93,6 +112,25 @@
      own, so the plain class won at every width and silently ate the desktop
      override too — measured 152px of padding still applying at 1280px wide.
      Self-contained here, there is no ordering to get wrong. */
+  /* Expands a small control's tap target to 44x44 without touching layout.
+     The margin trick (grow padding, cancel with negative margin) only works
+     where nothing else depends on the box: in a `gap`-spaced header a
+     negative margin drags the title inward too. This puts an invisible,
+     centred 44px box inside the button instead — it is a child of the
+     button, so taps on it still hit the button, and it occupies no space.
+     Do not use it inside an `overflow: hidden` parent, which would clip it. */
+  .tap-44 {
+    position: relative;
+  }
+  .tap-44::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
   .pb-scroll-content {
     padding-bottom: calc(env(safe-area-inset-bottom) + 152px);
   }

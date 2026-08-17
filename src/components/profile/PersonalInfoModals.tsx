@@ -22,7 +22,7 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
       >
         {/* Header */}
         <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
-          <button aria-label="閉じる" onClick={guard.requestClose} className="mr-3">
+          <button aria-label="閉じる" onClick={guard.requestClose} className="tap-44 mr-3">
             <X className="w-6 h-6 text-ink" />
           </button>
           <h2 className="text-lg font-bold text-ink">人的事項</h2>

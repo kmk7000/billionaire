@@ -343,7 +343,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
     >
       {/* Header */}
       <div className="flex items-center p-4 bg-surface">
-        <button aria-label="戻る" onClick={onBack} className="p-1 -ml-1">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5">
           <ArrowLeft className="w-6 h-6 text-ink" />
         </button>
         <h1 className="ml-4 text-lg font-bold text-ink">名刺地図</h1>
@@ -375,7 +375,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-surface rounded-xl shadow-lg border border-line overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-48 bg-surface rounded-lg shadow-lg border border-line overflow-hidden z-50"
                 >
                   <div className="absolute -top-2 right-6 w-4 h-4 bg-surface border-t border-l border-line transform rotate-45" />
                   <div className="relative bg-surface z-10">
@@ -615,14 +615,14 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           <button
             aria-label="拡大"
             onClick={() => setZoom((prev) => Math.min(prev + 1, 20))}
-            className="w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors border-b border-line"
+            className="tap-44 w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors border-b border-line"
           >
             <Plus className="w-6 h-6" />
           </button>
           <button
             aria-label="縮小"
             onClick={() => setZoom((prev) => Math.max(prev - 1, 3))}
-            className="w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors"
+            className="tap-44 w-12 h-12 bg-surface flex items-center justify-center text-ink-muted hover:bg-canvas transition-colors"
           >
             <Minus className="w-6 h-6" />
           </button>
@@ -632,7 +632,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         <div className="absolute bottom-6 right-4 flex gap-3 z-[1000]">
           <button
             onClick={() => setGroupByCompany((prev) => !prev)}
-            className={`px-5 py-3 rounded-xl shadow-xl border flex items-center gap-2 text-sm font-bold active:scale-95 transition-transform ${
+            className={`px-5 py-3 rounded-lg shadow-xl border flex items-center gap-2 text-sm font-bold active:scale-95 transition-transform ${
               groupByCompany
                 ? 'bg-primary border-primary text-white'
                 : 'bg-surface border-primary text-ink'
@@ -643,7 +643,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className="bg-surface px-5 py-3 rounded-xl shadow-xl border border-primary flex items-center gap-2 text-sm font-bold text-ink active:scale-95 transition-transform"
+            className="bg-surface px-5 py-3 rounded-lg shadow-xl border border-primary flex items-center gap-2 text-sm font-bold text-ink active:scale-95 transition-transform"
           >
             <ChevronUp className="w-5 h-5 text-primary" />
             リスト
@@ -674,7 +674,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
         <button
           onClick={handleSearchArea}
           disabled={isGeocoding || pendingGeocode.length === 0}
-          className="bg-primary/5 text-primary px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-transform"
+          className="bg-primary/5 text-primary px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-transform"
         >
           <RefreshCw className={`w-4 h-4 ${isGeocoding ? 'animate-spin' : ''}`} />
           住所を再取得
@@ -693,7 +693,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
           >
             <div className="flex items-center justify-between p-4 bg-surface border-b border-line">
               <h2 className="text-lg font-bold text-ink">基準位置変更</h2>
-              <button aria-label="閉じる" onClick={() => setIsLocationSearchOpen(false)} className="p-1">
+              <button aria-label="閉じる" onClick={() => setIsLocationSearchOpen(false)} className="tap-44 p-1">
                 <X className="w-6 h-6 text-ink" />
               </button>
             </div>
@@ -706,7 +706,7 @@ export const MeishiMapView: React.FC<MeishiMapViewProps> = ({
                   placeholder="検索"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-canvas rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full bg-canvas rounded-md py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>

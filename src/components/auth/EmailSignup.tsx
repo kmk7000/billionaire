@@ -10,7 +10,7 @@ export const EmailSignup: React.FC<{ onBack: () => void; onComplete: (email: str
   return (
     <div className="min-h-screen bg-surface flex flex-col max-w-md mx-auto shadow-2xl pt-safe">
       <div className="p-4">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5">
           <ChevronRight className="w-6 h-6 rotate-180" />
         </button>
       </div>
@@ -49,7 +49,7 @@ export const EmailSignup: React.FC<{ onBack: () => void; onComplete: (email: str
         <button
           disabled={!isValid}
           onClick={() => onComplete(email, password)}
-          className={`w-full py-4 rounded-xl font-bold transition-colors ${isValid ? 'bg-primary text-white shadow-lg' : 'bg-primary-soft text-ink-faint'}`}
+          className={`w-full py-4 rounded-lg font-bold transition-colors ${isValid ? 'bg-primary text-white shadow-lg' : 'bg-primary-soft text-ink-faint'}`}
         >
           登録する
         </button>

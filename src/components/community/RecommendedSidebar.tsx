@@ -20,7 +20,7 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ posts, o
 
   return (
     <Wrapper className={inline ? 'space-y-4' : 'hidden lg:block w-80 shrink-0 space-y-4 sticky top-20'}>
-      <div className={inline ? 'bg-surface rounded-xl border border-line p-4 shadow-xs' : 'bg-surface p-4'}>
+      <div className={inline ? 'bg-surface rounded-lg border border-line p-4 shadow-xs' : 'bg-surface p-4'}>
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-line">
           <h3 className="font-bold text-sm text-ink">推薦投稿</h3>
           <span className="text-[10px] text-ink-faint">Billionaire Live</span>

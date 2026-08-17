@@ -35,7 +35,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
   return (
     <div className="min-h-screen bg-surface flex flex-col max-w-md mx-auto shadow-2xl relative pt-safe">
       <div className="p-4">
-        <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2">
+        <button aria-label="戻る" onClick={onBack} className="p-2.5 -ml-2.5">
           <ChevronRight className="w-6 h-6 rotate-180" />
         </button>
       </div>
@@ -47,7 +47,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
 
         <div 
           onClick={handleToggleAll}
-          className={`p-5 border rounded-xl mb-8 flex items-center gap-3 cursor-pointer transition-colors ${agreements.all ? 'border-primary bg-canvas' : 'border-line'}`}
+          className={`p-5 border rounded-lg mb-8 flex items-center gap-3 cursor-pointer transition-colors ${agreements.all ? 'border-primary bg-canvas' : 'border-line'}`}
         >
           <div className={`w-6 h-6 rounded-full flex items-center justify-center border ${agreements.all ? 'bg-primary border-primary' : 'border-line'}`}>
             <Check className={`w-4 h-4 transition-colors ${agreements.all ? 'text-white' : 'text-ink-faint'}`} />
@@ -80,7 +80,7 @@ export const TermsAgreement: React.FC<{ onNext: () => void; onBack: () => void }
         <button
           disabled={!canProceed}
           onClick={onNext}
-          className={`w-full py-4 rounded-xl font-bold transition-colors ${canProceed ? 'bg-primary text-white' : 'bg-primary-soft text-ink-faint'}`}
+          className={`w-full py-4 rounded-lg font-bold transition-colors ${canProceed ? 'bg-primary text-white' : 'bg-primary-soft text-ink-faint'}`}
         >
           次へ
         </button>

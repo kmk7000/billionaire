@@ -60,7 +60,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ posts, onSelectP
       </div>
 
       {/* App & Digital Business Card QR Widget */}
-      <div className="bg-gradient-to-br from-[#0A0A0A] via-[#1A1A1A] to-[#2B2B2B] text-white rounded-xl p-4 shadow-xs flex items-center gap-4">
+      <div className="bg-gradient-to-br from-[#0A0A0A] via-[#1A1A1A] to-[#2B2B2B] text-white rounded-lg p-4 shadow-xs flex items-center gap-4">
         <div className="bg-surface p-2 rounded-lg shrink-0">
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window.location.origin + '?c=billionaire_demo')}`}

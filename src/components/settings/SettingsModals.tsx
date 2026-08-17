@@ -104,7 +104,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3">
-            <button aria-label="戻る" onClick={s.closeMorePage} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeMorePage} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">もっと見る</h1>
@@ -251,7 +251,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3">
-            <button aria-label="戻る" onClick={s.closeSettingsPage} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeSettingsPage} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">設定</h1>
@@ -395,7 +395,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3">
-            <button aria-label="戻る" onClick={s.closeAccountManagement} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeAccountManagement} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">アカウント</h1>
@@ -438,7 +438,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
         >
           {/* Header */}
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4">
-            <button aria-label="戻る" onClick={s.closeWithdrawal} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={s.closeWithdrawal} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
           </header>
@@ -511,7 +511,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3 border-b border-line">
-            <button aria-label="戻る" onClick={passwordChangeGuard.requestClose} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={passwordChangeGuard.requestClose} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">パスワード再設定</h1>
@@ -579,7 +579,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-surface rounded-xl w-full max-w-[320px] p-8 text-center shadow-2xl"
+            className="bg-surface rounded-lg w-full max-w-[320px] p-8 text-center shadow-2xl"
           >
             <h3 className="text-[18px] font-bold text-ink mb-4">
               パスワードを変更しました
@@ -589,7 +589,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
             </p>
             <button
               onClick={s.closePasswordResetSuccess}
-              className="w-full h-[48px] bg-primary rounded-md text-[16px] font-bold text-white hover:opacity-90 transition-colors"
+              className="w-full h-[48px] bg-primary rounded-lg text-[16px] font-bold text-white hover:opacity-90 transition-colors"
             >
               確認
             </button>
@@ -606,7 +606,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-surface rounded-xl w-full max-w-[320px] p-8 text-center shadow-2xl"
+            className="bg-surface rounded-lg w-full max-w-[320px] p-8 text-center shadow-2xl"
           >
             <h3 className="text-[18px] font-bold text-ink mb-4">
               エラー
@@ -616,7 +616,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
             </p>
             <button
               onClick={s.closePasswordResetError}
-              className="w-full h-[48px] bg-primary rounded-md text-[16px] font-bold text-white hover:opacity-90 transition-colors"
+              className="w-full h-[48px] bg-primary rounded-lg text-[16px] font-bold text-white hover:opacity-90 transition-colors"
             >
               確認
             </button>
@@ -635,7 +635,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
           className="fixed inset-0 bg-surface z-[120] flex flex-col max-w-md mx-auto pt-safe"
         >
           <header className="sticky top-0 z-10 bg-surface h-[52px] flex items-center px-4 gap-3 border-b border-line">
-            <button aria-label="戻る" onClick={passwordResetGuard.requestClose} className="p-1 -ml-1">
+            <button aria-label="戻る" onClick={passwordResetGuard.requestClose} className="p-2.5 -ml-2.5">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
             <h1 className="text-lg font-bold text-ink">パスワード再設定</h1>
@@ -694,7 +694,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="relative bg-surface rounded-xl w-full max-w-[320px] overflow-hidden shadow-2xl"
+            className="relative bg-surface rounded-lg w-full max-w-[320px] overflow-hidden shadow-2xl"
           >
             <div className="h-[150px] w-[320px] flex flex-col justify-center px-6 text-center">
               <h3 className="text-[15px] font-bold text-ink mb-6">
