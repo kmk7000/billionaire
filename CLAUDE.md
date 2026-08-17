@@ -209,6 +209,12 @@ src/
     - 브라우저에서 실측: 비디오 580px 높이에서 옛 코드는 top=**190px**을 가정했지만 실제 프레임은 top=**164px** — **26px 오차**(`mt-6` 24px + 캡션 줄높이 ≈ 28px의 절반). 그만큼 아래에서 잘라내니 결과물이 밀렸다.
     - 지금은 `guideRef`로 `getBoundingClientRect()`를 찍어 비디오 박스 기준 상대좌표를 쓴다. 가정이 사라져서 **레이아웃이 또 바뀌어도 따라간다.**
 
+26. **하단 스크롤 콘텐츠가 BottomNav+Fab에 가려 끝까지 안 보임 (2026-08)** — 명함첩 마지막 카드가 하단 탭바와 명함등록 FAB에 가려져 온전히 안 보인다는 신고. 원인은 두 겹이었다.
+    - **패딩이 부족했다.** 스크롤 컨테이너(`<main>`)의 `pb-20`(80px)은 고정값이라 `env(safe-area-inset-bottom)`을 포함하지 않고, `.bottom-above-nav`(FAB가 nav 위 `env+76px` 지점에 뜬다)와 FAB 자체 높이(pill ~50px, circle 56px)를 전혀 고려하지 않았다. `.pb-scroll-content`(`env(safe-area-inset-bottom) + 152px`)를 새로 만들어 교체했다 — `76px(.bottom-above-nav와 동일 기준) + 76px(FAB 몸통+여유)`.
+    - **더 미묘한 버그: 데스크톱이 조용히 깨졌다.** `pb-scroll-content lg:pb-6`로 처음 넣었는데, `@layer utilities`에 정의한 커스텀 클래스가 이 파일에서 Tailwind의 `@import` **뒤에** 나오는 바람에 컴파일된 CSS에서 Tailwind가 생성한 `.lg\:pb-6`(미디어쿼리 안)보다 **더 뒤에** 위치했다. 특이성이 동률이면 **소스 순서상 나중 규칙이 이긴다** — 미디어쿼리 조건 충족 여부와 무관하게. 그 결과 1280px 폭에서도 `pb-scroll-content`의 152px이 계속 이겨서 데스크톱 하단 여백이 깨져 있었다(육안으로는 티가 잘 안 남). 실제로 `getComputedStyle`로 찍어보고서야 발견했다.
+    - **교훈**: 커스텀 유틸리티 클래스와 Tailwind의 `lg:` 같은 반응형 variant를 같은 엘리먼트에 나란히 걸어 우선순위를 클래스 순서에 맡기지 말 것. `@layer utilities`에 있어도 Tailwind가 생성한 반응형 규칙보다 소스상 뒤에 온다는 보장이 없다. **반응형 분기가 필요하면 커스텀 클래스 자체 안에 미디어쿼리를 넣어 자기완결적으로 만들 것** — 지금 `.pb-scroll-content`는 내부에 `@media (min-width: 1024px)`로 데스크톱 값(1.5rem)을 직접 정의하고, `lg:` variant는 아예 안 쓴다.
+    - 검증: 모바일에서 마지막 카드가 FAB와 nav 양쪽 모두를 완전히 벗어나는 것 확인, 데스크톱(1280px)에서 `paddingBottom`이 정확히 `24px`(=lg:pb-6와 동일)로 나오는 것 확인.
+
 ## 코딩 규칙 (docs/SPEC.md §9 요약)
 
 - TypeScript strict, `any` 금지

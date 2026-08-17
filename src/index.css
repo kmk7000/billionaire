@@ -65,4 +65,28 @@
   .bottom-above-nav {
     bottom: calc(env(safe-area-inset-bottom) + 76px);
   }
+  /* Bottom padding for the tab content that scrolls under BottomNav + Fab.
+     A flat `pb-20` (80px) was less than the two fixed elements actually take:
+     bottom-above-nav already reserves env()+76px before the Fab's own body
+     even starts, so the Fab's top edge lands around env()+76px+56px. A last
+     list item never fully cleared that on a real iPhone — it scrolled to the
+     end of its container and the Fab/nav were still sitting over the last
+     ~70-90px of it. 76px (matching .bottom-above-nav) + 76px of Fab body and
+     margin covers the largest Fab (the 56px circle) with room to spare.
+
+     The lg override lives here, in the same unconditional-specificity class,
+     rather than as a separate `lg:pb-6` utility on the element: a plain class
+     and a Tailwind-generated `lg:` media-query class are equal specificity,
+     and this file's custom @layer utilities block is emitted after Tailwind's
+     own, so the plain class won at every width and silently ate the desktop
+     override too — measured 152px of padding still applying at 1280px wide.
+     Self-contained here, there is no ordering to get wrong. */
+  .pb-scroll-content {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 152px);
+  }
+  @media (min-width: 1024px) {
+    .pb-scroll-content {
+      padding-bottom: 1.5rem;
+    }
+  }
 }

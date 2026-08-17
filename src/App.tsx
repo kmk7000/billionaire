@@ -1015,7 +1015,7 @@ export default function App() {
             {renderHeader()}
           </div>
 
-          <main className="flex-1 overflow-y-auto pb-20 lg:pb-6">
+          <main className="flex-1 overflow-y-auto pb-scroll-content">
         <AnimatePresence mode="wait">
           {activeTab === 'meishi' && (
             <MeishiListScreen
