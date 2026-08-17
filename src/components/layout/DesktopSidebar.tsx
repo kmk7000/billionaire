@@ -69,7 +69,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ posts, onSelectP
           />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-bold text-amber-300">スマホ名刺スキャン Sync</p>
+          <p className="text-xs font-bold text-warning-on-dark">スマホ名刺スキャン Sync</p>
           <p className="text-[11px] text-white/70 mt-1 leading-snug">
             QRコードをスキャンして、モバイルアプリとデジタル名刺をすぐに確認できます。
           </p>

@@ -18,8 +18,20 @@
   --color-primary: #0A0A0A;
   --color-primary-soft: #F3F3F3;
   --color-accent: #C9483B;
-  --color-success: #1F8A5B;
-  --color-warning: #B8860B;
+  /* success/warning are darkened from #1F8A5B / #B8860B so they clear WCAG AA
+     (4.5:1) as body text on white. The old values measured 4.33 and 3.25 —
+     both were already used for small text (このIDは使用できます。, the
+     自分の名刺登録 badge, PublicCardModal's notes), so they failed today.
+     Now 5.32 and 5.11, and still ≥4.5 over their own /10 tints. */
+  --color-success: #1B7A50;
+  --color-warning: #8F6708;
+  /* The same two semantics on a near-black surface, where the values above
+     invert into unreadable (success would be 3.93 on #1C1C1C). These exist
+     because the public card's banner and the desktop QR widget genuinely need
+     an on-dark variant — previously spelled as raw text-emerald-400 /
+     text-amber-300, i.e. outside the system entirely. */
+  --color-success-on-dark: #34D399;
+  --color-warning-on-dark: #FCD34D;
   --color-danger: #C0392B;
 
   --shadow-xs: 0 1px 2px rgba(20, 26, 33, 0.04);
