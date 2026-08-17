@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -33,6 +34,7 @@ export function useCareerEditor(
 ) {
   const [isListOpen, setIsListOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [isCompanySearchOpen, setIsCompanySearchOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<'start' | 'end' | null>(null);
   const [editingCareerId, setEditingCareerId] = useState<string | null>(null);
@@ -55,6 +57,12 @@ export function useCareerEditor(
     }
   }, [isListOpen, userProfile]);
 
+  /** The editable fields, in one place, so the baseline captured on open and
+      the value compared against it can never drift apart. */
+  const formSnapshot = (
+    v: [string, boolean, string, string, string, string, string, string, string],
+  ) => v;
+
   const resetForm = () => {
     setCompany('');
     setIsCurrent(false);
@@ -73,6 +81,7 @@ export function useCareerEditor(
   const openNewCareer = () => {
     setEditingCareerId(null);
     resetForm();
+    dirty.capture(formSnapshot(['', false, '', '', '', '', '', '', '']));
     setIsEditOpen(true);
   };
 
@@ -96,6 +105,12 @@ export function useCareerEditor(
       setLocationRegion('');
       setLocationCountry('');
     }
+    const region = PREFECTURES.includes(loc) ? loc : loc ? '海外' : '';
+    const country = PREFECTURES.includes(loc) ? '' : loc ? loc : '';
+    dirty.capture(formSnapshot([
+      career.companyName, career.isCurrent, career.startDate, career.endDate || '',
+      career.title || '', career.department || '', career.description || '', region, country,
+    ]));
     setIsEditOpen(true);
   };
 
@@ -183,6 +198,10 @@ export function useCareerEditor(
   };
 
   return {
+    isDirty: dirty.isDirty(formSnapshot([
+      company, isCurrent, startDate, endDate, title, department, description,
+      locationRegion, locationCountry,
+    ])),
     careers: userProfile?.careers || [],
     isListOpen, openList, closeList,
     isEditOpen, setIsEditOpen,

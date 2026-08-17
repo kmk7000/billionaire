@@ -2,8 +2,15 @@ import React from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { PersonalInfoEditor } from '../../hooks/usePersonalInfoEditor';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
-export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> = ({ personalInfo: p }) => (
+export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> = ({ personalInfo: p }) => {
+  // Back arrow and left-edge swipe both route through the guard, so a
+  // half-filled form cannot be discarded without asking.
+  const guard = useUnsavedChangesGuard(!p.isUnchanged, p.close, p.isEditOpen);
+
+  return (
   <AnimatePresence>
     {p.isEditOpen && (
       <motion.div
@@ -15,7 +22,7 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
       >
         {/* Header */}
         <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
-          <button aria-label="閉じる" onClick={p.close} className="mr-3">
+          <button aria-label="閉じる" onClick={guard.requestClose} className="mr-3">
             <X className="w-6 h-6 text-ink" />
           </button>
           <h2 className="text-lg font-bold text-ink">人的事項</h2>
@@ -81,5 +88,13 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
         </div>
       </motion.div>
     )}
+    <ConfirmDialog
+      isOpen={guard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={guard.confirmDiscard}
+      onCancel={guard.cancelDiscard}
+    />
   </AnimatePresence>
-);
+  );
+};

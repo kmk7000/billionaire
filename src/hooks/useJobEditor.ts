@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -8,13 +9,16 @@ const MAX_JOBS = 5;
 
 export function useJobEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [jobSearchQuery, setJobSearchQuery] = useState('');
   const [selectionError, setSelectionError] = useState(false);
 
   const open = () => {
-    setSelectedJobs(userProfile?.jobs || []);
+    const seed = userProfile?.jobs || [];
+    setSelectedJobs(seed);
+    dirty.capture(seed);
     setIsEditOpen(true);
   };
 
@@ -56,6 +60,7 @@ export function useJobEditor(user: FirebaseUser | null, userProfile: UserProfile
   };
 
   return {
+    isDirty: dirty.isDirty(selectedJobs),
     isEditOpen, open, close,
     selectedJobs, setSelectedJobs,
     openCategory, toggleCategory,

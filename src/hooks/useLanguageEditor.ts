@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -6,6 +7,7 @@ import type { Language, UserProfile } from '../types/app';
 
 export function useLanguageEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
@@ -20,6 +22,7 @@ export function useLanguageEditor(user: FirebaseUser | null, userProfile: UserPr
 
   const openNew = () => {
     resetForm();
+    dirty.capture(["", ""]);
     setIsEditOpen(true);
   };
 
@@ -27,6 +30,7 @@ export function useLanguageEditor(user: FirebaseUser | null, userProfile: UserPr
     setSelectedLanguage(lang.language);
     setSelectedLevel(lang.level);
     setEditingLanguageId(lang.id);
+    dirty.capture([lang.language, lang.level]);
     setIsEditOpen(true);
   };
 
@@ -84,6 +88,7 @@ export function useLanguageEditor(user: FirebaseUser | null, userProfile: UserPr
   };
 
   return {
+    isDirty: dirty.isDirty([selectedLanguage, selectedLevel]),
     isEditOpen, openNew, openExisting, close,
     selectedLanguage, setSelectedLanguage,
     selectedLevel, setSelectedLevel,

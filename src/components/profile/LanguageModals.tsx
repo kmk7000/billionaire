@@ -3,8 +3,15 @@ import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LANGUAGES, LANGUAGE_LEVELS } from '../../constants/profileData';
 import type { LanguageEditor } from '../../hooks/useLanguageEditor';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
-export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ language: l }) => (
+export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ language: l }) => {
+  // Back arrow and left-edge swipe both route through the guard, so a
+  // half-filled form cannot be discarded without asking.
+  const guard = useUnsavedChangesGuard(l.isDirty, l.close, l.isEditOpen);
+
+  return (
   <AnimatePresence>
     {l.isEditOpen && (
       <motion.div
@@ -17,7 +24,7 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
         <div className="sticky top-0 bg-surface z-20 border-b border-line">
           <div className="px-4 py-4 flex items-center justify-between relative">
             <button aria-label="戻る"
-              onClick={l.close}
+              onClick={guard.requestClose}
               className="p-1 -ml-1"
             >
               <ArrowLeft className="w-6 h-6 text-ink" />
@@ -157,5 +164,13 @@ export const LanguageModals: React.FC<{ language: LanguageEditor }> = ({ languag
         </AnimatePresence>
       </motion.div>
     )}
+    <ConfirmDialog
+      isOpen={guard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={guard.confirmDiscard}
+      onCancel={guard.cancelDiscard}
+    />
   </AnimatePresence>
-);
+  );
+};

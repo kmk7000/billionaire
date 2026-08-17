@@ -5,11 +5,16 @@ import { WheelPickerColumn, WheelPickerBand } from './WheelPickerColumn';
 import { JAPANESE_COMPANIES, PREFECTURES, COUNTRIES } from '../../constants/profileData';
 import { calculateCareerDuration, type CareerEditor } from '../../hooks/useCareerEditor';
 import { useSwipeBack } from '../../hooks/useSwipeBack';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
 export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) => {
   // The list is a read-only page; the editor beneath it is a form and is
   // deliberately left out until it can prompt about unsaved input.
   useSwipeBack(c.closeList, c.isListOpen);
+  // The editor opens on top of the list, so it registers after it — the
+  // gesture stack hands a swipe to the last registration.
+  const editGuard = useUnsavedChangesGuard(c.isDirty, () => c.setIsEditOpen(false), c.isEditOpen);
 
   return (
   <>
@@ -108,7 +113,7 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button onClick={() => c.setIsEditOpen(false)}>
+              <button onClick={editGuard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">{c.editingCareerId ? '経歴編集' : '経歴追加'}</h2>
@@ -435,6 +440,13 @@ export const CareerModals: React.FC<{ career: CareerEditor }> = ({ career: c }) 
         </>
       )}
     </AnimatePresence>
+  <ConfirmDialog
+    isOpen={editGuard.isPrompting}
+    {...UNSAVED_CHANGES_DIALOG}
+    destructive
+    onConfirm={editGuard.confirmDiscard}
+    onCancel={editGuard.cancelDiscard}
+  />
   </>
   );
 };

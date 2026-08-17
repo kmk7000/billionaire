@@ -61,6 +61,8 @@ export function usePublicationEditor(user: FirebaseUser | null) {
   };
 
   return {
+    // open() always blanks the form, so anything present is unsaved input.
+    isDirty: !!title || !!date,
     isEditOpen, open, close,
     title, setTitle,
     date,

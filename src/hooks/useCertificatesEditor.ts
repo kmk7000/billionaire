@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { deleteField, doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -6,10 +7,13 @@ import type { UserProfile } from '../types/app';
 
 export function useCertificatesEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [certificatesList, setCertificatesList] = useState<string[]>(['']);
 
   const open = () => {
-    setCertificatesList(userProfile?.certificates?.length ? userProfile.certificates : ['']);
+    const seed = userProfile?.certificates?.length ? userProfile.certificates : [''];
+    setCertificatesList(seed);
+    dirty.capture(seed);
     setIsEditOpen(true);
   };
 
@@ -42,6 +46,7 @@ export function useCertificatesEditor(user: FirebaseUser | null, userProfile: Us
   };
 
   return {
+    isDirty: dirty.isDirty(certificatesList),
     isEditOpen, open, close,
     certificatesList, addCertificateInput, changeCertificate,
     handleSave,

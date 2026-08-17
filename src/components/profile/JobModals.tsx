@@ -3,8 +3,15 @@ import { X, Search, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { JOB_CATEGORIES } from '../../constants/profileData';
 import type { JobEditor } from '../../hooks/useJobEditor';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
-export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => (
+export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => {
+  // Back arrow and left-edge swipe both route through the guard, so a
+  // half-filled form cannot be discarded without asking.
+  const guard = useUnsavedChangesGuard(j.isDirty, j.close, j.isEditOpen);
+
+  return (
   <AnimatePresence>
     {j.isEditOpen && (
       <motion.div
@@ -17,7 +24,7 @@ export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => (
         <div className="sticky top-0 bg-surface z-20">
           <div className="px-4 py-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-ink">職務選択</h2>
-            <button aria-label="閉じる" onClick={j.close} className="p-1 -mr-1">
+            <button aria-label="閉じる" onClick={guard.requestClose} className="p-1 -mr-1">
               <X className="w-6 h-6 text-ink" />
             </button>
           </div>
@@ -133,5 +140,13 @@ export const JobModals: React.FC<{ job: JobEditor }> = ({ job: j }) => (
         </div>
       </motion.div>
     )}
+    <ConfirmDialog
+      isOpen={guard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={guard.confirmDiscard}
+      onCancel={guard.cancelDiscard}
+    />
   </AnimatePresence>
-);
+  );
+};

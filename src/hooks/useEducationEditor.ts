@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -11,6 +12,7 @@ export function useEducationEditor(
   toggleProfileStep: (step: number) => void,
 ) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [school, setSchool] = useState('');
   const [degree, setDegree] = useState('');
   const [major, setMajor] = useState('');
@@ -36,7 +38,17 @@ export function useEducationEditor(
     setDescription('');
   };
 
-  const open = () => setIsEditOpen(true);
+  /** The editable fields, in one place, so the baseline captured on open and
+      the value compared against it can never drift apart. */
+  const formSnapshot = (): [string, string, string, string, string, boolean, string] =>
+    [school, degree, major, startDate, endDate, isCurrent, description];
+
+  const open = () => {
+    // open() does not seed these fields — they persist from the last time the
+    // form was used — so the baseline is simply whatever they hold right now.
+    dirty.capture(formSnapshot());
+    setIsEditOpen(true);
+  };
   const close = () => setIsEditOpen(false);
 
   const handleSave = async () => {
@@ -90,6 +102,7 @@ export function useEducationEditor(
   };
 
   return {
+    isDirty: dirty.isDirty(formSnapshot()),
     isEditOpen, open, close,
     school, setSchool,
     degree, setDegree,

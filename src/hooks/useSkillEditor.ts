@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -6,11 +7,14 @@ import type { UserProfile } from '../types/app';
 
 export function useSkillEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillSearchQuery, setSkillSearchQuery] = useState('');
 
   const open = () => {
-    setSelectedSkills(userProfile?.skills || []);
+    const seed = userProfile?.skills || [];
+    setSelectedSkills(seed);
+    dirty.capture(seed);
     setIsEditOpen(true);
   };
 
@@ -39,6 +43,7 @@ export function useSkillEditor(user: FirebaseUser | null, userProfile: UserProfi
   };
 
   return {
+    isDirty: dirty.isDirty(selectedSkills),
     isEditOpen, open, close,
     selectedSkills, setSelectedSkills,
     skillSearchQuery, setSkillSearchQuery,

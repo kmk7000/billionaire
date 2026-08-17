@@ -4,8 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { UserProfile } from '../../types/app';
 import { ALL_SKILLS, JOB_CATEGORIES, SKILL_RECOMMENDATIONS } from '../../constants/profileData';
 import type { SkillEditor } from '../../hooks/useSkillEditor';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
-export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfile | null }> = ({ skill: s, userProfile }) => (
+export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfile | null }> = ({ skill: s, userProfile }) => {
+  // Back arrow and left-edge swipe both route through the guard, so a
+  // half-filled form cannot be discarded without asking.
+  const guard = useUnsavedChangesGuard(s.isDirty, s.close, s.isEditOpen);
+
+  return (
   <AnimatePresence>
     {s.isEditOpen && (
       <motion.div
@@ -19,7 +26,7 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
           <div className="px-4 py-4 flex items-center justify-between relative">
             <div className="w-6" />
             <h2 className="text-lg font-bold text-ink">専門分野・スキル選択</h2>
-            <button aria-label="閉じる" onClick={s.close} className="p-1 -mr-1">
+            <button aria-label="閉じる" onClick={guard.requestClose} className="p-1 -mr-1">
               <X className="w-6 h-6 text-ink" />
             </button>
           </div>
@@ -160,5 +167,13 @@ export const SkillModals: React.FC<{ skill: SkillEditor; userProfile: UserProfil
         </div>
       </motion.div>
     )}
+    <ConfirmDialog
+      isOpen={guard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={guard.confirmDiscard}
+      onCancel={guard.cancelDiscard}
+    />
   </AnimatePresence>
-);
+  );
+};

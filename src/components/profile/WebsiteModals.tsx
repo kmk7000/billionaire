@@ -2,8 +2,15 @@ import React from 'react';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { WebsiteEditor } from '../../hooks/useWebsiteEditor';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
-export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w }) => (
+export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w }) => {
+  // Back arrow and left-edge swipe both route through the guard, so a
+  // half-filled form cannot be discarded without asking.
+  const guard = useUnsavedChangesGuard(w.isDirty, w.close, w.isEditOpen);
+
+  return (
   <AnimatePresence>
     {w.isEditOpen && (
       <motion.div
@@ -17,7 +24,7 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
           <div className="flex items-center justify-between p-4 relative">
             <div className="flex items-center gap-3">
               <button aria-label="戻る"
-                onClick={w.close}
+                onClick={guard.requestClose}
                 className="p-1 -ml-1"
               >
                 <ArrowLeft className="w-6 h-6 text-ink" />
@@ -65,5 +72,13 @@ export const WebsiteModals: React.FC<{ website: WebsiteEditor }> = ({ website: w
         </div>
       </motion.div>
     )}
+    <ConfirmDialog
+      isOpen={guard.isPrompting}
+      {...UNSAVED_CHANGES_DIALOG}
+      destructive
+      onConfirm={guard.confirmDiscard}
+      onCancel={guard.cancelDiscard}
+    />
   </AnimatePresence>
-);
+  );
+};

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -7,6 +8,7 @@ import type { Article, UserProfile } from '../types/app';
 export function useArticleEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isListOpen, setIsListOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -23,6 +25,7 @@ export function useArticleEditor(user: FirebaseUser | null, userProfile: UserPro
 
   const openNew = () => {
     resetForm();
+    dirty.capture(["", ""]);
     setIsEditOpen(true);
   };
 
@@ -30,6 +33,7 @@ export function useArticleEditor(user: FirebaseUser | null, userProfile: UserPro
     setEditingArticleId(article.id);
     setTitle(article.title);
     setUrl(article.url);
+    dirty.capture([article.title, article.url]);
     setIsEditOpen(true);
   };
 
@@ -88,6 +92,7 @@ export function useArticleEditor(user: FirebaseUser | null, userProfile: UserPro
   };
 
   return {
+    isDirty: dirty.isDirty([title, url]),
     articles: userProfile?.articles || [],
     isListOpen, openList, closeList,
     isEditOpen, openNew, openExisting, close,

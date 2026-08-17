@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDirtySnapshot } from './useDirtySnapshot';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -6,10 +7,13 @@ import type { UserProfile } from '../types/app';
 
 export function useWebsiteEditor(user: FirebaseUser | null, userProfile: UserProfile | null) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const dirty = useDirtySnapshot();
   const [websiteUrls, setWebsiteUrls] = useState<string[]>(['']);
 
   const open = () => {
-    setWebsiteUrls(userProfile?.websites?.length ? userProfile.websites : ['']);
+    const seed = userProfile?.websites?.length ? userProfile.websites : [''];
+    setWebsiteUrls(seed);
+    dirty.capture(seed);
     setIsEditOpen(true);
   };
 
@@ -41,6 +45,7 @@ export function useWebsiteEditor(user: FirebaseUser | null, userProfile: UserPro
   };
 
   return {
+    isDirty: dirty.isDirty(websiteUrls),
     isEditOpen, open, close,
     websiteUrls, addUrlInput, changeUrl,
     handleSave,

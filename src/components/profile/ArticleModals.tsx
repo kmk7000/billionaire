@@ -3,11 +3,16 @@ import { ArrowLeft, ChevronRight, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { ArticleEditor } from '../../hooks/useArticleEditor';
 import { useSwipeBack } from '../../hooks/useSwipeBack';
+import { ConfirmDialog } from '../ConfirmDialog';
+import { UNSAVED_CHANGES_DIALOG, useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
 export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a }) => {
   // The list is a read-only page; the editor beneath it is a form and is
   // deliberately left out until it can prompt about unsaved input.
   useSwipeBack(a.closeList, a.isListOpen);
+  // The editor opens on top of the list, so it registers after it — the
+  // gesture stack hands a swipe to the last registration.
+  const editGuard = useUnsavedChangesGuard(a.isDirty, a.close, a.isEditOpen);
 
   return (
   <>
@@ -73,7 +78,7 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
-              <button aria-label="戻る" onClick={a.close}>
+              <button aria-label="戻る" onClick={editGuard.requestClose}>
                 <ArrowLeft className="w-6 h-6 text-ink" />
               </button>
               <h2 className="text-lg font-bold text-ink">{a.editingArticleId ? '記事編集' : '記事追加'}</h2>
@@ -199,6 +204,13 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
         </motion.div>
       )}
     </AnimatePresence>
+  <ConfirmDialog
+    isOpen={editGuard.isPrompting}
+    {...UNSAVED_CHANGES_DIALOG}
+    destructive
+    onConfirm={editGuard.confirmDiscard}
+    onCancel={editGuard.cancelDiscard}
+  />
   </>
   );
 };
