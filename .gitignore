@@ -13,3 +13,6 @@ service-account.json
 
 # Operator console build output (deployed separately from the app)
 dist-admin
+
+# Cloud Functions build output
+functions/lib/

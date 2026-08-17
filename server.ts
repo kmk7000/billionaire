@@ -6,7 +6,7 @@ import axios from "axios";
 import admin from "firebase-admin";
 import dotenv from "dotenv";
 import fs from "fs";
-import { GoogleGenAI, Type } from "@google/genai";
+import { createOcrRouter } from "./functions/src/ocrRoutes";
 
 dotenv.config({ path: ['.env.local', '.env'] });
 
@@ -48,169 +48,18 @@ if (serviceAccountKey && isJson) {
 }
 
 const app = express();
-const PORT = 3000;
-
-// Business card photos are base64-inlined JSON, well past Express's 100kb
-// default body limit.
-app.use(express.json({ limit: "15mb" }));
+const PORT = Number(process.env.PORT) || 3000;
 
 // --- Gemini-backed OCR routes ---------------------------------------------
-// GEMINI_API_KEY lives only in this process's env, never in the client
-// bundle. Every route below requires a valid Firebase ID token so the key
-// can't be burned through by anonymous traffic hitting our server directly.
+// Mounted from the same module the deployed Cloud Function uses
+// (functions/src/ocrRoutes.ts), so what is verified here is what runs on the
+// device. These handlers used to live inline in this file, which meant the
+// deployed copy and the dev copy were free to drift apart.
 
-const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
-
-interface AuthedRequest extends Request {
-  uid?: string;
-}
-
-async function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return res.status(401).json({ error: "Missing Authorization header" });
-  }
-  try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    req.uid = decoded.uid;
-    next();
-  } catch (error) {
-    console.error("Failed to verify ID token:", error);
-    res.status(401).json({ error: "Invalid or expired token" });
-  }
-}
-
-// Minimal in-memory per-user rate limit. This is enough to stop a single
-// account from running up the Gemini bill by accident (e.g. a retry loop);
-// it resets on deploy and does not coordinate across instances, so treat it
-// as a floor, not a full abuse-prevention system, once this scales past one
-// server process.
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 30;
-const requestLog = new Map<string, number[]>();
-
-function rateLimit(req: AuthedRequest, res: Response, next: NextFunction) {
-  const uid = req.uid!;
-  const now = Date.now();
-  const timestamps = (requestLog.get(uid) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
-    return res.status(429).json({ error: "Too many requests. Please try again later." });
-  }
-  timestamps.push(now);
-  requestLog.set(uid, timestamps);
-  next();
-}
-
-function requireGenAI(_req: Request, res: Response, next: NextFunction) {
-  if (!genAI) {
-    return res.status(503).json({ error: "GEMINI_API_KEY is not configured on the server" });
-  }
-  next();
-}
-
-app.post("/api/ocr/meishi", requireAuth, rateLimit, requireGenAI, async (req, res) => {
-  const { frontImage, backImage } = req.body as { frontImage?: string; backImage?: string | null };
-  if (!frontImage) {
-    return res.status(400).json({ error: "frontImage is required" });
-  }
-
-  try {
-    const parts: any[] = [
-      {
-        text:
-          "Extract information from this business card. Return JSON with name, company, position, email, phone. " +
-          "If a field is not found, use an empty string. Language is Japanese. If there are two images, the " +
-          "second one is the back side of the card.",
-      },
-      { inlineData: { data: frontImage.split(",")[1] ?? frontImage, mimeType: "image/jpeg" } },
-    ];
-    if (backImage) {
-      parts.push({ inlineData: { data: backImage.split(",")[1] ?? backImage, mimeType: "image/jpeg" } });
-    }
-
-    const response = await genAI!.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: [{ parts }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            company: { type: Type.STRING },
-            position: { type: Type.STRING },
-            department: { type: Type.STRING },
-            email: { type: Type.STRING },
-            phone: { type: Type.STRING },
-            mobile: { type: Type.STRING },
-            fax: { type: Type.STRING },
-            address: { type: Type.STRING },
-            detailedAddress: { type: Type.STRING },
-          },
-          required: ["name", "company", "position", "email", "phone"],
-        },
-      },
-    });
-
-    res.json(JSON.parse(response.text));
-  } catch (error) {
-    console.error("Meishi OCR error:", error);
-    res.status(502).json({ error: "OCR request failed" });
-  }
-});
-
-app.post("/api/ocr/card-corners", requireAuth, rateLimit, requireGenAI, async (req, res) => {
-  const { image } = req.body as { image?: string };
-  if (!image) {
-    return res.status(400).json({ error: "image is required" });
-  }
-
-  try {
-    const response = await genAI!.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: [
-        {
-          parts: [
-            {
-              text:
-                "Find the single business card in this photo. Return the four outer corners of the card itself " +
-                "(not the photo border), as points on a 0-1000 normalized grid where x is measured left to right " +
-                "and y top to bottom. Order them clockwise starting from the card's top-left corner. If no card " +
-                "is clearly visible, return an empty list.",
-            },
-            { inlineData: { data: image.split(",")[1] ?? image, mimeType: "image/jpeg" } },
-          ],
-        },
-      ],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            corners: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  x: { type: Type.NUMBER },
-                  y: { type: Type.NUMBER },
-                },
-                required: ["x", "y"],
-              },
-            },
-          },
-          required: ["corners"],
-        },
-      },
-    });
-
-    res.json(JSON.parse(response.text));
-  } catch (error) {
-    console.error("Card corner detection error:", error);
-    res.status(502).json({ error: "Corner detection request failed" });
-  }
-});
+app.use(createOcrRouter({
+  auth: () => admin.auth(),
+  getApiKey: () => process.env.GEMINI_API_KEY,
+}));
 
 // API routes
 app.get("/api/auth/line/url", (req, res) => {
