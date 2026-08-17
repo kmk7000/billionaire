@@ -179,7 +179,11 @@ export function createLineRouter({
       client_id: cfg.clientId,
       redirect_uri: cfg.redirectUri,
       state: issueState(payload, cfg.clientSecret),
-      scope: 'profile openid email',
+      // No `email` scope: LINE gates it behind a separate application and
+      // review, and nothing here reads an email address — the profile call
+      // below only uses userId, displayName and pictureUrl. Asking for it
+      // would add an approval step to buy nothing.
+      scope: 'profile openid',
     });
     res.json({ url: `https://access.line.me/oauth2/v2.1/authorize?${params.toString()}` });
   });
