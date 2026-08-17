@@ -41,10 +41,10 @@ export const MeishiEditView: React.FC<{
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-surface z-[200] flex flex-col overflow-y-auto no-scrollbar pt-safe"
+      className="fixed inset-0 bg-surface z-[200] flex flex-col overflow-y-auto no-scrollbar"
     >
       {/* Header */}
-      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between border-b border-line z-10">
+      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between border-b border-line z-10 pt-safe">
         <div className="flex items-center gap-4">
           <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
             <ArrowLeft className="w-6 h-6" />

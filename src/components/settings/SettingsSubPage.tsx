@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 
 /**
  * Shell for the pages that hang off 設定 / もっと見る.
@@ -15,7 +16,12 @@ export const SettingsSubPage: React.FC<{
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-}> = ({ isOpen, onClose, title, children }) => (
+}> = ({ isOpen, onClose, title, children }) => {
+  // Left-edge swipe goes back, same as the arrow. Gated on isOpen so a
+  // closed page does not sit in the gesture stack.
+  useSwipeBack(onClose, isOpen);
+
+  return (
   <AnimatePresence>
     {isOpen && (
       <motion.div
@@ -36,7 +42,8 @@ export const SettingsSubPage: React.FC<{
       </motion.div>
     )}
   </AnimatePresence>
-);
+  );
+};
 
 /** Section heading used inside the pages above. */
 export const SubPageSection: React.FC<{ title: string; children: React.ReactNode }> = ({

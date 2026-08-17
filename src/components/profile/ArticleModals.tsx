@@ -13,10 +13,10 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
         >
           {/* Header */}
-          <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10">
+          <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <button aria-label="戻る" onClick={a.closeList} className="mr-3">
               <ArrowLeft className="w-6 h-6 text-ink" />
             </button>
@@ -62,10 +62,10 @@ export const ArticleModals: React.FC<{ article: ArticleEditor }> = ({ article: a
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+          className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10">
+          <div className="flex items-center justify-between p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
             <div className="flex items-center gap-3">
               <button aria-label="戻る" onClick={a.close}>
                 <ArrowLeft className="w-6 h-6 text-ink" />

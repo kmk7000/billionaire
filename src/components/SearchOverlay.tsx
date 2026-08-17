@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import type { Meishi } from '../types/app';
 import type { CommunityPost } from '../types/db';
 import { getCommunityBoardLabel } from '../constants/communityBoards';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 interface SearchOverlayProps {
   meishis: Meishi[];
@@ -41,6 +42,9 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
       .filter(p => matches([p.title, p.body], needle))
       .slice(0, 20);
   }, [posts, needle]);
+
+  // Left-edge swipe closes, same as the back arrow.
+  useSwipeBack(onClose);
 
   const hasQuery = needle.length > 0;
   const hasResults = meishiResults.length > 0 || postResults.length > 0;

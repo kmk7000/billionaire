@@ -25,6 +25,7 @@ import {
 } from '../../native/callerIdIndex';
 import { buildCallerIdEntries } from '../../hooks/useCallerIdSync';
 import type { Meishi, UserProfile } from '../../types/app';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 import { useToast } from '../Toast';
 
 interface CallerIdInfoSheetProps {
@@ -112,6 +113,9 @@ export const CallerIdInfoSheet: React.FC<CallerIdInfoSheetProps> = ({
       setIsSyncing(false);
     }
   };
+
+  // Left-edge swipe goes back, same as the arrow.
+  useSwipeBack(onClose, isOpen);
 
   const handleOpenSettings = async () => {
     setIsOpeningSettings(true);

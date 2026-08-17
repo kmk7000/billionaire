@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MessageSquare, ChevronRight, Mail, ArrowLeft, Edit2, Trash2, MoreHorizontal, Download, Phone, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Tab, Meishi } from '../../types/app';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 import { DEFAULT_PHONE_COUNTRY, getPhoneCountry } from '../../constants/phoneCountries';
 
 export const MeishiDetailView: React.FC<{
@@ -12,6 +13,8 @@ export const MeishiDetailView: React.FC<{
   onSaveMemo: (memo: string) => void;
 }> = ({ meishi, onBack, onEdit, onDelete, onSaveMemo }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'memo'>('info');
+  // Left-edge swipe goes back, same as the arrow.
+  useSwipeBack(onBack);
   // Whichever number can actually place a call, preferring the mobile.
   const callNumber = meishi.mobile || meishi.phone;
   const phoneCountry = getPhoneCountry(meishi.phoneCountry);
@@ -54,10 +57,10 @@ export const MeishiDetailView: React.FC<{
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
+      className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar"
     >
       {/* Header */}
-      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10">
+      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10 pt-safe">
         <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>

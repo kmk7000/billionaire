@@ -3,6 +3,7 @@ import { ArrowLeft, UserCog, Edit2, Plus, User, Camera, Mail, Eye, ThumbsUp, Mes
 import { motion, AnimatePresence } from 'motion/react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { Meishi, UserProfile } from '../../types/app';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 import type { CommunityPost } from '../../types/db';
 import { getCommunityBoardLabel } from '../../constants/communityBoards';
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
@@ -66,7 +67,12 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
   career, education, job, skill, language, website, lecture, publication, article,
   awards, certificates, personalInfo, myPosts, onSelectPost, onOpenPublicCard, publicHandle,
   onOpenSettings, onEditMeishi, onOpenMap, myMeishiHistory, onDeleteHistoryEntry,
-}) => (
+}) => {
+  // Left-edge swipe goes back, same as the arrow. Gated on isOpen so a
+  // closed overlay does not sit in the gesture stack.
+  useSwipeBack(onClose, isOpen);
+
+  return (
   <AnimatePresence>
     {isOpen && (
       <motion.div
@@ -74,10 +80,10 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-surface z-50 overflow-y-auto no-scrollbar max-w-md mx-auto pt-safe"
+        className="fixed inset-0 bg-surface z-50 overflow-y-auto no-scrollbar max-w-md mx-auto"
       >
         {/* Profile Page Content */}
-        <div className="flex items-center justify-between p-4 sticky top-0 bg-surface z-10 border-b border-line">
+        <div className="flex items-center justify-between p-4 sticky top-0 bg-surface z-10 border-b border-line pt-safe">
           <div className="flex items-center gap-4">
             <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1 hover:bg-primary-soft rounded-full transition-colors">
               <ArrowLeft className="w-6 h-6 text-ink" />
@@ -236,4 +242,5 @@ export const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
       </motion.div>
     )}
   </AnimatePresence>
-);
+  );
+};

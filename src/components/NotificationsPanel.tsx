@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AnnouncementList } from './AnnouncementList';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 interface NotificationsPanelProps {
   onClose: () => void;
@@ -10,7 +11,11 @@ interface NotificationsPanelProps {
 // Shows operator announcements written in the admin console. Personal push
 // notifications (community replies, likes) still need a sender — see
 // CLAUDE.md item 8 — so nothing here fakes a badge count.
-export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose }) => (
+export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose }) => {
+  // Left-edge swipe closes, same as the back arrow.
+  useSwipeBack(onClose);
+
+  return (
   <motion.div
     initial={{ x: '100%' }}
     animate={{ x: 0 }}
@@ -29,4 +34,5 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
       <AnnouncementList />
     </div>
   </motion.div>
-);
+  );
+};

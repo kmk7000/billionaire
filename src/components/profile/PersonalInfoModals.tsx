@@ -11,10 +11,10 @@ export const PersonalInfoModals: React.FC<{ personalInfo: PersonalInfoEditor }> 
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto flex flex-col pt-safe"
+        className="fixed inset-0 bg-surface z-[60] overflow-y-auto no-scrollbar max-w-md mx-auto flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10">
+        <div className="flex items-center p-4 bg-surface border-b border-line sticky top-0 z-10 pt-safe">
           <button aria-label="閉じる" onClick={p.close} className="mr-3">
             <X className="w-6 h-6 text-ink" />
           </button>

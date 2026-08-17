@@ -9,6 +9,7 @@ import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { communityService, safetyService } from '../../services/firestoreService';
 import { useCommunityComments } from '../../hooks/useCommunityComments';
 import { CommentThread } from './CommentThread';
+import { useSwipeBack } from '../../hooks/useSwipeBack';
 
 interface PostDetailOverlayProps {
   post: CommunityPost;
@@ -60,15 +61,17 @@ export const PostDetailOverlay: React.FC<PostDetailOverlayProps> = ({ post, user
     setIsMoreOpen(false);
   };
 
+  useSwipeBack(onBack);
+
   return (
     <motion.div
       initial={{ x: '100%' }}
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar pt-safe"
+      className="fixed inset-0 bg-surface z-[100] flex flex-col overflow-y-auto no-scrollbar"
     >
-      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10 border-b border-line">
+      <div className="sticky top-0 bg-surface px-4 py-3 flex items-center justify-between z-10 border-b border-line pt-safe">
         <button aria-label="戻る" onClick={onBack} className="p-2 -ml-2 text-ink">
           <ArrowLeft className="w-6 h-6" />
         </button>
