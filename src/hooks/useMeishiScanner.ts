@@ -2,6 +2,15 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { resizeImage } from '../utils/imageUtils';
 import { autoScanCard } from '../services/cardScanService';
 
+// `focusMode` is a real, widely-shipped MediaStream constraint that
+// TypeScript's DOM lib does not declare. Narrowly extending the built-in types
+// keeps the call sites checked, which a cast to `any` would not.
+type FocusConstraintSet = MediaTrackConstraintSet & { focusMode?: string };
+type CameraConstraints = MediaTrackConstraints & {
+  focusMode?: string;
+  advanced?: FocusConstraintSet[];
+};
+
 export type MeishiStep = 'camera' | 'preview' | 'settings' | 'success';
 export type MeishiSide = 'front' | 'back';
 export type MeishiSettingsOption = 'send' | 'save';
@@ -42,12 +51,42 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
   const startCamera = useCallback(async () => {
     try {
       stopCamera();
+      // Ask for the highest stream the camera will give. Without a size hint
+      // browsers hand back 640x480, and this screen then crops the guide
+      // rectangle out of that — roughly 540x340 of actual card. Business card
+      // type simply is not legible at that size, so the capture looked out of
+      // focus and the OCR that followed had nothing to read. The browser
+      // clamps `ideal` down to whatever the device actually supports, so
+      // asking for 4K is safe on every camera.
+      //
+      // focusMode is not in the TS lib and iOS ignores it (it autofocuses
+      // continuously anyway); Android Chrome honours it and it is what stops
+      // the preview hunting for focus on a close-up card.
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 3840 },
+          height: { ideal: 2160 },
+          focusMode: 'continuous',
+        } as CameraConstraints,
       });
       setMeishiCameraStream(stream);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+      }
+
+      // Re-apply as an advanced constraint too: when focusMode is passed in
+      // the initial request some browsers drop the whole video block as
+      // over-constrained rather than ignoring the unknown key.
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        try {
+          await track.applyConstraints({
+            advanced: [{ focusMode: 'continuous' }],
+          } as CameraConstraints);
+        } catch {
+          // Unsupported on this camera — the device's own autofocus stands.
+        }
       }
     } catch (error) {
       console.error('Error accessing camera:', error);
@@ -174,7 +213,11 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
     );
 
     const imageData = canvas.toDataURL('image/jpeg', 0.95);
-    const resizedImageData = await resizeImage(imageData);
+    // Kept at OCR resolution, not storage resolution. The old call took the
+    // default 1000px/0.7, which threw away the detail the recognizer needs
+    // before it ever ran; the smaller copy that goes into Firestore is made
+    // separately at save time.
+    const resizedImageData = await resizeImage(imageData, 2400, 2400, 0.92);
 
     applyCapturedImage(resizedImageData);
     setMeishiStep('preview');
@@ -196,7 +239,9 @@ export function useMeishiScanner({ isOpen, onClose }: UseMeishiScannerOptions) {
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        const resizedBase64 = await resizeImage(base64);
+        // Same OCR resolution as the camera path — an album photo was being
+        // squeezed to 1000px/0.7 before recognition too.
+        const resizedBase64 = await resizeImage(base64, 2400, 2400, 0.92);
         applyCapturedImage(resizedBase64);
         setMeishiStep('preview');
         stopCamera();

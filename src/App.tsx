@@ -553,8 +553,11 @@ export default function App() {
     setIsRegisteringMyMeishi(false);
   };
 
-  const processMeishiOcrAndSave = async (frontImage: string, backImage: string | null, settings: 'send' | 'save') => {
-    if (!frontImage) return;
+  /** Returns false when the card could not be recognized, so the caller can
+      keep the user on the settings step instead of congratulating them for a
+      registration that did not happen. */
+  const processMeishiOcrAndSave = async (frontImage: string, backImage: string | null, settings: 'send' | 'save'): Promise<boolean> => {
+    if (!frontImage) return false;
     setIsMeishiOcrProcessing(true);
     try {
       // OCR runs server-side (see server.ts /api/ocr/meishi) so the Gemini
@@ -570,17 +573,22 @@ export default function App() {
           ...result,
           updatedAt: new Date().toISOString(),
           createdAt: serverTimestamp(),
-          imageUrl: frontImage,
-          imageUrlBack: backImage || null,
+          // OCR got the full-resolution capture above; the document keeps a
+          // compact copy. A Firestore doc caps at 1MB and a card can carry
+          // two images, so the stored pair has to stay small.
+          imageUrl: await resizeImage(frontImage, 1000, 1000, 0.7),
+          imageUrlBack: backImage ? await resizeImage(backImage, 1000, 1000, 0.7) : null,
           isMyCard: isRegisteringMyMeishi
         };
         
         await setDoc(doc(db, 'meishi', newMeishiId), newMeishi);
         setIsRegisteringMyMeishi(false);
       }
+      return true;
     } catch (error) {
       console.error("OCR error:", error);
       toast.error("名刺の認識に失敗しました。\n明るい場所で、名刺全体が入るように撮影してください。");
+      return false;
     } finally {
       setIsMeishiOcrProcessing(false);
     }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  X, 
+import {
+  Check,
+  X,
   Flashlight, 
   ImageIcon, 
   MoreHorizontal, 
@@ -22,7 +23,8 @@ import { useMeishiScanner } from '../hooks/useMeishiScanner';
 export interface MeishiScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaveMeishi: (capturedImage: string, capturedBack: string | null, settings: 'send' | 'save') => Promise<void>;
+  /** Resolves false when recognition failed — see handleFinalSave. */
+  onSaveMeishi: (capturedImage: string, capturedBack: string | null, settings: 'send' | 'save') => Promise<boolean>;
   isProcessing: boolean;
   isRegisteringMyMeishi?: boolean;
   /** Open straight into the photo picker instead of the camera viewfinder. */
@@ -80,8 +82,14 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 
   const handleFinalSave = async () => {
     if (!capturedMeishiImage) return;
-    await onSaveMeishi(capturedMeishiImage, capturedMeishiBack, meishiSettings);
-    setMeishiStep('success');
+    // Only advance on an actual save. This used to move to the success step
+    // unconditionally, so a failed recognition showed
+    // 「1枚の名刺を登録しました！」 with the failure toast on top of it —
+    // the screen said the opposite of what happened, and nothing had been
+    // written. Staying here keeps the card in hand so the user can go back
+    // and retake it.
+    const saved = await onSaveMeishi(capturedMeishiImage, capturedMeishiBack, meishiSettings);
+    if (saved) setMeishiStep('success');
   };
 
   if (!isOpen) return null;
@@ -110,7 +118,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
             <div className="p-4 flex justify-between items-center z-10 text-white bg-gradient-to-b from-black/60 to-transparent">
               <button aria-label="フラッシュを切り替え" 
                 onClick={toggleFlash}
-                className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-amber-400 text-black' : 'bg-surface/10 text-white'}`}
+                className={`p-2 rounded-full transition-colors ${isFlashOn ? 'bg-warning text-white' : 'bg-surface/10 text-white'}`}
               >
                 <Flashlight className="w-6 h-6" />
               </button>
@@ -157,7 +165,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                   <motion.div 
                     animate={{ y: ["0%", "100%", "0%"] }}
                     transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="w-full h-0.5 bg-primary shadow-[0_0_8px_#0A0A0A]"
+                    className="w-full h-0.5 bg-primary shadow-[0_0_8px_var(--color-primary)]"
                   />
                 </div>
 
@@ -268,7 +276,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               </button>
               <button 
                 onClick={handleConfirmMeishi}
-                className="flex-1 py-4 rounded-lg font-bold bg-surface text-black active:scale-95 transition-transform"
+                className="flex-1 py-4 rounded-lg font-bold bg-surface text-ink active:scale-95 transition-transform"
               >
                 確認
               </button>
@@ -278,7 +286,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
 
         {meishiStep === 'settings' && (
           <div className="flex-1 flex flex-col bg-canvas">
-            <div className="p-4 flex items-center justify-between bg-surface border-b sticky top-0 z-10">
+            <div className="px-4 h-12 flex items-center justify-between bg-surface border-b border-line sticky top-0 z-10">
               <button onClick={() => setMeishiStep('preview')}>
                 <ChevronLeft className="w-6 h-6 text-ink" />
               </button>
@@ -291,7 +299,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <p className="text-xs font-bold text-ink-muted text-center">表面</p>
-                  <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line shadow-sm bg-surface">
+                  <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line bg-surface">
                     <img 
                       src={capturedMeishiImage!} 
                       alt="Front" 
@@ -302,7 +310,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 {capturedMeishiBack && (
                   <div className="space-y-2">
                     <p className="text-xs font-bold text-ink-muted text-center">裏面</p>
-                    <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line shadow-sm bg-surface">
+                    <div className="aspect-[1.6/1] w-full rounded-lg overflow-hidden border border-line bg-surface">
                       <img 
                         src={capturedMeishiBack} 
                         alt="Back" 
@@ -313,56 +321,44 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                 )}
               </div>
 
-              <div className="space-y-4">
-                <div className="bg-surface rounded-xl p-5 shadow-sm border border-line flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Send className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-ink">名刺を送る</p>
-                      <p className="text-xs text-ink-muted">登録と同時に相手に送信します</p>
-                    </div>
+              {/* Both rows used to be switches driving one either/or value, so
+                  turning 名刺を送る on flipped 名刺帳に保存 off on screen — while
+                  the save ran regardless, because the setting was never read.
+                  The screen claimed the card would not be filed, and filed it.
+                  Sending needs the card-exchange feature that does not exist
+                  yet, so it says 準備中 instead of pretending. */}
+              <div className="space-y-3">
+                <div className="bg-surface rounded-lg border border-line p-4 flex items-center gap-4 opacity-60">
+                  <div className="w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center text-ink-faint shrink-0">
+                    <Send className="w-5 h-5" />
                   </div>
-                  <div 
-                    onClick={() => setMeishiSettings(meishiSettings === 'send' ? 'save' : 'send')}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'send' ? 'bg-primary' : 'bg-primary-soft'}`}
-                  >
-                    <motion.div 
-                      animate={{ x: meishiSettings === 'send' ? 24 : 4 }}
-                      className="absolute top-1 w-4 h-4 bg-surface rounded-full shadow-sm" 
-                    />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-ink">名刺を送る</p>
+                      <span className="text-[11px] font-bold text-ink-faint bg-primary-soft rounded px-1.5 py-0.5">準備中</span>
+                    </div>
+                    <p className="text-[12px] text-ink-muted mt-0.5">登録と同時に相手へ送信できるようになります</p>
                   </div>
                 </div>
 
-                <div className="bg-surface rounded-xl p-5 shadow-sm border border-line flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Briefcase className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-ink">名刺帳に保存</p>
-                      <p className="text-xs text-ink-muted">名刺帳に新しい名刺を登録します</p>
-                    </div>
+                <div className="bg-surface rounded-lg border border-line p-4 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center text-ink shrink-0">
+                    <Briefcase className="w-5 h-5" />
                   </div>
-                  <div 
-                    onClick={() => setMeishiSettings(meishiSettings === 'save' ? 'send' : 'save')}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${meishiSettings === 'save' ? 'bg-primary' : 'bg-primary-soft'}`}
-                  >
-                    <motion.div 
-                      animate={{ x: meishiSettings === 'save' ? 24 : 4 }}
-                      className="absolute top-1 w-4 h-4 bg-surface rounded-full shadow-sm" 
-                    />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-bold text-ink">名刺帳に保存</p>
+                    <p className="text-[12px] text-ink-muted mt-0.5">名刺帳に新しい名刺を登録します</p>
                   </div>
+                  <Check className="w-5 h-5 text-success shrink-0" />
                 </div>
               </div>
             </div>
 
-            <div className="p-6 bg-surface border-t">
+            <div className="p-5 bg-surface border-t border-line pb-safe">
               <button 
                 onClick={handleFinalSave}
                 disabled={isProcessing}
-                className="w-full py-4 rounded-xl font-bold bg-primary hover:bg-black text-white shadow-lg shadow-[#0A0A0A]/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98 transition-transform"
+                className="w-full py-4 rounded-lg font-bold bg-primary text-white hover:opacity-90 transition-opacity duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isProcessing ? (
                   <>
@@ -402,13 +398,13 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
               </div>
             </div>
 
-            <div className="p-6 bg-surface border-t">
+            <div className="p-5 bg-surface border-t border-line pb-safe">
               <button 
                 onClick={() => {
                   handleClose();
                   onViewSavedMeishis?.();
                 }}
-                className="w-full py-4 rounded-xl font-bold bg-surface border-2 border-primary text-primary hover:bg-primary/5 transition-colors"
+                className="w-full py-4 rounded-lg font-bold border border-line text-ink hover:bg-canvas transition-colors duration-200"
               >
                 見に行く
               </button>
@@ -439,7 +435,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                     setIsMeishiMoreOptionsOpen(false);
                     onOpenDirectInput?.();
                   }}
-                  className="w-full p-4 bg-canvas rounded-xl flex items-center gap-3 hover:bg-primary-soft transition-colors"
+                  className="w-full p-4 bg-canvas rounded-lg flex items-center gap-3 hover:bg-primary-soft transition-colors"
                 >
                   <Edit2 className="w-5 h-5 text-primary" />
                   <span className="font-bold text-ink">直接入力して登録</span>
@@ -449,7 +445,7 @@ export const MeishiScannerModal: React.FC<MeishiScannerModalProps> = ({
                     setIsMeishiMoreOptionsOpen(false);
                     handleAlbumClick();
                   }}
-                  className="w-full p-4 bg-canvas rounded-xl flex items-center gap-3 hover:bg-primary-soft transition-colors"
+                  className="w-full p-4 bg-canvas rounded-lg flex items-center gap-3 hover:bg-primary-soft transition-colors"
                 >
                   <ImageIcon className="w-5 h-5 text-primary" />
                   <span className="font-bold text-ink">アルバムから選択</span>
