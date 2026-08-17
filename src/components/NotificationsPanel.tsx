@@ -23,7 +23,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
     className="fixed inset-0 bg-surface z-[120] flex flex-col pt-safe lg:max-w-md lg:left-auto lg:shadow-lg"
   >
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-line">
+    <div className="flex items-center gap-3 px-4 py-3">
       <button aria-label="戻る" onClick={onClose} className="p-1 -ml-1 text-ink">
         <ArrowLeft className="w-6 h-6" />
       </button>
