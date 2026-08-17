@@ -181,7 +181,14 @@ src/
 23. **`名刺登録設定`의 토글 2개는 아무 동작도 하지 않았다 (2026-08)** — `settings: 'send' | 'save'` 값이 `processMeishiOcrAndSave`의 인자로 선언만 되고 **본문에서 한 번도 읽히지 않았다.** 게다가 둘이 배타적이라 `名刺を送る`를 켜면 화면상 `名刺帳に保存`이 꺼지는데 저장은 그대로 실행됐다 — **UI가 사실과 반대되는 말을 하고 있었다.** 명함 교환 기능이 아직 없으므로 `名刺を送る`는 `準備中` 표시로 바꾸고, `名刺帳に保存`은 실제로 항상 일어나는 일이므로 체크 표시로 고정했다(10번 항목의 스텁 금지 원칙).
 
 24. **설치된 앱에서는 `/api/*` 상대경로가 절대 동작하지 않는다 (2026-08)** — 명함 OCR(`/api/ocr/meishi`)과 자동 윤곽 검출(`/api/ocr/card-corners`)이 **실기기에서만 100% 실패**하던 원인. `ocrClient.ts`가 `fetch('/api/ocr/meishi')`처럼 **상대경로**를 썼는데, 설치된 앱의 오리진은 iOS `capacitor://localhost` / Android `https://localhost`(14번 항목 — iOS 스킴은 변경 불가)라 이 경로는 **번들된 웹 자산**을 가리킨다. 거기엔 그런 라우트가 없다. 브라우저에서는 앱과 API가 같은 오리진이라 멀쩡히 동작하므로 **개발 중에는 절대 재현되지 않는다.**
-    - 지금은 `VITE_API_BASE_URL`(절대 오리진)을 읽고, 네이티브인데 값이 없으면 `OcrUnavailableError`를 던진다. **배포된 HTTPS 서버가 있어야 실기기에서 OCR/윤곽검출이 동작한다** — 8번 항목의 LINE 로그인과 같은 전제조건이다.
+    - 지금은 `VITE_API_BASE_URL`(절대 오리진)을 읽고, 네이티브인데 값이 없으면 `OcrUnavailableError`를 던진다.
+    - **배포 완료 (2026-08)**: Cloud Functions 2세대 `api`(asia-northeast1). URL은 `https://asia-northeast1-ai-studio-applet-webapp-c0fee.cloudfunctions.net/api`이고 **이게 그대로 `VITE_API_BASE_URL`**이다 — 함수 이름 `api`가 첫 경로 세그먼트라 Express는 그 뒤(`/api/ocr/meishi`)를 받는다. `.env.local`에 설정돼 있고 `.env.local`은 gitignore 대상이므로 **다른 환경에서 빌드할 땐 반드시 다시 넣어야 한다** — 빠뜨리면 웹은 멀쩡한데 앱만 조용히 실패한다.
+    - **핵심 코드는 `functions/src/ocrRoutes.ts` 하나**다. dev 서버(`server.ts`)와 배포본이 같은 라우터를 mount하므로 갈라질 수 없다.
+    - **CORS 허용 오리진에 `capacitor://localhost`가 반드시 있어야 한다.** 없으면 브라우저가 서버에 닿기도 전에 막는다. 검증: preflight 204 + 일치하는 allow-origin, 무관한 오리진은 헤더 없음.
+    - `GEMINI_API_KEY`는 Secret Manager(`defineSecret`)로 런타임 주입한다. **`.value()`는 import 시점에 읽으면 안 된다** — 배포 도구가 모듈을 분석하는 동안에는 비어 있다. 그래서 `getApiKey: () => …` 게터로 받아 최초 사용 시에 읽는다. 빌드 산출물에 키가 0건인 것 확인함.
+    - `firebase-admin`의 `Auth` 타입을 import하면 루트와 `functions/`의 설치본이 **명목적으로 달라 타입 에러**가 난다. 구조적 타입(`TokenVerifier`)으로 받는다.
+    - **배포 첫 시도는 `iam.serviceaccounts.actAs` 403으로 실패한다.** Firebase가 방금 켠 API들의 서비스 계정이 아직 전파되지 않아서다. **잠시 뒤 재시도하면 그대로 성공한다** — 권한 설정을 뒤질 필요 없다.
+    - Blaze 결제가 켜져 있어도 `functions:list`는 Cloud Functions API가 활성화되기 전까지 403 `SERVICE_DISABLED`를 낸다. **이건 결제 문제가 아니다** — `firebase deploy`가 알아서 켠다.
     - **에러 메시지를 원인별로 갈랐다.** 예전엔 서버에 닿지도 못했는데 「명함 인식 실패 — 밝은 곳에서 다시 찍으세요」라고 안내했다. 사진을 본 적도 없으면서 사진 탓을 한 것이다. `fetch`가 reject하는 경우(오프라인·DNS·TLS·CORS)도 같이 `OcrUnavailableError`로 묶었다. `detectCardCorners`는 "못 찾음"(null 반환 → 원본 사용)과 "물어볼 수가 없음"(재throw)을 구분한다.
 25. **촬영 크롭은 가이드 프레임을 계산하지 말고 측정할 것 (2026-08)** — 「틀에 맞춰 찍었는데 사진이 밀려서 찍힌다」의 원인. `captureImage`가 가이드 위치를 상수로 재계산했는데(`가로 85%`, `1.6:1`, **컨테이너 정중앙**), 실제로는 중앙이 아니다. 오버레이가 `flex flex-col justify-center`로 **가이드 프레임 + 아래 캡션을 한 덩어리로** 중앙정렬하므로 프레임 자체는 캡션 높이의 절반만큼 위로 올라간다.
     - 브라우저에서 실측: 비디오 580px 높이에서 옛 코드는 top=**190px**을 가정했지만 실제 프레임은 top=**164px** — **26px 오차**(`mt-6` 24px + 캡션 줄높이 ≈ 28px의 절반). 그만큼 아래에서 잘라내니 결과물이 밀렸다.
