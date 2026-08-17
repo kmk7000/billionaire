@@ -23,7 +23,7 @@ export const RecommendedSidebar: React.FC<RecommendedSidebarProps> = ({ posts, o
       <div className={inline ? 'bg-surface rounded-xl border border-line p-4 shadow-xs' : 'bg-surface p-4'}>
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-line">
           <h3 className="font-bold text-sm text-ink">推薦投稿</h3>
-          <span className="text-[10px] text-ink-faint">Remember Live</span>
+          <span className="text-[10px] text-ink-faint">Billionaire Live</span>
         </div>
 
         <div className="space-y-3">

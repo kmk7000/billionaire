@@ -417,7 +417,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
                 onClick={s.openWithdrawal}
                 className="w-full flex items-center justify-between px-4 py-5 border-b border-line hover:bg-canvas transition-colors"
               >
-                <span className="text-[16px] font-bold text-ink">Rememberを退会</span>
+                <span className="text-[16px] font-bold text-ink">Billionaireを退会</span>
                 <ChevronRight className="w-5 h-5 text-ink-faint" />
               </button>
             </div>
@@ -445,7 +445,7 @@ export const SettingsModals: React.FC<SettingsModalsProps> = ({
 
           <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-4">
             <div className="text-center mb-8">
-              <h2 className="text-[24px] font-bold text-ink mb-2">Rememberを退会</h2>
+              <h2 className="text-[24px] font-bold text-ink mb-2">Billionaireを退会</h2>
               <p className="text-[14px] text-ink-muted">退会する前に以下の内容を必ずご確認ください</p>
             </div>
 

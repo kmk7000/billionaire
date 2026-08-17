@@ -985,7 +985,14 @@ export default function App() {
                   </h3>
                   <ShieldCheck className="w-4 h-4 text-success shrink-0" title="認証済み" />
                 </div>
-                <p className="text-xs text-ink-muted truncate">株式会社サンプル ・ 営業部</p>
+                {/* Derived, not invented. This used to read a hardcoded
+                    「株式会社サンプル ・ 営業部」 for every user — the same fake-data
+                    bug as the hardcoded phone number in 設定. */}
+                {(userProfile?.company || userProfile?.position) && (
+                  <p className="text-xs text-ink-muted truncate">
+                    {[userProfile?.company, userProfile?.position].filter(Boolean).join(' ・ ')}
+                  </p>
+                )}
               </div>
             </div>
 
