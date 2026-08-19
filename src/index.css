@@ -26,6 +26,12 @@
      stack rather than a webfont — it costs no request and the only thing asked
      of it is fixed advance width. */
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  /* "Billionaire" wordmark only (LoginScreen + both top headers). Copperplate
+     Gothic itself isn't a free/licensable webfont, so this leans on the
+     "Copperplate" family Apple ships on macOS/iOS — the platform this app
+     actually targets — and falls back to a generic serif everywhere else
+     (Windows, Android, Linux), where it reads as a plain serif instead. */
+  --font-logo: "Copperplate", "Copperplate Gothic Light", "Copperplate Gothic", serif;
 
   /* Design tokens — 静かな信頼 (quiet trust) */
   --color-ink: #141A21;

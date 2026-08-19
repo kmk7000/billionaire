@@ -3,7 +3,7 @@ import { MessageSquare, Mail } from 'lucide-react';
 export const LoginScreen = ({ onLogin, onLineLogin, onEmailSignup, errorMessage }: { onLogin: () => void; onLineLogin: () => void; onEmailSignup: () => void; errorMessage?: string | null }) => (
   <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-6 py-12 max-w-md mx-auto shadow-2xl">
     <div className="flex-1 flex flex-col items-center justify-center text-center">
-      <h1 className="text-4xl font-black tracking-tight text-ink mb-2 font-serif">Billionaire</h1>
+      <h1 className="text-4xl font-black tracking-tight text-ink mb-2 font-logo">Billionaire</h1>
       <p className="text-ink-muted font-medium">チャンスが広がる、キャリアブリッジ</p>
       {errorMessage && (
         <p className="mt-4 text-xs text-danger bg-danger/10 rounded-lg px-3 py-2 max-w-xs break-words">{errorMessage}</p>
