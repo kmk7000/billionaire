@@ -741,7 +741,7 @@ export default function App() {
         return (
           <header className="bg-surface sticky top-0 z-10">
             {tabHeaderRow(
-              <h1 className="text-[20px] font-bold font-logo tracking-tighter text-primary">Billionaire</h1>
+              <h1 className="text-[24px] font-bold font-logo tracking-tighter text-primary">Billionaire</h1>
             )}
           </header>
         );
@@ -886,7 +886,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('today')}>
-              <h1 className="text-[20px] font-black font-logo tracking-tight text-white">Billionaire</h1>
+              <h1 className="text-[24px] font-black font-logo tracking-tight text-white">Billionaire</h1>
             </div>
 
             {/* Global Web Search (opens the shared search overlay) */}
