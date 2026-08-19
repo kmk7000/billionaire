@@ -28,6 +28,14 @@ service cloud.firestore {
     //   - phone: string (optional) - Phone on the card
     //   - imageUrl: string (optional) - Image URL of the card
     //   - createdAt: timestamp (optional) - Creation time
+    //   - groupId: string (optional) - meishi_groups doc this card is filed under
+    //
+    // Collection: meishi_groups (matches MeishiGroup in src/types/app.ts)
+    // Document ID: {groupId}
+    // Fields:
+    //   - ownerUid: string (required) - UID of the user who owns this group
+    //   - name: string (required) - Group label, e.g. "エムアンドエス"
+    //   - order: number (required) - Manual sort position
     //
     // Collection: posts (matches CommunityPost in src/types/db.ts)
     // Document ID: {postId}
@@ -114,7 +122,19 @@ service cloud.firestore {
              // ISO 3166-1 alpha-2 for the card's phone numbers. Absent is
              // valid and means JP — every card predates the picker.
              (!('phoneCountry' in data) ||
-              (data.phoneCountry is string && data.phoneCountry.matches('^[A-Z]{2}$')));
+              (data.phoneCountry is string && data.phoneCountry.matches('^[A-Z]{2}$'))) &&
+             // Which meishi_groups doc this card is filed under. Absent means
+             // 未分類 — not validated against the group actually existing,
+             // same as the rest of this validator not doing referential
+             // checks; the client is the one that offers only real group ids.
+             (!('groupId' in data) || (data.groupId is string && data.groupId.size() > 0));
+    }
+
+    function isValidMeishiGroup(data) {
+      return hasRequiredFields(['ownerUid', 'name', 'order']) &&
+             data.ownerUid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 30 &&
+             data.order is number;
     }
 
     function isValidDigitalCard(data) {
@@ -163,6 +183,17 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidMeishi(request.resource.data);
       allow update: if isAuthenticated() && resource.data.ownerUid == request.auth.uid && isValidMeishi(request.resource.data);
       allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // User-defined folders for 名刺帳 (グループ機能). Deleting a group does not
+    // cascade here — the client clears `groupId` on member cards itself
+    // before removing the group doc, since rules cannot do multi-document
+    // writes.
+    match /meishi_groups/{groupId} {
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidMeishiGroup(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.ownerUid == request.auth.uid && isValidMeishiGroup(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Public digital business cards, keyed by owner uid so no list query is

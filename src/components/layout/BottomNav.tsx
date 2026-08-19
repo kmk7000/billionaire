@@ -7,9 +7,12 @@ interface BottomNavProps {
   onChangeTab: (tab: Tab) => void;
   isEditMode: boolean;
   onOpenMoreMenu: () => void;
+  /** Files the current 名刺帳 selection into a group. Only meaningful with
+      a non-empty selection — MeishiListScreen's checkboxes are what fill it. */
+  onOpenGroupAssign: () => void;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab, isEditMode, onOpenMoreMenu }) => (
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab, isEditMode, onOpenMoreMenu, onOpenGroupAssign }) => (
   !isEditMode ? (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface/70 backdrop-blur-xl backdrop-saturate-150 border-t border-line/60 flex justify-around items-center py-2 px-2 z-20 pb-safe lg:hidden">
       <button
@@ -36,7 +39,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab, is
     </nav>
   ) : (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-primary/80 backdrop-blur-xl backdrop-saturate-150 text-white flex justify-around items-center py-2 px-2 z-20 pb-safe lg:hidden">
-      <button className="flex flex-col items-center gap-1 flex-1 py-1 text-white/60 hover:text-white transition-colors">
+      <button
+        onClick={onOpenGroupAssign}
+        className="flex flex-col items-center gap-1 flex-1 py-1 text-white/60 hover:text-white transition-colors"
+      >
         <Users className="w-6 h-6" />
         <span className="text-[10px] font-medium">グループ</span>
       </button>

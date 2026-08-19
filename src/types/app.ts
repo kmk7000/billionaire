@@ -124,6 +124,19 @@ export interface Meishi {
   createdAt?: any;
   lat?: number;
   lng?: number;
+  /** Which MeishiGroup this card belongs to. Absent means 未分類. */
+  groupId?: string;
+}
+
+/** A user-defined folder for organizing 名刺帳 (e.g. "エムアンドエス"). */
+export interface MeishiGroup {
+  id: string;
+  ownerUid: string;
+  name: string;
+  /** Manual ordering; lower sorts first. Set to Date.now() on creation so new
+      groups append to the end without reading the existing list first. */
+  order: number;
+  createdAt?: any;
 }
 
 export interface Post {

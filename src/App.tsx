@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, signInWithCredential, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithCustomToken, linkWithCredential, reauthenticateWithCredential, updatePassword, createUserWithEmailAndPassword, signInWithEmailAndPassword, User as FirebaseUser } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
-import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, serverTimestamp, orderBy, where, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteField, deleteDoc, writeBatch } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType, EmailAuthProvider } from './firebase';
 import type { Tab, Career, Education, Language, Lecture, Publication, Article, UserProfile, Meishi } from './types/app';
 import { JAPANESE_COMPANIES, JAPANESE_UNIVERSITIES, JAPANESE_MAJORS, DEGREES, SKILL_RECOMMENDATIONS, ALL_SKILLS, LANGUAGES, LANGUAGE_LEVELS, JOB_CATEGORIES, PREFECTURES, COUNTRIES } from './constants/profileData';
@@ -28,6 +28,8 @@ import { useCommunityPosts } from './hooks/useCommunityPosts';
 import { useCommunityWrite } from './hooks/useCommunityWrite';
 import { useNativePush } from './hooks/useNativePush';
 import { useCallerIdSync } from './hooks/useCallerIdSync';
+import { useMeishiGroups } from './hooks/useMeishiGroups';
+import { MeishiGroupSheet } from './components/meishi/MeishiGroupSheet';
 import { useToast } from './components/Toast';
 import { CareerModals } from './components/profile/CareerModals';
 import { useCareerEditor } from './hooks/useCareerEditor';
@@ -164,6 +166,11 @@ export default function App() {
   // doubt what it is showing.
   const [resyncKey, setResyncKey] = useState(0);
   const [selectedMeishis, setSelectedMeishis] = useState<string[]>([]);
+  // 'filter' = tapping "すべて" in 名刺帳 to browse by group.
+  // 'assign' = filing the current multi-selection into a group, from その他.
+  // null keeps the sheet unmounted, matching the other AnimatePresence overlays.
+  const [groupSheetMode, setGroupSheetMode] = useState<'filter' | 'assign' | null>(null);
+  const [activeMeishiGroupFilter, setActiveMeishiGroupFilter] = useState<'all' | 'unclassified' | string>('all');
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMyMeishiDeleteDialogOpen, setIsMyMeishiDeleteDialogOpen] = useState(false);
@@ -174,6 +181,7 @@ export default function App() {
   const communityWrite = useCommunityWrite(user, userProfile);
   useNativePush(user);
   useCallerIdSync(meishis, userProfile?.callerIdEnabled !== false);
+  const meishiGroups = useMeishiGroups(user?.uid ?? null);
   const toast = useToast();
   const selectedPost = posts.find((p) => p.id === selectedPostId) || null;
   const [loading, setLoading] = useState(true);
@@ -318,9 +326,22 @@ export default function App() {
     [meishis]
   );
 
+  // Retired マイ名刺 belong to 名刺ヒストリー, not the contact list — filtered
+  // out before the group counts below so a group's count and the group-sheet
+  // "すべて" count agree with what MeishiListScreen actually renders.
+  const currentMeishis = React.useMemo(
+    () => meishis.filter(m => !m.isPastMyCard),
+    [meishis],
+  );
+
   const sortedMeishis = React.useMemo(() => {
-    // Retired マイ名刺 belong to 名刺ヒストリー, not the contact list.
-    return meishis.filter(m => !m.isPastMyCard).sort((a, b) => {
+    const filtered = activeMeishiGroupFilter === 'all'
+      ? currentMeishis
+      : activeMeishiGroupFilter === 'unclassified'
+        ? currentMeishis.filter(m => !m.groupId)
+        : currentMeishis.filter(m => m.groupId === activeMeishiGroupFilter);
+
+    return [...filtered].sort((a, b) => {
       // Prioritize My Card
       if (a.isMyCard && !b.isMyCard) return -1;
       if (!a.isMyCard && b.isMyCard) return 1;
@@ -329,7 +350,50 @@ export default function App() {
       const dateB = new Date(b.updatedAt || 0).getTime();
       return meishiSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
-  }, [meishis, meishiSortOrder]);
+  }, [currentMeishis, meishiSortOrder, activeMeishiGroupFilter]);
+
+  const meishiGroupCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    currentMeishis.forEach(m => { if (m.groupId) counts[m.groupId] = (counts[m.groupId] ?? 0) + 1; });
+    return counts;
+  }, [currentMeishis]);
+  const unclassifiedMeishiCount = currentMeishis.filter(m => !m.groupId).length;
+
+  const activeGroupLabel = activeMeishiGroupFilter === 'all'
+    ? `すべて (${currentMeishis.length})`
+    : activeMeishiGroupFilter === 'unclassified'
+      ? `未分類 (${unclassifiedMeishiCount})`
+      : (() => {
+          const g = meishiGroups.groups.find(g => g.id === activeMeishiGroupFilter);
+          return g ? `${g.name} (${meishiGroupCounts[g.id] ?? 0})` : `すべて (${currentMeishis.length})`;
+        })();
+
+  // A deleted or otherwise vanished group must not leave the list silently
+  // stuck on a filter nothing matches.
+  React.useEffect(() => {
+    if (activeMeishiGroupFilter === 'all' || activeMeishiGroupFilter === 'unclassified') return;
+    if (!meishiGroups.groups.some(g => g.id === activeMeishiGroupFilter)) {
+      setActiveMeishiGroupFilter('all');
+    }
+  }, [meishiGroups.groups, activeMeishiGroupFilter]);
+
+  async function handleAssignMeishisToGroup(groupId: string | null) {
+    if (selectedMeishis.length === 0 || !user) return;
+    try {
+      const batch = writeBatch(db);
+      // Absent means 未分類 (see Meishi.groupId) — a literal null fails the
+      // rules validator, which only accepts a non-empty string or no field.
+      selectedMeishis.forEach(id => batch.update(doc(db, 'meishi', id), { groupId: groupId ?? deleteField() }));
+      await batch.commit();
+      toast.success(groupId ? 'グループに追加しました' : '未分類に戻しました');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'meishi');
+      toast.error('グループへの追加に失敗しました');
+    } finally {
+      setSelectedMeishis([]);
+      setIsEditMode(false);
+    }
+  }
 
   // Auth state listener
   React.useEffect(() => {
@@ -1039,7 +1103,6 @@ export default function App() {
             <MeishiListScreen
               key="meishi"
               activeMeishiTab={activeMeishiTab}
-              meishis={meishis}
               sortedMeishis={sortedMeishis}
               meishiSortOrder={meishiSortOrder}
               onToggleSortOrder={() => setMeishiSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
@@ -1055,6 +1118,8 @@ export default function App() {
               onSelectMeishi={(meishi) => setSelectedMeishiForDetail(meishi)}
               onOpenMap={() => setIsMeishiMapOpen(true)}
               onOpenCamera={handleOpenMeishiCamera}
+              activeGroupLabel={activeGroupLabel}
+              onOpenGroupSheet={() => setGroupSheetMode('filter')}
             />
           )}
 
@@ -1154,6 +1219,7 @@ export default function App() {
         onChangeTab={setActiveTab}
         isEditMode={isEditMode}
         onOpenMoreMenu={() => setIsMoreMenuOpen(true)}
+        onOpenGroupAssign={() => { if (selectedMeishis.length > 0) setGroupSheetMode('assign'); }}
       />
 
       <ProfileOverlay
@@ -1710,7 +1776,7 @@ export default function App() {
                   <Settings className="w-5 h-5 text-ink-muted" />
                   <span className="font-bold text-ink">簡単ログイン設定</span>
                 </button>
-                <button 
+                <button
                   onClick={handleDeleteSelectedMeishis}
                   className="w-full flex items-center gap-3 p-4 hover:bg-canvas transition-colors text-left rounded-lg"
                 >
@@ -1731,6 +1797,37 @@ export default function App() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {groupSheetMode === 'filter' && (
+          <MeishiGroupSheet
+            key="group-sheet-filter"
+            onClose={() => setGroupSheetMode(null)}
+            groups={meishiGroups.groups}
+            allCount={currentMeishis.length}
+            unclassifiedCount={unclassifiedMeishiCount}
+            groupCounts={meishiGroupCounts}
+            activeFilter={activeMeishiGroupFilter}
+            onSelectFilter={setActiveMeishiGroupFilter}
+            onAddGroup={meishiGroups.addGroup}
+            onRenameGroup={meishiGroups.renameGroup}
+            onDeleteGroup={(groupId) => meishiGroups.deleteGroup(groupId, currentMeishis)}
+          />
+        )}
+        {groupSheetMode === 'assign' && (
+          <MeishiGroupSheet
+            key="group-sheet-assign"
+            onClose={() => setGroupSheetMode(null)}
+            groups={meishiGroups.groups}
+            allCount={currentMeishis.length}
+            unclassifiedCount={unclassifiedMeishiCount}
+            groupCounts={meishiGroupCounts}
+            onAssign={handleAssignMeishisToGroup}
+            onAddGroup={meishiGroups.addGroup}
+            onRenameGroup={meishiGroups.renameGroup}
+            onDeleteGroup={(groupId) => meishiGroups.deleteGroup(groupId, currentMeishis)}
+          />
         )}
       </AnimatePresence>
       <AnimatePresence>

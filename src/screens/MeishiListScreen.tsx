@@ -7,7 +7,6 @@ import { MeishiCard } from '../components/meishi/MeishiCard';
 
 interface MeishiListScreenProps {
   activeMeishiTab: 'my' | 'team' | 'group';
-  meishis: Meishi[];
   sortedMeishis: Meishi[];
   meishiSortOrder: 'desc' | 'asc';
   onToggleSortOrder: () => void;
@@ -18,11 +17,13 @@ interface MeishiListScreenProps {
   onSelectMeishi: (meishi: Meishi) => void;
   onOpenMap: () => void;
   onOpenCamera: () => void;
+  /** Label for the filter row — "すべて (N)" or the active group's name. */
+  activeGroupLabel: string;
+  onOpenGroupSheet: () => void;
 }
 
 export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
   activeMeishiTab,
-  meishis,
   sortedMeishis,
   meishiSortOrder,
   onToggleSortOrder,
@@ -33,6 +34,8 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
   onSelectMeishi,
   onOpenMap,
   onOpenCamera,
+  activeGroupLabel,
+  onOpenGroupSheet,
 }) => (
   <motion.div
     key="meishi"
@@ -67,10 +70,10 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
       <>
         {/* Filter Bar */}
         <div className="px-4 py-1.5 h-[35px] flex justify-between items-center bg-surface border-b border-line">
-          <div className="flex items-center gap-1 text-sm font-bold text-ink">
-            <span>すべて ({meishis.length})</span>
+          <button onClick={onOpenGroupSheet} className="tap-44 flex items-center gap-1 text-sm font-bold text-ink">
+            <span>{activeGroupLabel}</span>
             <ChevronDown className="w-4 h-4" />
-          </div>
+          </button>
           <div className="flex items-center gap-4 text-xs font-medium text-ink-muted">
             <button
               onClick={onOpenMap}
