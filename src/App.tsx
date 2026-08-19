@@ -1168,6 +1168,9 @@ export default function App() {
               onOpenCamera={handleOpenMeishiCamera}
               activeGroupLabel={activeGroupLabel}
               onOpenGroupSheet={() => setGroupSheetMode('filter')}
+              onToggleSelectAll={() => setSelectedMeishis(prev =>
+                prev.length === sortedMeishis.length ? [] : sortedMeishis.map(m => m.id)
+              )}
             />
           )}
 

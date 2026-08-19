@@ -38,7 +38,7 @@ export const MeishiCard: React.FC<{
           <p className="text-[13px] font-bold text-ink-faint mb-2">{formattedDate}</p>
         )}
         <div className="flex items-center gap-2 mb-2">
-          <h3 className="text-[18px] font-bold text-ink">{meishi.name || '名前なし'}</h3>
+          <h3 className="text-[16px] font-bold text-ink">{meishi.name || '名前なし'}</h3>
           {meishi.isMyCard && (
             <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">本人</span>
           )}

@@ -20,6 +20,7 @@ interface MeishiListScreenProps {
   /** Label for the filter row — "すべて (N)" or the active group's name. */
   activeGroupLabel: string;
   onOpenGroupSheet: () => void;
+  onToggleSelectAll: () => void;
 }
 
 export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
@@ -36,7 +37,11 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
   onOpenCamera,
   activeGroupLabel,
   onOpenGroupSheet,
-}) => (
+  onToggleSelectAll,
+}) => {
+  const allSelected = sortedMeishis.length > 0 && selectedMeishis.length === sortedMeishis.length;
+
+  return (
   <motion.div
     key="meishi"
     initial={{ opacity: 0, y: 10 }}
@@ -70,10 +75,16 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
       <>
         {/* Filter Bar */}
         <div className="px-4 py-1.5 h-[35px] flex justify-between items-center bg-surface border-b border-line">
-          <button onClick={onOpenGroupSheet} className="tap-44 flex items-center gap-1 text-sm font-bold text-ink">
-            <span>{activeGroupLabel}</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
+          {isEditMode ? (
+            <button onClick={onToggleSelectAll} className="tap-44 text-[12px] font-bold text-primary">
+              {allSelected ? '選択を解除' : '全て選択'}
+            </button>
+          ) : (
+            <button onClick={onOpenGroupSheet} className="tap-44 flex items-center gap-1 text-[12px] font-bold text-ink">
+              <span>{activeGroupLabel}</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          )}
           <div className="flex items-center gap-4 text-xs font-medium text-ink-muted">
             <button
               onClick={onOpenMap}
@@ -129,4 +140,5 @@ export const MeishiListScreen: React.FC<MeishiListScreenProps> = ({
       </>
     )}
   </motion.div>
-);
+  );
+};
