@@ -395,6 +395,54 @@ export default function App() {
     }
   }
 
+  // Hands a tel:/sms:/mailto: URL to the OS. WKWebView (the iOS app's actual
+  // runtime) only reliably forwards these custom schemes to Mail/Messages
+  // from a real anchor click — assigning window.location.href from a plain
+  // JS function silently does nothing on-device, even though it works in a
+  // desktop browser during dev testing. MeishiDetailView's tel/sms/mailto
+  // buttons are genuine <a href> elements for the same reason; this mirrors
+  // that instead of reusing the assignment form that only looked fine here.
+  function openExternalUrl(url: string) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.click();
+  }
+
+  // mailto:/sms: with multiple recipients — the OS-level compose UI handles
+  // the actual sending, so there is no delivery state to track here. Both
+  // read mobile-first (see item 17 in CLAUDE.md): a card's 携帯電話 reaches
+  // the person directly, 電話番号 often rings a switchboard.
+  function handleEmailSelectedMeishis() {
+    if (selectedMeishis.length === 0) return;
+    const emails = Array.from(new Set(
+      meishis.filter(m => selectedMeishis.includes(m.id) && m.email).map(m => m.email)
+    ));
+    if (emails.length === 0) {
+      toast.error('選択した名刺にメールアドレスが登録されていません');
+      return;
+    }
+    openExternalUrl(`mailto:${emails.join(',')}`);
+    setSelectedMeishis([]);
+    setIsEditMode(false);
+  }
+
+  function handleMessageSelectedMeishis() {
+    if (selectedMeishis.length === 0) return;
+    const numbers = Array.from(new Set(
+      meishis
+        .filter(m => selectedMeishis.includes(m.id))
+        .map(m => m.mobile || m.phone)
+        .filter((n): n is string => !!n)
+    ));
+    if (numbers.length === 0) {
+      toast.error('選択した名刺に電話番号が登録されていません');
+      return;
+    }
+    openExternalUrl(`sms:${numbers.join(',')}`);
+    setSelectedMeishis([]);
+    setIsEditMode(false);
+  }
+
   // Auth state listener
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1220,6 +1268,8 @@ export default function App() {
         isEditMode={isEditMode}
         onOpenMoreMenu={() => setIsMoreMenuOpen(true)}
         onOpenGroupAssign={() => { if (selectedMeishis.length > 0) setGroupSheetMode('assign'); }}
+        onEmailSelected={handleEmailSelectedMeishis}
+        onMessageSelected={handleMessageSelectedMeishis}
       />
 
       <ProfileOverlay
